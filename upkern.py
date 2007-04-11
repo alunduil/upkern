@@ -116,6 +116,9 @@ def main():
 		sources         =   ""
 		buildMethod     =   "menuconfig"
 		kernelName      =   ""
+		splashTheme	=   ""
+		initrd		=   ""
+		kernelOptions	=   ""
 
 		try:
 			optionList, arguments = getopt.gnu_getopt( sys.argv[1:], shortOptions, longOptions )
@@ -201,7 +204,7 @@ def main():
 
 		# Create the bootloader.
 		try:
-			bootLoader = BootLoader(kernel.kernelImage, kernel.rootPartition, kernel.isBootMounted(), splashTheme or "", initrd or "", kernelOptions or "")
+			bootLoader = BootLoader(kernel.kernelImage, kernel.rootPartition, kernel.isBootMounted(), splashTheme, initrd, kernelOptions)
 		except BootLoaderError, bootLoaderError:
 			print bootLoaderError
 			return

@@ -308,6 +308,22 @@ class Kernel:
 			raise exceptions.SourceAccessDeniedError
 		return
 
+	# getMakeOpts() ===========================================================
+	# Function:         Find out how many jobs this Gentoo wants.
+	# PreConditions:    You have the file /etc/make.conf right?
+	# PostConditions:   Your kernel build fast man...
+	# Returns:          The fast way to do things.
+	# =========================================================================
+
+	def getMakeOpts(self):
+		makeExpression = re.compile('^MAKEOPTS="(?P<makeOpts>.+?)"$')
+
+		makeOutput = os.popen('fgrep MAKEOPTS /etc/make.conf', 'r')
+
+		match = makeExpression.match(makeOutput.readline())
+
+		return match.group("makeOpts")
+
 	# configure() =============================================================
 	# Function:         Configure the kernel for your system with the method
 	#                   you choose.
@@ -318,6 +334,7 @@ class Kernel:
 
 	def configure(self, verbosity):
 		self.cwdSource()
+		makeOpts = self.getMakeOpts()
 
 		methodExpression = re.compile('^(menuconfig|xconfig|gconfig|oldconfig|silentoldconfig|defconfig|allyesconfig|allmodconfig|allnoconfig|randconfig)$')
 		outputExpression = re.compile('^(menuconfig|oldconfig|silentoldconfig)$')
@@ -328,20 +345,20 @@ class Kernel:
 		if match1:
 			if verbosity <= 0:
 				if match2:
-					os.system('make -s ' + self.buildMethod + ' 2>/dev/null')
+					os.system('make -s ' + makeOpts + ' ' + self.buildMethod + ' 2>/dev/null')
 				else:
-					os.system('make ' + self.buildMethod + '>/dev/null 2>/dev/null')
+					os.system('make ' + makeOpts + ' ' + self.buildMethod + '>/dev/null 2>/dev/null')
 			elif verbosity == 1:
-				os.system('make ' + self.buildMethod + ' 2>/dev/null')
+				os.system('make ' + makeOpts + ' ' + self.buildMethod + ' 2>/dev/null')
 			elif verbosity >= 2:
-				os.system('make ' + self.buildMethod)
+				os.system('make ' + makeOpts + ' ' + self.buildMethod)
 		elif len(self.buildMethod) == 0:
 			if verbosity <= 0:
-				os.system('make -s menuconfig 2>/dev/null')
+				os.system('make -s ' + makeOpts + ' menuconfig 2>/dev/null')
 			elif verbosity == 1:
-				os.system('make menuconfig 2>/dev/null')
+				os.system('make ' + makeOpts + ' menuconfig 2>/dev/null')
 			elif verbosity >= 2:
-				os.system('make menuconfig')
+				os.system('make ' + makeOpts + ' menuconfig')
 		else:
 			raise exceptions.BadConfiguratorError(self.buildMethod)
 		return
@@ -368,6 +385,7 @@ class Kernel:
 
 	def build(self, verbosity):
 		self.cwdSource()
+		makeOpts = self.getMakeOpts()
 
 		kernelExpression = re.compile('^.+(?P<version>\d+\.\d+)\..+$')
 
@@ -381,16 +399,16 @@ class Kernel:
 			output = '>/dev/null 2>/dev/null'
 		if version == "2.4":
 			if self.archName == "sparc32":
-				os.system('make dep' + output + '&& make clean vmlinux modules modules_install' + output)
+				os.system('make ' + makeOpts + ' dep' + output + '&& make ' + makeOpts + ' clean vmlinux modules modules_install' + output)
 			elif self.archName == "sparc64":
-				os.system('make dep' + output + '&& make clean vmlinux image modules modules_install' + output)
+				os.system('make ' + makeOpts + ' dep' + output + '&& make ' + makeOpts + ' clean vmlinux image modules modules_install' + output)
 			else:
-				os.system('make dep' + output + '&& make bzImage modules modules_install' + output)
+				os.system('make ' + makeOpts + ' dep' + output + '&& make ' + makeOpts + ' bzImage modules modules_install' + output)
 		elif version == "2.6":
 			if self.archName == "sparc64":
-				os.system('make ' + output + '&& make image modules_install' + output)
+				os.system('make ' + makeOpts + ' ' + output + '&& make ' + makeOpts + ' image modules_install' + output)
 			else:
-				os.system('make ' + output + '&& make modules_install' + output)
+				os.system('make ' + makeOpts + ' ' + output + '&& make ' + makeOpts + ' modules_install' + output)
 		if self.rebuildModules:
 			os.system('module-rebuild -X rebuild' + output)
 		return
@@ -438,7 +456,8 @@ class Kernel:
 
 			shutil.copy('.config', '/boot/config' + self.kernelName[operator.indexOf(self.kernelName, '-'):])
 			shutil.copy('System.map', '/boot/System.map' + self.kernelName[operator.indexOf(self.kernelName, '-'):])
-			shutil.symlink('/boot/System.map' + self.kernelName[operator.indexOf(self.kernelName, '-'):], '/boot/System.map')
+			os.remove('/boot/System.map')
+			os.symlink('/boot/System.map' + self.kernelName[operator.indexOf(self.kernelName, '-'):], '/boot/System.map')
 
 		else:
 			os.system('mount /boot')

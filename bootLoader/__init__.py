@@ -94,9 +94,9 @@ class BootLoader:
 		liloOutput = os.popen('emerge -p lilo 2>/dev/null | tail -n1', 'r')
 		siloOutput = os.popen('emerge -p silo 2>/dev/null | tail -n1', 'r')
 
-		grubMatch = bootLoaderExpression.match(grubOutput)
-		liloMatch = bootLoaderExpression.match(liloOutput)
-		siloMatch = bootLoaderExpression.match(siloOutput)
+		grubMatch = bootLoaderExpression.match(grubOutput.readline())
+		liloMatch = bootLoaderExpression.match(liloOutput.readline())
+		siloMatch = bootLoaderExpression.match(siloOutput.readline())
 
 		if liloMatch:
 			self.bootLoader = "lilo"
@@ -145,9 +145,9 @@ class BootLoader:
 	def setGrubRoot(self):
 
 		partOne = ascii_lowercase.find(self.bootPartition[2])
-		partTwo = string(int(self.bootPartition[3]) - 1)
+		partTwo = str(int(self.bootPartition[3]) - 1)
 
-		self.grubRoot = "(hd" + partOne + "," + partTwo + ")"
+		self.grubRoot = "(hd" + `partOne` + "," + `partTwo` + ")"
 
 	# hasKernel() =============================================================
 	# Functions:        Check if the kernel we want to add is already in the
@@ -174,7 +174,7 @@ class BootLoader:
 				kernelExpression = re.compile('$image\s=\s/boot/' + self.kernelName + '.+$')
 
 			if os.access(self.configLocation, os.F_OK):
-				menuFile = open(self.configLocation, os.F_OK)
+				menuFile = open(self.configLocation, 'r')
 			else:
 				raise MenuReadError
 			for line in menuFile:
@@ -198,11 +198,11 @@ class BootLoader:
 
 	def setKernelString(self):
 
-		self.kernelString = "\n# Kernel added by upkern on " + datetime.date.today() + "\n"
+		self.kernelString = "\n# Kernel added by upkern on " + `datetime.date.today()` + "\n"
 
 		if self.bootLoader == "grub":
 
-			self.kernelString + "title=" + self.kernelName + "\n\troot " + self.rootPartition + "\n\tkernel " + self.kernelName[operator.indexOf('-'):] + " root=" + self.rootPartition
+			self.kernelString + "title=" + self.kernelName + "\n\troot " + self.rootPartition + "\n\tkernel " + self.kernelName[operator.indexOf('-', self.kernelName):] + " root=" + self.rootPartition
 
 			if len(self.kernelOptions) != 0:
 				self.kernelString += " " + self.kernelOptions
