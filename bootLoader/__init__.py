@@ -203,7 +203,7 @@ class BootLoader:
 		else:
 			os.system('mount /boot')
 			self.hasKernel()
-			os.system('mount /boot')
+			os.system('umount /boot')
 
 	# setKernelString() =======================================================
 	# Function:         Add a kernel to the menu for the loader.
@@ -259,7 +259,7 @@ class BootLoader:
 
 					if match and not self.hasKernel():
 						if self.bootLoader == "grub":
-							newMenuFile.write(match.group(1) + string(int(match.group("kernelNumber")) + 1))
+							newMenuFile.write(match.group(1) + str(int(match.group("kernelNumber")) + 1))
 						elif self.bootLoader == "lilo" or self.bootLoader == "silo":
 							newMenuFile.write(match.group(1) + self.kernelName)
 					else:
@@ -282,8 +282,8 @@ class BootLoader:
 
 	def installConfiguration(self):
 		if self.isBootMounted():
-			if os.access(self.configuration + '.tmp', os.F_OK):
-				shutil.move(self.configuration + '.tmp', self.configuration)
+			if os.access(self.configLocation + '.tmp', os.F_OK):
+				shutil.move(self.configLocation + '.tmp', self.configLocation)
 		else:
 			os.system('mount /boot')
 			self.installConfiguration()
