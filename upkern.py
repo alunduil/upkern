@@ -204,7 +204,7 @@ def main():
 
 		# Create the bootloader.
 		try:
-			bootLoader = BootLoader(kernel.kernelImage, kernel.rootPartition, kernel.isBootMounted(), splashTheme, initrd, kernelOptions)
+			bootLoader = BootLoader(kernel.kernelImage, kernel.rootPartition, splashTheme, initrd, kernelOptions)
 		except BootLoaderError, bootLoaderError:
 			print bootLoaderError
 			return

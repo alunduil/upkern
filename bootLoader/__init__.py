@@ -26,7 +26,6 @@ from string import ascii_lowercase
 import datetime
 import operator
 import shutil
-from kernel import Kernel
 
 ## BootLoader Class Definition:
 
@@ -128,12 +127,29 @@ class BootLoader:
 					self.bootPartition = bootExpression.match(line).group("device")
 					break
 			else:
-				if Kernel.isBootMounted():
+				if self.isBootMounted():
 					self.bootPartition = self.rootPartition
 				else:
 					raise exceptions.BootNotFoundError
 		else:
 			raise exceptions.FstabReadError
+
+	# isBootMounted() ===========================================================
+	# Function:         Determine whether the boot partition is already
+	#                   mounted.
+	# PreConditions:
+	# PostConditions:   A boolean (self.isBootMounted) of whether the /boot
+	#                   partition is mounted is set.
+	# Returns:
+	# -------------------------------------------------------------------------
+
+	def isBootMounted(self):
+		bootFiles = os.listdir('/boot/')
+
+		for file in bootFiles:
+			if file != "boot":
+				return True
+		return False
 
 	# setGrubRoot() ===========================================================
 	# Function:         Get the root partition for the grub configuration file.
@@ -160,7 +176,7 @@ class BootLoader:
 	# -------------------------------------------------------------------------
 
 	def hasKernel(self):
-		if Kernel.isBootMounted():
+		if self.isBootMounted():
 			if self.bootLoader == "grub":
 
 				kernelExpression = re.compile('$.+kernel\s+/boot/' + self.kernelName + '\s+.+$')
@@ -229,7 +245,7 @@ class BootLoader:
 
 	def createConfiguration(self):
 
-		if Kernel.isBootMounted():
+		if self.isBootMounted():
 			grubExpression = re.compile('^(default\s+)(?P<kernelNumber>\d+)$')
 			liloExpression = re.compile('^(default=)(?P<defaultEntry>.+)$')
 			siloExpression = re.compile('^(default\s=\s)(?P<defaultEntry>.+)$')
@@ -265,7 +281,7 @@ class BootLoader:
 	# -------------------------------------------------------------------------
 
 	def installConfiguration(self):
-		if Kernel.isBootMounted():
+		if self.isBootMounted():
 			if os.access(self.configuration + '.tmp', os.F_OK):
 				shutil.move(self.configuration + '.tmp', self.configuration)
 		else:
