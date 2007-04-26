@@ -26,6 +26,7 @@ from string import ascii_lowercase
 import datetime
 import operator
 import shutil
+from kernel import Kernel
 
 ## BootLoader Class Definition:
 
@@ -38,10 +39,9 @@ class BootLoader:
 	# Returns:          BootLoader configuration.
 	# -------------------------------------------------------------------------
 
-	def __init__(self, kernelName, rootPartition, isBootMounted = False, splashTheme = "", initrd = "", kernelOptions = ""):
+	def __init__(self, kernelName, rootPartition, splashTheme = "", initrd = "", kernelOptions = ""):
 
 		self.rootPartition = rootPartition
-		self.isBootMounted = isBootMounted
 		self.kernelName = kernelName
 		self.splashTheme = splashTheme
 		self.initrd = initrd
@@ -128,7 +128,7 @@ class BootLoader:
 					self.bootPartition = bootExpression.match(line).group("device")
 					break
 			else:
-				if self.isBootMounted:
+				if Kernel.isBootMounted():
 					self.bootPartition = self.rootPartition
 				else:
 					raise exceptions.BootNotFoundError
@@ -160,7 +160,7 @@ class BootLoader:
 	# -------------------------------------------------------------------------
 
 	def hasKernel(self):
-		if self.isBootMounted:
+		if Kernel.isBootMounted():
 			if self.bootLoader == "grub":
 
 				kernelExpression = re.compile('$.+kernel\s+/boot/' + self.kernelName + '\s+.+$')
@@ -229,7 +229,7 @@ class BootLoader:
 
 	def createConfiguration(self):
 
-		if self.isBootMounted:
+		if Kernel.isBootMounted():
 			grubExpression = re.compile('^(default\s+)(?P<kernelNumber>\d+)$')
 			liloExpression = re.compile('^(default=)(?P<defaultEntry>.+)$')
 			siloExpression = re.compile('^(default\s=\s)(?P<defaultEntry>.+)$')
@@ -265,7 +265,7 @@ class BootLoader:
 	# -------------------------------------------------------------------------
 
 	def installConfiguration(self):
-		if self.isBootMounted:
+		if Kernel.isBootMounted():
 			if os.access(self.configuration + '.tmp', os.F_OK):
 				shutil.move(self.configuration + '.tmp', self.configuration)
 		else:
