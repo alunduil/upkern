@@ -218,7 +218,7 @@ class BootLoader:
 
 		if self.bootLoader == "grub":
 
-			self.kernelString + "title=" + self.kernelName + "\n\troot " + self.rootPartition + "\n\tkernel " + self.kernelName[operator.indexOf('-', self.kernelName):] + " root=" + self.rootPartition
+			self.kernelString + "title=" + self.kernelName + "\n\troot " + self.rootPartition + "\n\tkernel " + self.kernelName[self.kernelName.index('-'):] + " root=" + self.rootPartition
 
 			if len(self.kernelOptions) != 0:
 				self.kernelString += " " + self.kernelOptions
