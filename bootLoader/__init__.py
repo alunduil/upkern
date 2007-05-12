@@ -26,6 +26,7 @@ from string import ascii_lowercase
 import datetime
 import operator
 import shutil
+import datetime
 
 ## BootLoader Class Definition:
 
@@ -250,24 +251,30 @@ class BootLoader:
 			liloExpression = re.compile('^(default=)(?P<defaultEntry>.+)$')
 			siloExpression = re.compile('^(default\s=\s)(?P<defaultEntry>.+)$')
 
-			if os.access(self.configLocation, os.F_OK):
-				menuFile = open(self.configLocation, 'r')
-				newMenuFile = open(self.configLocation + '.tmp', 'w')
+			if not self.hasKernel():
+				if os.access(self.configLocation, os.F_OK):
+					menuFile = open(self.configLocation, 'r')
+					newMenuFile = open(self.configLocation + '.tmp', 'w')
 
-				for line in menuFile:
-					match = grubExpression.match(line) or liloExpression.match(line) or siloExpression.match(line)
+					for line in menuFile:
+						match = grubExpression.match(line) or liloExpression.match(line) or siloExpression.match(line)
 
-					if match and not self.hasKernel():
-						if self.bootLoader == "grub":
-							newMenuFile.write(match.group(1) + str(int(match.group("kernelNumber")) + 1))
-						elif self.bootLoader == "lilo" or self.bootLoader == "silo":
-							newMenuFile.write(match.group(1) + self.kernelName)
-					else:
-						newMenuFile.write(line)
-				newMenuFile.write(self.kernelString)
+						if self.bootLoader == "grub" and match:
+							newMenuFile.write(match.group(1) + str(int(match.group("kernelNumber")) + 1) + "\n")
+						elif self.bootLoader == "lilo" or self.bootLoader == "silo" and match:
+							newMenuFile.write(match.group(1) + self.kernelName + "\n")
+						else
+							newMenuFile.write(line)
+
+					newMenuFile.write('# ' + datetime.date.today() + ' :: Kernel added by upkern (http://svn.alunduil.com/svn/upkern/trunk)')
+					newMenuFile.write(self.kernelString)
 
 				menuFile.close()
 				newMenuFile.close()
+
+		else
+			shutil.copy(self.configLocation, self.configLocation + '.tmp')
+
 		else:
 			os.system('mount /boot')
 			self.createConfiguration()
