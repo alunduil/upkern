@@ -214,12 +214,11 @@ class BootLoader:
 	# -------------------------------------------------------------------------
 
 	def setKernelString(self):
-
-		self.kernelString = "\n# Kernel added by upkern on " + `datetime.date.today()` + "\n"
+		self.kernelString = "\n# " + str(datetime.date.today()) + " :: Kernel added by upkern (http://svn.alunduil.com/svn/upkern/trunk)\n"
 
 		if self.bootLoader == "grub":
 
-			self.kernelString + "title=" + self.kernelName + "\n\troot " + self.rootPartition + "\n\tkernel " + self.kernelName[self.kernelName.index('-'):] + " root=" + self.rootPartition
+			self.kernelString += "title=" + self.kernelName + "\n\troot " + self.rootPartition + "\n\tkernel " + self.kernelName[self.kernelName.index('-'):] + " root=" + self.rootPartition
 
 			if len(self.kernelOptions) != 0:
 				self.kernelString += " " + self.kernelOptions
@@ -263,7 +262,7 @@ class BootLoader:
 							newMenuFile.write(match.group(1) + str(int(match.group("kernelNumber")) + 1) + "\n")
 						elif self.bootLoader == "lilo" or self.bootLoader == "silo" and match:
 							newMenuFile.write(match.group(1) + self.kernelName + "\n")
-						else
+						else:
 							newMenuFile.write(line)
 
 					newMenuFile.write('# ' + datetime.date.today() + ' :: Kernel added by upkern (http://svn.alunduil.com/svn/upkern/trunk)')
@@ -272,8 +271,8 @@ class BootLoader:
 				menuFile.close()
 				newMenuFile.close()
 
-		else
-			shutil.copy(self.configLocation, self.configLocation + '.tmp')
+			else:
+				shutil.copy(self.configLocation, self.configLocation + '.tmp')
 
 		else:
 			os.system('mount /boot')
