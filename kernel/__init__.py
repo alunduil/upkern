@@ -282,7 +282,7 @@ class Kernel:
 				match = configExpression.match(directory)
 
 				if match:
-					shutil.copy(match.group(), '/usr/src/.config')
+					shutil.copy(match.group(), '/usr/src/linux/.config')
 					break
 		else:
 			os.system('mount /boot')
