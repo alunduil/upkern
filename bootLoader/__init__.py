@@ -265,7 +265,6 @@ class BootLoader:
 						else:
 							newMenuFile.write(line)
 
-					newMenuFile.write('# ' + datetime.date.today() + ' :: Kernel added by upkern (http://svn.alunduil.com/svn/upkern/trunk)')
 					newMenuFile.write(self.kernelString)
 
 				menuFile.close()

@@ -335,3 +335,39 @@ class BogusSourceTypeError:
 
 	def __str__(self):
 		return "The sources '" + self.sourceType + "' is not valid.\nIf this is a bug please file a bug report with Gentoo's bugzilla."
+
+class NoMakeOptError:
+
+	# NoMakeOptError Constructor ==============================================
+	# Function:			Create an error that tells the user they are stranger
+	# 					than debian users. No makeopt, no build for you!
+	# PreConditions:	The user doesn't want to take advantage of multiple
+	# 					builds.
+	# PostConditions:	User is informed of their strangeness.
+	# Returns:			The scowl of discomfort.
+	# -------------------------------------------------------------------------
+
+	def __init__(self):
+		return
+
+	# NoMakeOptError Round Trip String ========================================
+	# Function:			Return the error message because there is only one way
+	# 					to yell at negligent people.
+	# PreConditions:	The user is lethargic, or not a Gentoo user.
+	# PostConditions:	The user is informed of their lazy or non-Gentoo ways.
+	# Returns:			Super String for the string needs of the super user.
+	# -------------------------------------------------------------------------
+
+	def __repr__(self):
+		return self.__str__()
+
+	# NoMakeOptError String ===================================================
+	# Function:			Return the error message, because this message is high
+	# 					priority.
+	# PreConditions:	The user gets smacked around for their negligence.
+	# PostConditions:	Call the medic.
+	# Returns:			The news flash for the user.
+	# -------------------------------------------------------------------------
+
+	def __str__(self):
+		return "The number of parallel builds you would like was not able to be determined from your /etc/make.conf. Please, check that you have the appropriate line, MAKEOPTS=\"-jN\".

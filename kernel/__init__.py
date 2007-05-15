@@ -322,6 +322,11 @@ class Kernel:
 
 		match = makeExpression.match(makeOutput.readline())
 
+		if not match:
+			exceptions.NoMakeOptError noMakeOptError
+			print noMakeOptError
+			return "-j1"
+
 		return match.group("makeOpts")
 
 	# configure() =============================================================
