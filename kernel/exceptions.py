@@ -370,4 +370,4 @@ class NoMakeOptError:
 	# -------------------------------------------------------------------------
 
 	def __str__(self):
-		return "The number of parallel builds you would like was not able to be determined from your /etc/make.conf. Please, check that you have the appropriate line, MAKEOPTS=\"-jN\".
+		return 'The number of parallel builds you would like was not able to be determined from your /etc/make.conf. Please, check that you have the appropriate line, MAKEOPTS="-jN".'
