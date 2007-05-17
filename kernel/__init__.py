@@ -103,7 +103,7 @@ class Kernel:
 	# -------------------------------------------------------------------------
 
 	def determineRoot(self):
-		rootExpression = re.compile('^(/dev/\w+)\s+/\s+.+$', re.IGNORECASE)
+		rootExpression = re.compile('^(/dev/[a-zA-Z0-9/]+)\s+/\s+.+$', re.IGNORECASE)
 
 		if os.access('/etc/fstab', os.F_OK):
 			fstab = open('/etc/fstab', 'r')
@@ -120,7 +120,7 @@ class Kernel:
 			fstab.close()
 		return
 
-	# isBootMounted() ===========================================================
+	# isBootMounted() =========================================================
 	# Function:         Determine whether the boot partition is already
 	#                   mounted.
 	# PreConditions:
