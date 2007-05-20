@@ -208,7 +208,7 @@ class BootLoader:
 
 	# setKernelString() =======================================================
 	# Function:         Add a kernel to the menu for the loader.
-	# PreConditions:    We know what we are putting were.
+	# PreConditions:    We know what we are putting where.
 	# PostConditions:   We have the string prepared to place in our file.
 	# Returns:          The kernel string to place in the file.
 	# -------------------------------------------------------------------------
@@ -218,7 +218,7 @@ class BootLoader:
 
 		if self.bootLoader == "grub":
 
-			self.kernelString += "title=" + self.kernelName + "\n\troot " + self.rootPartition + "\n\tkernel " + self.kernelName[self.kernelName.index('-'):] + " root=" + self.rootPartition
+			self.kernelString += "title=" + self.kernelName + "\n\troot " + self.grubRoot + "\n\tkernel bzImage" + self.kernelName[self.kernelName.index('-'):] + " root=" + self.rootPartition
 
 			if len(self.kernelOptions) != 0:
 				self.kernelString += " " + self.kernelOptions
