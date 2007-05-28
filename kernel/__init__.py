@@ -204,8 +204,7 @@ class Kernel:
 	# -------------------------------------------------------------------------
 
 	def areSourcesDownloaded(self):
-		hiddenDirectoryExpression = re.compile('^\..+$')
-		snortDirectoryExpression = re.compile('^snort_dynamicsrc&')
+		hiddenDirectoryExpression = re.compile('^(\..+)|(snort_dynamicsrc)$')
 
 		directories = os.listdir('/usr/src/')
 		directories.sort(reverse=True)
@@ -213,12 +212,10 @@ class Kernel:
 		for directory in directories:
 			match = hiddenDirectoryExpression.match(directory)
 			if not match:
-				match = snortDirectoryExpression.match(directory)
-				if not match:
-					if len(self.kernelName) == 0:
-						self.kernelName = directory
-					if self.kernelName == directory:
-						return True
+				if len(self.kernelName) == 0:
+					self.kernelName = directory
+				if self.kernelName == directory:
+					return True
 		return False
 
 	# download() ==============================================================
