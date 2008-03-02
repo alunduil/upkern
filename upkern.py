@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 ############################################################################
-#    Copyright (C) 2007 by Alex Brandt                                     #
-#    alunduil@alunduil.com                                                 #
+#    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
 #                                                                          #
 #    This program is free software; you can redistribute it and#or modify  #
 #    it under the terms of the GNU General Public License as published by  #
@@ -20,208 +19,237 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-## Description
+"""Kernel update automater for Gentoo.
 
-"""
 Python script that updates a kernel for the sysadmin in a way that is
-conducive to the gentoo environment.
+conducive to the Gentoo environment. This script will only work on a system
+that has portage installed, but should only raise a warning if other
+non-necessary modules from the portage system are utilized.
+
 """
 
 import getopt
-import os
 import sys
-from kernel import Kernel
-from kernel.exceptions import *
-from bootLoader import BootLoader
-from bootLoader.exceptions import *
+from textwrap import wrap
 import time
 
-def usage():
-	print "usage: upkern [-m <method>] [-i <initrd file>] [-o <kernel options>] [-b <boot splash theme>] [-v[v]] [-h] [-r] [-e <editor>] [-s <sources>] [[-k] kernel]"
-	sys.exit(0)
+from kernel import *
+from bootloader import *
 
-def help():
-	print "Usage: upkern [options]... [kernel]"
-	print "Automates the upgrade of a kernel. Including updating the information for boot"
-	print "purposes in a grub or lilo configuration file."
-	print ""
-	print "Mandatory options for short options are mandatory for long options as well."
-	print ""
-	print "-m , --method=CONFIGURATOR       Specifies the configurator for the kernel."
-	print "                                 Configurator can be one of the following:"
-	print "                                 oldconfig, menuconfig, xconfig. All are the normal"
-	print "                                 kernel configurators, and are documents in the"
-	print "                                 source."
-	print ""
-	print "-i , --initrd=INITRDFILE         Specifies the initial ramdisk file to be used by"
-	print "                                 the boot configuration. This option will be"
-	print "                                 overruled by the -s/--splash-theme if it is"
-	print "                                 specified."
-	print ""
-	print "-o , --kernel-opts=OPTIONS       Passes the string OPTIONS to the boot"
-	print "                                 configuration. This is the place to pass the"
-	print "                                 framebuffer line. One can use this or pass the"
-	print "                                 option -e/--editor, and manually type it into the"
-	print "                                 boot configuration file."
-	print ""
-	print "-b , --boot-splash-theme=THEME   Automatically makes sure that the necessary tools"
-	print "                                 are installed, and then creates all the necessary"
-	print "                                 system information to have a nice boot splash image"
-	print "                                 on startup."
-	print ""
-	print "-v , --verbose                   Without this option or the -vv/--very-verbose"
-	print "                                 option set there will be no output of the install"
-	print "                                 or build progress of the kernel. With this option"
-	print "                                 set the output will include errors, but not the"
-	print "                                 standard build output."
-	print ""
-	print "-vv, --very-verbose              This option is similar to the -v/--verbose option."
-	print "                                 This option will output everything from the build"
-	print "                                 not just the errors or the necessary output."
-	print ""
-	print "-h , --help                      Brings up this help menu, and displays the"
-	print "                                 the usage of some options that aren't quite"
-	print "                                 obvious."
-	print ""
-	print "-r , --rebuild-modules           Tells the program to rebuild the modules that you"
-	print "                                 have emerged into your system. Examples of these"
-	print "                                 include nvidia-drivers, alsa-drivers, svgalib, and"
-	print "                                 others. This option takes advantage of the"
-	print "                                 module-rebuild script that one can emerge, and will"
-	print "                                 not work without it."
-	print ""
-	print "-e , --editor=EDITOR             Brings up the configuration file in an editor after"
-	print "                                 it has been modified by the script so that you may"
-	print "                                 verify the modifications, and make your own if you"
-	print "                                 wish to do so. EDITOR is the full path to the"
-	print "                                 editor you wish to utilize."
-	print ""
-	print "-s , --sources=SOURCES           The sources you wish to use (if you need to specify"
-	print "                                 a set, or if you wish to use multiple sources on the"
-	print "                                 same machine."
-	print ""
-	print "-k , --kernel=KERNEL             The kernel you wish to build. This does not have to"
-	print "                                 be specified, but if it is the version number must"
-	print "                                 be specified at the very least. If the kernel is"
-	print "                                 not specified the highest version kernel already"
-	print "                                 installed will be used."
-	sys.exit(0)
+def usage(name):
+    """Prints out the usage of the utility.
+
+    Passes the usage string to the user, and then terminates the program.
+
+    """
+    usage_list = [
+        "usage: " + name,
+        " [-c configurator]",
+        " [-i initrd]",
+        " [-o kernel options]",
+        " [-b bootsplash theme]",
+        " [-s sources]",
+        " [-e editor]",
+        " [-v level]",
+        " [-r]",
+        " [-t]",
+        " [-h]",
+        " [[-k] kernel]"
+        ]
+    usage_string = ''.join(usage_list)
+    print usage_string
+
+def help(name):
+    """Prints out the help menu for the utility.
+
+    Passes the help menu string to the user in groups of 70 characters at a time.
+
+    """
+    print "Usage: " + name + " [options] ... [kernel]"
+
+    help_list = [
+        "Automates the updating of a Gentoo kernel, and will even attempt to",
+        " download sources that are not present on your machine if so",
+        " instructed. The script should be able to handle anything you throw",
+        " at it, but it can't always read your mind. For usability",
+        " suggestions or comments, please, contact the author with",
+        " appropriate feedback"
+        ]
+    help_string = ''.join(help_list)
+    for string in wrap(help_string):
+        print string
+    print ""
+
+    help_list = [
+        "Mandatory options for short options are mandatory for long options",
+        " as well."
+        ]
+    help_string = ''.join(help_list)
+    for string in wrap(help_string):
+        print string
+    print ""
+
+    help_list = [
+        "-c, --configurator=CONFIGURATOR\tSpecifies which configurator",
+        " should be"
+    ]
+    help_string = ''.join(help_list)
+    print help_string
+    print "\t\t\t\tused to configure the kernel sources."
+    print "\t\t\t\tThe CONFIGURATOR can be one of the"
+    print "\t\t\t\tfollowing: oldconfig, menuconfig,"
+    print "\t\t\t\txconfig, etc. All the configurators"
+    print "\t\t\t\tare documented in the kernel source"
+    print "\t\t\t\tfiles."
+    print ""
+
+    print "-i, --initrd=INITRD\t\tSpecifies the initial ramdisk file to"
+    print "\t\t\t\tthe boot loader configuration."
+    print ""
+
+    print "-o, --options=OPTIONS\t\tThis string is literally tacked on to"
+    print "\t\t\t\tthe kernel line in your boot loader's"
+    print "\t\t\t\tconfiguration. This is the place you"
+    print "\t\t\t\twould want to stick a framebuffer"
+    print "\t\t\t\tline, or any other options you want"
+    print "\t\t\t\tyour kernel to have."
+    print ""
+
+    print "-b, --boot-splash=THEME\t\tVerifies the splash-utils are"
+    print "\t\t\t\tinstalled, and uses the THEME"
+    print "\t\t\t\tspecified."
+    print ""
+
+    print "-s, --sources=SOURCES\t\tSpecify the sources that will by used"
+    print "\t\t\t\tfor this kernel build. If not"
+    print "\t\t\t\tspecified, the gentoo sources will be"
+    print "\t\t\t\tused."
+    print ""
+
+    print "-e, --editor=EDITOR\t\tSpecify the editor to use for editing"
+    print "\t\t\t\tthe boot loader configuration"
+    print "\t\t\t\tfile after " + name + " has"
+    print "\t\t\t\talready modified it. The"
+    print "\t\t\t\tdefault editor is the one"
+    print "\t\t\t\tdefined by your ${EDITOR}"
+    print "\t\t\t\tenvironment variable."
+    print ""
+
+    print "-v, --verbose=LEVEL\t\tSets the verbosity level, and how many"
+    print "\t\t\t\tmessages are printed out as"
+    print "\t\t\t\t" + name + " runs. The values for"
+    print "\t\t\t\tLEVEL are: none, error, warning,"
+    print "\t\t\t\tand debug. By setting the level,"
+    print "\t\t\t\tyou are specifying the highest"
+    print "\t\t\t\tlevel that will be printed to the"
+    print "\t\t\t\tstandard output."
+    print ""
+
+    print "-r, --rebuild-modules\t\tMakes " + name + " use module-rebuild"
+    print "\t\t\t\tto rebuild the modules you have"
+    print "\t\t\t\tpulled in via portage for the new"
+    print "\t\t\t\tkernel."
+    print ""
+
+    print "-t, --time\t\t\tTimes the actual build of the kernel allowing"
+    print "\t\t\t\tone to determine if kernels are building faster or"
+    print "\t\t\t\tbased on different aspects of the machine."
+    print ""
+
+    print "-h, --help\t\t\tPrints out this help menu."
+    print ""
+
+    print "-k, --kernel=KERNEL\t\tSpecifies a varying amount of information"
+    print "\t\t\t\tabout the kernel you would like to"
+    print "\t\t\t\tbuild. Ranges from kernel version"
+    print "\t\t\t\tto the full gentoo specification."
 
 def main():
-	if os.getuid() == 0:
-		shortOptions    =   'm:i:o:s:k:b:vhre:'
-		longOptions     =   ['method=', 'initrd=', 'kernel-opts=', 'boot-splash-theme=', 'verbose', 'very-verbose', 'help', 'rebuild-modules', 'editor=', 'kernel=', 'sources=']
-		verbosity       =   0
-		rebuildModules  =   False
-		sources         =   ""
-		buildMethod     =   "menuconfig"
-		kernelName      =   ""
-		splashTheme	=   ""
-		initrd		=   ""
-		kernelOptions	=   ""
+    """
+    if os.getuid() != 0:
+        print "Superuser access is required!"
+        return 1;
+    """
 
-		try:
-			optionList, arguments = getopt.gnu_getopt( sys.argv[1:], shortOptions, longOptions )
-		except:
-			usage()
+    short_options = "c:i:o:b:s:e:vrthk:"
+    long_options = ['configurator=', 'initrd=', 'options=', 'boot-splash=',
+        'sources=', 'editor=', 'verbose=', 'rebuild-modules', 'time', 'help',
+        'kernel=']
 
-		for option in optionList:
-			if option[0] == '-m' or option[0] == '--method':
-				buildMethod = option[1]
-			elif option[0] == '-i' or option[0] == '--initrd':
-				initrd = option[1]
-			elif option[0] == '-o' or option[0] == '--kernel-opts':
-				kernelOptions = option[1]
-			elif option[0] == '-s' or option[0] == '--sources':
-				sources = option[1]
-			elif option[0] == '-v':
-				verbosity = verbosity + 1
-			elif option[0] == '-h' or option[0] == '--help':
-				help()
-			elif option[0] == '-r' or option[0] == '--rebuild-modules':
-				rebuildModules = True
-			elif option[0] == '-e' or option[0] == '--editor':
-				editor = option[1]
-			elif option[0] == '-b' or option[0] == '--boot-splash-theme':
-				splashTheme = option[1]
-			elif option[0] == '--very-verbose':
-				verbosity = 2
-			elif option[0] == '--verbose':
-				verbosity = 1
+    configurator = 'menuconfig'
+    initrd = ''
+    options = ''
+    boot_splash = ''
+    sources = 'gentoo'
+    editor = os.getenv("EDITOR", "")
+    verbosity = 0
+    rebuild_modules = False
+    time_build = False
+    kernel_name = ""
 
-		if len(arguments) != 0:
-			kernelName = arguments[0]
+    try:
+        options, arguments = getopt.gnu_getopt(sys.argv[1:], short_options, long_options)
+    except:
+        usage(sys.argv[0])
+        sys.exit(1)
 
-		try:
-			kernel = Kernel(kernelName, sources, rebuildModules, buildMethod)
-		except RootNotFoundError, rootNotFoundError:
-			print rootNotFoundError
-			return
-		except FstabReadError, fstabReadError:
-			print fstabReadError
-			return
-		except BadKernelError, badKernelError:
-			print badKernelError
-			return
-		except KernelNotFoundError, kernelNotFoundError:
-			print kernelNotFoundError
-			return
-		except KernelMaskedError, kernelMaskedError:
-			print kernelMaskedError
-			return
-		except BadSourceTypeError, badSourceTypeError:
-			print badSourceTypeError
-			return
-		except BogusSourceTypeError, bogusSourceTypeError:
-			print bogusSourceTypeError
-			return
+    for option in options:
+        if option[0] == '-c' or option[0] == '--configurator':
+            configurator = option[1]
+        elif option[0] == '-i' or option[0] == '--initrd':
+            initrd = option[1]
+        elif option[0] == '-o' or option[0] == '--options':
+            options = option[1]
+        elif option[0] == '-b' or option[0] == '--boot-splash':
+            boot_splash = option[1]
+        elif option[0] == '-s' or option[0] == '--sources':
+            sources = option[1]
+        elif option[0] == '-e' or option[0] == '--editor':
+            editor = option[1]
+        elif option[0] == '-v':
+            verbosity += 1
+        elif option[0] == '--verbose':
+            if option[1].lower() == "none":
+                verbosity = 0
+            elif option[1].lower() == "error":
+                verbosity = 1
+            elif option[1].lower() == "warning":
+                verbosity = 2
+            elif option[1].lower() == "debug":
+                verbosity = 3
+            else: pass
+        elif option[0] == '-r' or option[0] == '--rebuild-modules':
+            rebuild_modules = True
+        elif option[0] == '-t' or option[0] == '--time':
+            time_build = True
+        elif option[0] == '-h' or option[0] == '--help':
+            help(sys.argv[0])
+            sys.exit(0)
+        elif option[0] == '-k' or option[0] == '--kernel':
+            kernel_name = option[1]
 
-		# The kernel is now ready to go. Let's configure the options.
-		try:
-			kernel.configure(verbosity)
-		except SourceAccessDeniedError, sourceAccessDeniedError:
-			print sourceAccessDeniedError
-			return
-		except BadConfiguratorError, badConfiguratorError:
-			print badConfiguratorError
-			return
+    if len(arguments) != 0:
+        kernel_name = arguments[0]
 
-		# The kernel is now configured. Let's build the thing.
-		try:
-			startTime = time.time()
-			kernel.build(verbosity)
-			finishTime = time.time()
-		except SourceAccessDeniedError, sourceAccessDeniedError:
-			print sourceAccessDeniedError
-			return
+    try:
+        kernel = Kernel(configurator, kernel_name, sources, rebuild_modules)
+        kernel.configure(verbosity)
+        if (time_build): start_time = time.time()
+        kernel.build(verbosity)
+        if (time_build): stop_time = time.time()
+        kernel.install(verbosity)
+    except KernelException, error:
+        error.print_message()
 
-		# Install the bits of the kernel where they should go.
-		try:
-			kernel.install()
-		except SourceAccessDeniedError, sourceAccessDeniedError:
-			print sourceAccessDeniedError
-			return
+    try:
+        boot_loader = create_bootloader()
+        boot_loader = create_configuration()
+        boot_loader = install_configuration()
+    except BootLoaderException, error:
+        error.print_message()
 
-		# Create the bootloader.
-		try:
-			bootLoader = BootLoader(kernel.kernelImage, kernel.rootPartition, splashTheme, initrd, kernelOptions)
-		except BootLoaderError, bootLoaderError:
-			print bootLoaderError
-			return
-		except BootNotFoundError, bootNotFoundError:
-			print bootNotFoundError
-			return
-		except FstabReadError, fstabReadError:
-			print fstabReadError
-			return
-
-		# Create the configuration file.
-		bootLoader.createConfiguration()
-
-		# Install the configuration file.
-		bootLoader.installConfiguration()
-
-	else:
-		print "You must be root to run this program."
+    print "The kernel has been successfully upgraded to " + kernel.name[1] + "."
+    if (time_build):
+        print "The time to build the kernel was "
 
 main()
