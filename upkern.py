@@ -232,9 +232,9 @@ def main():
     try:
         kernel = Kernel(configurator, kernel_name, sources, rebuild_modules)
         kernel.configure(verbosity)
-        if (time_build): start_time = time.time()
+        if (time_build): start_time = time.clock()
         kernel.build(verbosity)
-        if (time_build): stop_time = time.time()
+        if (time_build): stop_time = time.clock()
         kernel.install(verbosity)
     except KernelException, error:
         error.print_message()
@@ -248,6 +248,15 @@ def main():
 
     print "The kernel has been successfully upgraded to " + kernel.name[1] + "."
     if (time_build):
-        print "The time to build the kernel was "
+        print "The time to build the kernel was " + str(stop_time - \
+            start_time) + "s."
+    output_list = [
+        "Please, check that all config files are in the appropriate place,",
+        " and that there are no errors in the configuration of the boot",
+        " process. It would be unfortunate if you were not able to boot the",
+        " new kernel we just prepared."
+        ]
+    for string in wrap(output_list):
+        print string
 
 main()

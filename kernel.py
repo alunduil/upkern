@@ -87,6 +87,19 @@ class Kernel(object):
         self.__kernel_name = kernel_name
         self.__download_name, self.__kernel_name = self.__get_kernel_names()
 
+        self.name = self.__kernel_name
+
+        expression = re.compile('^.+(?P<version>\d+\.\d+)\..+$')
+        self.__kernel_version = \
+            expression.match(self.__kernel_name).group("version")
+
+        self.__kernel_suffix = \
+            self.__kernel_name[operator.indexOf(self.kernelName, '-'):]
+
+        self.__kernel_image = __get_image_name()
+
+        self.image = self.__kernel_image + self.__kernel_suffix
+
         self.__rebuild_modules = rebuild_modules
 
         self.__architecture = self.__determine_architecture()
@@ -162,8 +175,6 @@ class Kernel(object):
                 match3.group("version") + "-" + \
                 (match3.group("source_type") or self.__sources or "gentoo") \
                 + (match3.group("release") or ""))
-
-    name = property(__get_kernel_names, doc='Name of the kernel.')
 
     def __determine_architecture(self):
         """Determine the architecture of the running machine.
@@ -345,10 +356,6 @@ class Kernel(object):
         if not expression.match(os.getcwd()):
             raise KernelException("Could not cd into /usr/src/linux!")
 
-        expression = re.compile('^.+(?P<version>\d+\.\d+)\..+$')
-
-        version = expression.match(self.__kernel_name).group("version")
-
         if verbosity > 2:
             output = ''
         elif verbosity == 1 or verbosity == 2:
@@ -356,7 +363,7 @@ class Kernel(object):
         elif verbosity <= 0:
             output = '>/dev/null 2>/dev/null'
 
-        if version == "2.4":
+        if self.__kernel_version == "2.4":
             if self.__architecture == "sparc32":
                 os.system('make ' + self.__make_opts + ' dep' + output + \
                     '&& make ' + self.__make_opts + \
@@ -369,7 +376,7 @@ class Kernel(object):
                 os.system('make ' + self.__make_opts + ' dep' + output + \
                     '&& make ' + self.__make_opts + \
                     ' bzImage modules modules_install' + output)
-        elif version == "2.6":
+        elif self.__kernel_version == "2.6":
             if self.__architecture == "sparc64":
                 os.system('make ' + self.__make_opts + ' ' + output + \
                     '&& make ' + self.__make_opts + ' image modules_install' \
@@ -380,3 +387,65 @@ class Kernel(object):
                     + output)
         if self.__rebuild_modules:
             os.system('module-rebuild -X rebuild' + output)
+
+    def __get_image_name(self):
+        """Get the image name for the compiled kernel.
+
+        Determine if the kernel will be a bzImage, image, vmlinux, etc.
+
+        """
+        expression = re.compile('^i\d86$')
+
+        if exression.match(self.__architecture) or \
+            self.__architecture == "x86_64":
+            return "bzImage"
+        elif self.__architecture == "sparc64":
+            return "image"
+        elif self.__architecture == "sparc32":
+            if self.__kernel_version == "2.4":
+                return "vmlinux"
+            elif self.__kernel_version == "2.6":
+                return "image"
+
+        raise KernelException( \
+            "Could not determine the image for your architecture!", \
+            self.__architecture)
+
+    def install(self, verbosity = 0):
+        """Install the kernel into /boot
+
+        Get the appropriate kernel pieces into the boot area.
+
+        """
+        os.chdir(/usr/src/linux)
+
+        expression = re.compile('^/usr/src/linux.+$')
+        if not expression.match(os.getcwd()):
+            raise KernelException("Could not cd into /usr/src/linux!")
+
+        expression = re.compile('^i\d86$')
+
+        destination = '/boot' + self.__kernel_image + self.__kernel_suffix
+
+        if is_boot_mounted():
+            if expression.match(self.__architecture):
+                shutil.copy('arch/i386/boot/' + self.__kernel_image, \
+                    destination)
+            elif self.__architecture == "sparc64" or \
+                self.__architecture == "x86_64":
+                shutil.copy('arch/' + self.__architecture + '/boot/' + \
+                    self.__kernel_image, destination)
+            elif self.__architecture == "sparc32":
+                if self.__kernel_version == "2.4":
+                    shutil.copy(self.__kernel_image, destination)
+                elif self.__kernel_version == "2.6":
+                    shutil.copy('arch/sparc/boot/' + self.__kernel_image, \
+                        destination)
+
+            shutil.copy('.config', '/boot/config' + self.__kernel_suffix)
+            shutil.copy('System.map', '/boot/System.map' + self.__kernel_suffix)
+            shutil.copy('System.map', '/System.map')
+        else:
+            os.system('mount /boot')
+            self.install()
+            os.system('umount /boot')
