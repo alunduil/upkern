@@ -165,11 +165,9 @@ def help(name):
     print "\t\t\t\tto the full gentoo specification."
 
 def main():
-    """
     if os.getuid() != 0:
         print "Superuser access is required!"
         return 1;
-    """
 
     short_options = "c:i:o:b:s:e:vrthk:"
     long_options = ['configurator=', 'initrd=', 'options=', 'boot-splash=',
