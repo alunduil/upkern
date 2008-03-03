@@ -26,6 +26,7 @@ Will provide a Kernel class, and a generic kernel exception class.
 import os
 import re
 import operator
+import shutil
 
 from helpers import is_boot_mounted
 
