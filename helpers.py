@@ -17,6 +17,8 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
+import os
+
 def is_boot_mounted():
     """Determines if the system's boot partition is mounted.
 
