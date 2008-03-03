@@ -293,7 +293,7 @@ class GRUB(BootLoader):
         match = expression.match(self._boot_partition)
         if match:
             return "(hd" + ascii_lowercase.find(match.group('drive_letter')) \
-                + "," + (int(match.group('part_number')) - 1) + ")"
+                + "," + str(int(match.group('part_number')) - 1) + ")"
 
         expression = re.compile(
             '/dev/cciss/c0d(?P<drive_number>\d+)p(?P<part_number>\d+)')
