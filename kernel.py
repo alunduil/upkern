@@ -263,7 +263,7 @@ class Kernel(object):
                     "Old configuration not found! Using default!");
         else:
             os.system('mount /boot')
-            self.copy_config()
+            self.__copy_config()
             os.system('umount /boot')
 
     def configure(self, verbosity = 0):
