@@ -41,7 +41,7 @@ class BootLoaderException(Exception):
         Exception.__init__(self, *args)
         self.message = message
 
-    def print_message():
+    def print_message(self):
         print message
 
 def create_bootloader(*args):

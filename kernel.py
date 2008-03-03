@@ -40,7 +40,7 @@ class KernelException(Exception):
         Exception.__init__(self, *args)
         self.message = message
 
-    def print_message():
+    def print_message(self):
         print self.message
 
 class Kernel(object):
