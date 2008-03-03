@@ -412,7 +412,7 @@ class Kernel(object):
         if self.__rebuild_modules:
             os.system('module-rebuild -X rebuild' + output)
 
-   def install(self, verbosity = 0):
+    def install(self, verbosity = 0):
         """Install the kernel into /boot
 
         Get the appropriate kernel pieces into the boot area.
