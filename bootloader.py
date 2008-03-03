@@ -29,6 +29,7 @@ import re
 import os
 import datetime
 from string import ascii_lowercase
+import shutil
 
 from helpers import is_boot_mounted
 
