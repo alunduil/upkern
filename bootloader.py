@@ -43,7 +43,7 @@ class BootLoaderException(Exception):
         self.message = message
 
     def print_message(self):
-        print message
+        print self.message
 
 def create_bootloader(*args):
     """Factory method for getting the appropriate BootLoader object.
