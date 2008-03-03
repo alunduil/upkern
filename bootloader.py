@@ -227,7 +227,7 @@ class GRUB(BootLoader):
 
         kernel_list = [
             "\n# Kernel added on " + datetime.date.today().ctime() + ":\n",
-            "title=" + self.__kernel_name + "\n",
+            "title=" + BootLoader.__kernel_name + "\n",
             "\troot " + self.__determine_grub_root() + "\n",
             "\tkernel " + self.__kernel_image + " root=" + self.__root_partition,
             " " + self.__kernel_options + " " + self.__splash_theme
