@@ -199,11 +199,11 @@ class Kernel(object):
 
         expression = re.compile('^(\..+)|(snort_dynamicsrc)$')
 
-        for directory in directories:
-            print directory
-
         directories = os.listdir('/usr/src/')
         directories.sort(reverse=True)
+
+        for directory in directories:
+            print directory
 
         for directory in directories:
             if not expression.match(directory) and self.__kernel_name == directory:
