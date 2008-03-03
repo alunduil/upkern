@@ -241,8 +241,8 @@ def main():
         kernel.install(verbosity)
 
         boot_loader = create_bootloader(kernel, kernel_options, initrd, boot_splash)
-        boot_loader = create_configuration()
-        boot_loader = install_configuration()
+        boot_loader.create_configuration()
+        boot_loader.install_configuration()
 
         if edit and len(editor) > 0:
             os.system(editor + " " + boot_loader.config)
