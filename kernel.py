@@ -199,6 +199,9 @@ class Kernel(object):
 
         expression = re.compile('^(\..+)|(snort_dynamicsrc)$')
 
+        for directory in directories:
+            print directory
+
         directories = os.listdir('/usr/src/')
         directories.sort(reverse=True)
 

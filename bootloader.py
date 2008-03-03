@@ -64,7 +64,8 @@ def create_bootloader(*args):
     expression = re.compile('^\[ebuild\s+R\s+\].+$')
 
     for boot_loader in ("grub", "lilo", "silo"):
-        output = os.popen('emerge -p ' + boot_loader + ' 2>/dev/null | tail -n1', 'r')
+        output = os.popen('emerge -p ' + boot_loader + \
+            ' 2>/dev/null | tail -n1', 'r')
         if expression.match(output.readline()):
             break;
     if boot_loader == "grub":
@@ -74,7 +75,8 @@ def create_bootloader(*args):
     elif boot_loader == "silo":
         return SILO(*args)
     else:
-        raise BootLoaderException("Could not determine the boot loader on this system!")
+        raise BootLoaderException(
+            "Could not determine the boot loader on this system!")
 
 class BootLoader(object):
     """A boot loader handling object.
@@ -308,6 +310,13 @@ class GRUB(BootLoader):
             self._boot_partition)
 
     def install_configuration(self):
+        """Install the newly created configuration file.
+
+
+        Install the tmp config file into the actual location.
+
+        """
+
         if is_boot_mounted():
             if os.access(self.__config_location + '.tmp', os.F_OK):
                 shutil.move(self.__config_location + '.tmp',
