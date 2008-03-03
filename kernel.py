@@ -62,29 +62,6 @@ class Kernel(object):
 
     """
 
-    def __get_image_name(self):
-        """Get the image name for the compiled kernel.
-
-        Determine if the kernel will be a bzImage, image, vmlinux, etc.
-
-        """
-        expression = re.compile('^i\d86$')
-
-        if exression.match(self.__architecture) or \
-            self.__architecture == "x86_64":
-            return "bzImage"
-        elif self.__architecture == "sparc64":
-            return "image"
-        elif self.__architecture == "sparc32":
-            if self.__kernel_version == "2.4":
-                return "vmlinux"
-            elif self.__kernel_version == "2.6":
-                return "image"
-
-        raise KernelException( \
-            "Could not determine the image for your architecture!", \
-            self.__architecture)
-
     def __init__(self, configurator = "menuconfig", kernel_name = "",
         sources = "", rebuild_modules = True):
         """Returns a Kernel object with properly initialized data.
@@ -120,7 +97,7 @@ class Kernel(object):
         self.__kernel_suffix = \
             self.__kernel_name[operator.indexOf(self.__kernel_name, '-'):]
 
-        self.__kernel_image = __get_image_name()
+        self.__kernel_image = self.__get_image_name()
 
         self.image = self.__kernel_image + self.__kernel_suffix
 
@@ -365,6 +342,29 @@ class Kernel(object):
             match = expression.match(output)
             return match.group("make_opts")
         return ""
+
+    def __get_image_name(self):
+        """Get the image name for the compiled kernel.
+
+        Determine if the kernel will be a bzImage, image, vmlinux, etc.
+
+        """
+        expression = re.compile('^i\d86$')
+
+        if exression.match(self.__architecture) or \
+            self.__architecture == "x86_64":
+            return "bzImage"
+        elif self.__architecture == "sparc64":
+            return "image"
+        elif self.__architecture == "sparc32":
+            if self.__kernel_version == "2.4":
+                return "vmlinux"
+            elif self.__kernel_version == "2.6":
+                return "image"
+
+        raise KernelException( \
+            "Could not determine the image for your architecture!", \
+            self.__architecture)
 
     def build(self, verbosity = 0):
         """Build the kernel.
