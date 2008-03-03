@@ -287,6 +287,8 @@ class GRUB(BootLoader):
 
         """
 
+        print self._boot_partition
+
         expression = re.compile(
             '/dev/.d(?P<drive_letter>.)(?P<part_number>\d+)')
         match = expression.match(self._boot_partition)
