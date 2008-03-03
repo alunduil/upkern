@@ -95,7 +95,7 @@ class Kernel(object):
             expression.match(self.__kernel_name).group("version")
 
         self.__kernel_suffix = \
-            self.__kernel_name[operator.indexOf(self.kernelName, '-'):]
+            self.__kernel_name[operator.indexOf(self.__kernel_name, '-'):]
 
         self.__kernel_image = __get_image_name()
 
