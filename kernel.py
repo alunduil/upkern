@@ -351,7 +351,7 @@ class Kernel(object):
         """
         expression = re.compile('^i\d86$')
 
-        if exression.match(self.__architecture) or \
+        if expression.match(self.__architecture) or \
             self.__architecture == "x86_64":
             return "bzImage"
         elif self.__architecture == "sparc64":
