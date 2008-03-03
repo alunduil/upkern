@@ -62,7 +62,30 @@ class Kernel(object):
 
     """
 
-    def __init__(self, configurator = "menuconfig", kernel_name = "",
+    def __get_image_name(self):
+        """Get the image name for the compiled kernel.
+
+        Determine if the kernel will be a bzImage, image, vmlinux, etc.
+
+        """
+        expression = re.compile('^i\d86$')
+
+        if exression.match(self.__architecture) or \
+            self.__architecture == "x86_64":
+            return "bzImage"
+        elif self.__architecture == "sparc64":
+            return "image"
+        elif self.__architecture == "sparc32":
+            if self.__kernel_version == "2.4":
+                return "vmlinux"
+            elif self.__kernel_version == "2.6":
+                return "image"
+
+        raise KernelException( \
+            "Could not determine the image for your architecture!", \
+            self.__architecture)
+
+     def __init__(self, configurator = "menuconfig", kernel_name = "",
         sources = "", rebuild_modules = True):
         """Returns a Kernel object with properly initialized data.
 
@@ -389,30 +412,7 @@ class Kernel(object):
         if self.__rebuild_modules:
             os.system('module-rebuild -X rebuild' + output)
 
-    def __get_image_name(self):
-        """Get the image name for the compiled kernel.
-
-        Determine if the kernel will be a bzImage, image, vmlinux, etc.
-
-        """
-        expression = re.compile('^i\d86$')
-
-        if exression.match(self.__architecture) or \
-            self.__architecture == "x86_64":
-            return "bzImage"
-        elif self.__architecture == "sparc64":
-            return "image"
-        elif self.__architecture == "sparc32":
-            if self.__kernel_version == "2.4":
-                return "vmlinux"
-            elif self.__kernel_version == "2.6":
-                return "image"
-
-        raise KernelException( \
-            "Could not determine the image for your architecture!", \
-            self.__architecture)
-
-    def install(self, verbosity = 0):
+   def install(self, verbosity = 0):
         """Install the kernel into /boot
 
         Get the appropriate kernel pieces into the boot area.
