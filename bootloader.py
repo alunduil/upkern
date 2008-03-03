@@ -181,7 +181,7 @@ class BootLoader(object):
         """
 
         if is_boot_mounted():
-            expression = re.compile('$.+' + self._kernel_image + '\s+.+$')
+            expression = re.compile('^.+' + self._kernel_image + '\s+.+$')
 
             if os.access(config_location, os.F_OK):
                 configuration = open(config_location, 'r')
@@ -200,7 +200,7 @@ class BootLoader(object):
             return False
         else:
             os.system('mount /boot')
-            self.__has_kernel()
+            self._has_kernel()
             os.system('umount /boot')
 
 class GRUB(BootLoader):
@@ -231,7 +231,7 @@ class GRUB(BootLoader):
             "\n# Kernel added on " + datetime.date.today().ctime() + ":\n",
             "title=" + self._kernel_name + "\n",
             "\troot " + self.__determine_grub_root() + "\n",
-            "\tkernel " + self._kernel_image + " root=" + self._root_partition,
+            "\tkernel /boot/" + self._kernel_image + " root=" + self._root_partition,
             " " + self._kernel_options + " " + self._splash_theme
             ]
         self.__kernel_string = ''.join(kernel_list)
