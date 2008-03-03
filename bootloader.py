@@ -180,7 +180,7 @@ class BootLoader(object):
         """
 
         if is_boot_mounted():
-            expression = re.compile('$.+' + self.__kernel_image + '\s+.+$')
+            expression = re.compile('$.+' + self._kernel_image + '\s+.+$')
 
             if os.access(config_location, os.F_OK):
                 configuration = open(config_location, 'r')
