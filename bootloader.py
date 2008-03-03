@@ -100,19 +100,19 @@ class BootLoader(object):
 
         """
 
-        self.__kernel_image = kernel.image
-        self.__kernel_name = kernel.name
+        self._kernel_image = kernel.image
+        self._kernel_name = kernel.name
 
         if len(root_partition) > 0:
-            self.__root_partition = root_partition
+            self._root_partition = root_partition
         else:
-            self.__root_partition = self.__determine_root()
+            self._root_partition = self.__determine_root()
 
-        self.__kernel_options = kernel_options
-        self.__initrd = initrd
-        self.__splash_theme = splash_theme
+        self._kernel_options = kernel_options
+        self._initrd = initrd
+        self._splash_theme = splash_theme
 
-        self.__boot_partition = self.__determine_boot()
+        self._boot_partition = self.__determine_boot()
 
     def __determine_root(self):
         """Determine the root partition of the machine.
@@ -170,7 +170,7 @@ class BootLoader(object):
         else:
             raise BootLoaderException("Could not access /etc/fstab!")
 
-    def __has_kernel(self, config_location):
+    def _has_kernel(self, config_location):
         """Determine if the boot loader's config already contains the kernel.
 
         Return true if the kernel we are interested in is already in the
@@ -227,14 +227,14 @@ class GRUB(BootLoader):
 
         kernel_list = [
             "\n# Kernel added on " + datetime.date.today().ctime() + ":\n",
-            "title=" + BootLoader.__kernel_name + "\n",
+            "title=" + self._kernel_name + "\n",
             "\troot " + self.__determine_grub_root() + "\n",
-            "\tkernel " + self.__kernel_image + " root=" + self.__root_partition,
-            " " + self.__kernel_options + " " + self.__splash_theme
+            "\tkernel " + self._kernel_image + " root=" + self._root_partition,
+            " " + self._kernel_options + " " + self._splash_theme
             ]
         self.__kernel_string = ''.join(kernel_list)
-        if len(self.__initrd) > 0:
-            self.__kernel_string += "\n" + self.__initrd
+        if len(self._initrd) > 0:
+            self.__kernel_string += "\n" + self._initrd
         self.__kernel_string += "\n"
 
     def create_configuration(self):
