@@ -248,7 +248,7 @@ class GRUB(BootLoader):
         """
 
         if is_boot_mounted():
-            if not self._has_kernel(self, self.__config_location):
+            if not self._has_kernel(self.__config_location):
                 if os.access(self.__config_location, os.F_OK):
                     old_configuration = open(self.__config_location, 'r')
                     new_configuration = open(self.__config_location + '.tmp', \
