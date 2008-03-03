@@ -28,6 +28,7 @@ on. Will also provide a generic bootloader exception class.
 import re
 import os
 import datetime
+from string import ascii_lowercase
 
 from helpers import is_boot_mounted
 
@@ -286,8 +287,6 @@ class GRUB(BootLoader):
         come to use.
 
         """
-
-        print self._boot_partition
 
         expression = re.compile(
             '/dev/.d(?P<drive_letter>.)(?P<part_number>\d+)')
