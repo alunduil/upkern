@@ -113,7 +113,7 @@ class BootLoader(object):
 
         self.__boot_partition = self.__determine_boot()
 
-   def __determine_root(self):
+    def __determine_root(self):
         """Determine the root partition of the machine.
 
         Return the full device path to the root partition of the machine we
