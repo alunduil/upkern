@@ -220,10 +220,10 @@ class Kernel(object):
         for line in output.readlines():
             match = expression2.match(line)
             if expression1.match(line):
-                raise KernelException("Kernel sources not found!", self.__downloadName)
+                raise KernelException("Kernel sources not found!", self.__download_name)
             elif match:
                 raise KernelException("Kernel sources are masked by portage!",
-                    self.__downloadName, match.group("keyword"))
+                    self.__download_name, match.group("keyword"))
         else:
             os.system('emerge -v =' + self.__download_name)
 
