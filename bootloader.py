@@ -27,6 +27,7 @@ on. Will also provide a generic bootloader exception class.
 
 import re
 import os
+import datetime
 
 from helpers import is_boot_mounted
 
