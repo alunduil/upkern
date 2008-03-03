@@ -239,13 +239,12 @@ def main():
         kernel.build(verbosity)
         if (time_build): stop_time = time.clock()
         kernel.install(verbosity)
-    except KernelException, error:
-        error.print_message()
 
-    try:
         boot_loader = create_bootloader(kernel, kernel_options, initrd, boot_splash)
         boot_loader = create_configuration()
         boot_loader = install_configuration()
+    except KernelException, error:
+        error.print_message()
     except BootLoaderException, error:
         error.print_message()
 
