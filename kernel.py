@@ -85,7 +85,7 @@ class Kernel(object):
             "Could not determine the image for your architecture!", \
             self.__architecture)
 
-     def __init__(self, configurator = "menuconfig", kernel_name = "",
+    def __init__(self, configurator = "menuconfig", kernel_name = "",
         sources = "", rebuild_modules = True):
         """Returns a Kernel object with properly initialized data.
 
