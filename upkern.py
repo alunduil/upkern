@@ -243,7 +243,7 @@ def main():
         if edit and len(editor) > 0:
             os.system(editor + " " + boot_loader.config)
 
-        print "The kernel has been successfully upgraded to " + kernel.name[1] + "."
+        print "The kernel has been successfully upgraded to " + kernel.name + "."
         if (time_build):
             print "The time to build the kernel was " + str(stop_time - \
                 start_time) + "s."
