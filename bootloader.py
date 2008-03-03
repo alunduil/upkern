@@ -234,7 +234,7 @@ class GRUB(BootLoader):
             " " + self._kernel_options + " " + self._splash_theme
             ]
         self.__kernel_string = ''.join(kernel_list)
-        if len(self._-initrd) > 0:
+        if len(self._initrd) > 0:
             self.__kernel_string += "\n" + self._initrd
         self.__kernel_string += "\n"
 
