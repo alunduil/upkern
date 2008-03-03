@@ -247,7 +247,7 @@ class Kernel(object):
         """
 
         if is_boot_mounted():
-            expression = re.compile('^/boot/config-.+$')
+            expression = re.compile('^config-.+$')
 
             directories = os.listdir('/boot')
             directories.sort(reverse=True)
@@ -256,7 +256,8 @@ class Kernel(object):
                 match = expression.match(directory)
 
                 if match:
-                    shutil.copy(match.group(), '/usr/src/linux/.config')
+                    shutil.copy('/boot/' + match.group(),
+                        '/usr/src/linux/.config')
                     break
             else:
                 raise KernelException(
