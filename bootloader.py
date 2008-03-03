@@ -233,7 +233,7 @@ class GRUB(BootLoader):
             " " + self._kernel_options + " " + self._splash_theme
             ]
         self.__kernel_string = ''.join(kernel_list)
-        if len(self._initrd) > 0:
+        if len(self._-initrd) > 0:
             self.__kernel_string += "\n" + self._initrd
         self.__kernel_string += "\n"
 
@@ -247,7 +247,7 @@ class GRUB(BootLoader):
         """
 
         if is_boot_mounted():
-            if not self.__has_kernel(self, self.__config_location):
+            if not self._has_kernel(self, self.__config_location):
                 if os.access(self.__config_location, os.F_OK):
                     old_configuration = open(self.__config_location, 'r')
                     new_configuration = open(self.__config_location + '.tmp', \
@@ -289,20 +289,20 @@ class GRUB(BootLoader):
 
         expression = re.compile(
             '/dev/.d(?P<drive_letter>.)(?P<part_number>\d+)')
-        match = expression.match(self.__boot_partition)
+        match = expression.match(self._boot_partition)
         if match:
             return "(hd" + ascii_lowercase.find(match.group('drive_letter')) \
                 + "," + (int(match.group('part_number')) - 1) + ")"
 
         expression = re.compile(
             '/dev/cciss/c0d(?P<drive_number>\d+)p(?P<part_number>\d+)')
-        match = expression.match(self.__boot_partition)
+        match = expression.match(self._boot_partition)
         if match:
             return "(hd" + ascii_lowercase.find(match.group('drive_number')) \
                 + "," + match.group('part_number') + ")"
 
         raise BootLoaderException("Couldn't determine the grub root string!",
-            self.__boot_partition)
+            self._boot_partition)
 
     def install_configuration(self):
         if is_boot_mounted():
