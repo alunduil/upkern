@@ -417,7 +417,7 @@ class Kernel(object):
         Get the appropriate kernel pieces into the boot area.
 
         """
-        os.chdir(/usr/src/linux)
+        os.chdir('/usr/src/linux')
 
         expression = re.compile('^/usr/src/linux.+$')
         if not expression.match(os.getcwd()):

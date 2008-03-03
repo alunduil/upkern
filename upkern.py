@@ -176,10 +176,11 @@ def main():
 
     configurator = 'menuconfig'
     initrd = ''
-    options = ''
+    kernel_options = ''
     boot_splash = ''
     sources = 'gentoo'
     editor = os.getenv("EDITOR", "")
+    edit = False
     verbosity = 0
     rebuild_modules = False
     time_build = False
@@ -197,13 +198,15 @@ def main():
         elif option[0] == '-i' or option[0] == '--initrd':
             initrd = option[1]
         elif option[0] == '-o' or option[0] == '--options':
-            options = option[1]
+            kernel_options = option[1]
         elif option[0] == '-b' or option[0] == '--boot-splash':
             boot_splash = option[1]
         elif option[0] == '-s' or option[0] == '--sources':
             sources = option[1]
         elif option[0] == '-e' or option[0] == '--editor':
-            editor = option[1]
+            if len(option[1]) > 0:
+                editor = option[1]
+            edit = True
         elif option[0] == '-v':
             verbosity += 1
         elif option[0] == '--verbose':
@@ -240,11 +243,14 @@ def main():
         error.print_message()
 
     try:
-        boot_loader = create_bootloader()
+        boot_loader = create_bootloader(kernel, kernel_options, initrd, boot_splash)
         boot_loader = create_configuration()
         boot_loader = install_configuration()
     except BootLoaderException, error:
         error.print_message()
+
+    if edit and len(editor) > 0:
+        os.system(editor + " " + boot_loader.config)
 
     print "The kernel has been successfully upgraded to " + kernel.name[1] + "."
     if (time_build):
