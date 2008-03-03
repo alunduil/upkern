@@ -203,9 +203,6 @@ class Kernel(object):
         directories.sort(reverse=True)
 
         for directory in directories:
-            print directory
-
-        for directory in directories:
             if not expression.match(directory) and self.__kernel_name == directory:
                 return True
         return False
