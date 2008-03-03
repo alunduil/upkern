@@ -56,8 +56,7 @@ def usage(name):
         " [-h]",
         " [[-k] kernel]"
         ]
-    usage_string = ''.join(usage_list)
-    print usage_string
+    print ''.join(usage_list)
 
 def help(name):
     """Prints out the help menu for the utility.
@@ -75,8 +74,7 @@ def help(name):
         " suggestions or comments, please, contact the author with",
         " appropriate feedback"
         ]
-    help_string = ''.join(help_list)
-    for string in wrap(help_string):
+    for string in wrap(''.join(help_list)):
         print string
     print ""
 
@@ -84,8 +82,7 @@ def help(name):
         "Mandatory options for short options are mandatory for long options",
         " as well."
         ]
-    help_string = ''.join(help_list)
-    for string in wrap(help_string):
+    for string in wrap(''.join(help_list)):
         print string
     print ""
 
@@ -93,8 +90,7 @@ def help(name):
         "-c, --configurator=CONFIGURATOR\tSpecifies which configurator",
         " should be"
     ]
-    help_string = ''.join(help_list)
-    print help_string
+    print ''.join(help_list)
     print "\t\t\t\tused to configure the kernel sources."
     print "\t\t\t\tThe CONFIGURATOR can be one of the"
     print "\t\t\t\tfollowing: oldconfig, menuconfig,"
@@ -257,7 +253,7 @@ def main():
             " process. It would be unfortunate if you were not able to boot the",
             " new kernel we just prepared."
             ]
-        for string in wrap(output_list):
+        for string in wrap(''.join(output_list)):
             print string
     except KernelException, error:
         error.print_message()
