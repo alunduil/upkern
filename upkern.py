@@ -243,25 +243,27 @@ def main():
         boot_loader = create_bootloader(kernel, kernel_options, initrd, boot_splash)
         boot_loader = create_configuration()
         boot_loader = install_configuration()
+
+        if edit and len(editor) > 0:
+            os.system(editor + " " + boot_loader.config)
+
+        print "The kernel has been successfully upgraded to " + kernel.name[1] + "."
+        if (time_build):
+            print "The time to build the kernel was " + str(stop_time - \
+                start_time) + "s."
+        output_list = [
+            "Please, check that all config files are in the appropriate place,",
+            " and that there are no errors in the configuration of the boot",
+            " process. It would be unfortunate if you were not able to boot the",
+            " new kernel we just prepared."
+            ]
+        for string in wrap(output_list):
+            print string
     except KernelException, error:
         error.print_message()
     except BootLoaderException, error:
         error.print_message()
 
-    if edit and len(editor) > 0:
-        os.system(editor + " " + boot_loader.config)
-
-    print "The kernel has been successfully upgraded to " + kernel.name[1] + "."
-    if (time_build):
-        print "The time to build the kernel was " + str(stop_time - \
-            start_time) + "s."
-    output_list = [
-        "Please, check that all config files are in the appropriate place,",
-        " and that there are no errors in the configuration of the boot",
-        " process. It would be unfortunate if you were not able to boot the",
-        " new kernel we just prepared."
-        ]
-    for string in wrap(output_list):
-        print string
+    sys.exit(0)
 
 main()
