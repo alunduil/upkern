@@ -292,7 +292,8 @@ class GRUB(BootLoader):
             '/dev/.d(?P<drive_letter>.)(?P<part_number>\d+)')
         match = expression.match(self._boot_partition)
         if match:
-            return "(hd" + ascii_lowercase.find(match.group('drive_letter')) \
+            return "(hd" + \
+                str(ascii_lowercase.find(match.group('drive_letter'))) \
                 + "," + str(int(match.group('part_number')) - 1) + ")"
 
         expression = re.compile(
