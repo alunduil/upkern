@@ -97,13 +97,13 @@ class Kernel(object):
         self.__kernel_suffix = \
             self.__kernel_name[operator.indexOf(self.__kernel_name, '-'):]
 
+        self.__architecture = self.__determine_architecture()
+
         self.__kernel_image = self.__get_image_name()
 
         self.image = self.__kernel_image + self.__kernel_suffix
 
         self.__rebuild_modules = rebuild_modules
-
-        self.__architecture = self.__determine_architecture()
 
         if not self.__are_sources_downloaded(): self.__download()
 
