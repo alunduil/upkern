@@ -31,7 +31,7 @@ non-necessary modules from the portage system are utilized.
 import getopt
 import sys
 from textwrap import wrap
-import time
+import datetime
 
 from kernel import *
 from bootloader import *

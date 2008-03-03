@@ -27,6 +27,7 @@ import os
 import re
 import operator
 import shutil
+from warning import warn
 
 from helpers import is_boot_mounted
 
@@ -261,8 +262,7 @@ class Kernel(object):
                         '/usr/src/linux/.config')
                     break
             else:
-                raise KernelException(
-                    "Old configuration not found! Using default!");
+                warn("Old configuration not found! Using default!");
         else:
             os.system('mount /boot')
             self.__copy_config()
