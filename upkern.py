@@ -80,7 +80,7 @@ def main():
         " a framebuffer line, or any other options you want your kernel to",
         " have."
         ]
-    parser.add_option('--options', '-o', dest='kernel_options', default=''
+    parser.add_option('--options', '-o', dest='kernel_options', default='',
         help=''.join(options_help_list))
 
     boot_splash_help_list = [
