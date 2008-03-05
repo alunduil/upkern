@@ -87,7 +87,7 @@ def main():
         "Verifies the splash-utils are installed, and sets up the specified",
         " boot splash theme to work on boot."
         ]
-    parser.add_option('--boot-splash', '-b', dest='boot_splash', default=''
+    parser.add_option('--boot-splash', '-b', dest='boot_splash', default='',
         help=''.join(boot_splash_help_list))
 
     sources_help_list = [
