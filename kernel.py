@@ -459,7 +459,7 @@ class Kernel(object):
     def __install_rebuild_modules(self):
         expression = re.compile('^\[ebuild\s+(R|U)\s+\].+$')
 
-        output = os.popen('emerge -p module-rebuild', 'r')
+        output = os.popen('emerge -p module-rebuild 2>/dev/null | tail -n1', 'r')
 
         if not expression.match(output.readline()):
             os.system('emerge -v module-rebuild')
