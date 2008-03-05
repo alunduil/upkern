@@ -153,7 +153,8 @@ def main():
         if (options.time_build): stop_time = time.time()
         kernel.install(options.verbosity)
 
-        boot_loader = create_bootloader(kernel, options.kernel_options, options.initrd, options.boot_splash)
+        boot_loader = create_bootloader(kernel, options.kernel_options,
+            options.initrd, options.boot_splash)
         boot_loader.create_configuration()
         boot_loader.install_configuration()
 
@@ -165,13 +166,13 @@ def main():
         print "The kernel has been successfully upgraded to " + \
             kernel.name + ".\n"
         if (options.time_build):
-            print "The time to build the kernel was " + str(float(stop_time) \
-                - float(start_time)) + "s.\n"
+            print "The time to build the kernel was %(time) s\n" % \
+                {'time': stop_time - start_time)
         output_list = [
-            "Please, check that all config files are in the appropriate place,",
-            " and that there are no errors in the configuration of the boot",
-            " process. It would be unfortunate if you were not able to boot the",
-            " new kernel we just prepared."
+            "Please, check that all config files are in the appropriate",
+            " place, and that there are no errors in the configuration of",
+            " the boot process. It would be unfortunate if you were not able",
+            " to boot the new kernel we just prepared."
             ]
         for string in textwrap.wrap(''.join(output_list)):
             print string
