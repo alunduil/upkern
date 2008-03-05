@@ -103,8 +103,7 @@ def main():
         " default editor is the one defined by your ${EDITOR} environment",
         " variable."
         ]
-    parser.add_option('--editor', '-e', default=os.getenv("EDITOR", ""),
-        help=''.join(editor_help_list))
+    parser.add_option('--editor', '-e', help=''.join(editor_help_list))
 
     verbose_help_list = [
         "Sets the verbosity level, and how many messages are printed out as ",
@@ -159,6 +158,8 @@ def main():
         boot_loader.install_configuration()
 
         if options.editor:
+            if len(options.editor) <= 0:
+                options.editor = os.getenv("EDITOR", "")
             os.system(options.editor + " " + boot_loader.config)
 
         print "The kernel has been successfully upgraded to " + \
