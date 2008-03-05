@@ -167,7 +167,7 @@ def main():
             kernel.name + ".\n"
         if (options.time_build):
             print "The time to build the kernel was %(time).2f s\n" % \
-                {'time': stop_time - start_time)}
+                {'time': stop_time - start_time}
         output_list = [
             "Please, check that all config files are in the appropriate",
             " place, and that there are no errors in the configuration of",
