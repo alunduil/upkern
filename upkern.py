@@ -165,8 +165,8 @@ def main():
         print "The kernel has been successfully upgraded to " + \
             kernel.name + ".\n"
         if (options.time_build):
-            print "The time to build the kernel was " + str(stop_time - \
-                start_time) + "s.\n"
+            print "The time to build the kernel was " + str(float(stop_time) \
+                - float(start_time)) + "s.\n"
         output_list = [
             "Please, check that all config files are in the appropriate place,",
             " and that there are no errors in the configuration of the boot",
