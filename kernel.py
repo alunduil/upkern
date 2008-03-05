@@ -456,3 +456,10 @@ class Kernel(object):
             self.install()
             os.system('umount /boot')
 
+    def __install_rebuild_modules(self):
+        expression = re.compile('^\[ebuild\s+(R|U)\s+\].+$')
+
+        output = os.popen('emerge -p module-rebuild', 'r')
+
+        if not expression.match(output.readline()):
+            os.system('emerge -v module-rebuild')
