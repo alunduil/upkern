@@ -71,7 +71,8 @@ def main():
     initrd_help_list = [
         "Specifies the initial ramdisk file to the boot loader configuration."
         ]
-    parser.add_option('--initrd', '-i', help=''.join(initrd_help_list))
+    parser.add_option('--initrd', '-i', default='',
+        help=''.join(initrd_help_list))
 
     options_help_list = [
         "This string is literally tacked on to the kernel line in your boot",
@@ -79,14 +80,14 @@ def main():
         " a framebuffer line, or any other options you want your kernel to",
         " have."
         ]
-    parser.add_option('--options', '-o', dest='kernel_options',
+    parser.add_option('--options', '-o', dest='kernel_options', default=''
         help=''.join(options_help_list))
 
     boot_splash_help_list = [
         "Verifies the splash-utils are installed, and sets up the specified",
         " boot splash theme to work on boot."
         ]
-    parser.add_option('--boot-splash', '-b', dest='boot_splash',
+    parser.add_option('--boot-splash', '-b', dest='boot_splash', default=''
         help=''.join(boot_splash_help_list))
 
     sources_help_list = [
