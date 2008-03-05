@@ -144,9 +144,6 @@ def main():
     if len(arguments) != 0:
         kernel_name = arguments[0]
 
-    print "Kernel Name: " + options.kernel_name
-    print "Sources:     " + options.sources
-
     try:
         kernel = Kernel(options.configurator, options.kernel_name or \
             kernel_name, options.sources, options.rebuild_modules)
