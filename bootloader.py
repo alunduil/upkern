@@ -61,7 +61,7 @@ def create_bootloader(*args):
 
     """
 
-    expression = re.compile('^\[ebuild\s+R\s+\].+$')
+    expression = re.compile('^\[ebuild\s+(R|U)\s+\].+$')
 
     for boot_loader in ("grub", "lilo", "silo"):
         output = os.popen('emerge -p ' + boot_loader + \

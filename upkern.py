@@ -28,223 +28,141 @@ non-necessary modules from the portage system are utilized.
 
 """
 
-import getopt
+import optparse
 import sys
-from textwrap import wrap
+import textwrap
 import time
 
 from kernel import *
 from bootloader import *
-
-def usage(name):
-    """Prints out the usage of the utility.
-
-    Passes the usage string to the user, and then terminates the program.
-
-    """
-    usage_list = [
-        "usage: " + name,
-        " [-c configurator]",
-        " [-i initrd]",
-        " [-o kernel options]",
-        " [-b bootsplash theme]",
-        " [-s sources]",
-        " [-e editor]",
-        " [-v level]",
-        " [-r]",
-        " [-t]",
-        " [-h]",
-        " [[-k] kernel]"
-        ]
-    print ''.join(usage_list)
-
-def help(name):
-    """Prints out the help menu for the utility.
-
-    Passes the help menu string to the user in groups of 70 characters at a time.
-
-    """
-    print "Usage: " + name + " [options] ... [kernel]"
-
-    help_list = [
-        "Automates the updating of a Gentoo kernel, and will even attempt to",
-        " download sources that are not present on your machine if so",
-        " instructed. The script should be able to handle anything you throw",
-        " at it, but it can't always read your mind. For usability",
-        " suggestions or comments, please, contact the author with",
-        " appropriate feedback"
-        ]
-    for string in wrap(''.join(help_list)):
-        print string
-    print ""
-
-    help_list = [
-        "Mandatory options for short options are mandatory for long options",
-        " as well."
-        ]
-    for string in wrap(''.join(help_list)):
-        print string
-    print ""
-
-    help_list = [
-        "-c, --configurator=CONFIGURATOR\tSpecifies which configurator",
-        " should be"
-    ]
-    print ''.join(help_list)
-    print "\t\t\t\tused to configure the kernel sources."
-    print "\t\t\t\tThe CONFIGURATOR can be one of the"
-    print "\t\t\t\tfollowing: oldconfig, menuconfig,"
-    print "\t\t\t\txconfig, etc. All the configurators"
-    print "\t\t\t\tare documented in the kernel source"
-    print "\t\t\t\tfiles."
-    print ""
-
-    print "-i, --initrd=INITRD\t\tSpecifies the initial ramdisk file to"
-    print "\t\t\t\tthe boot loader configuration."
-    print ""
-
-    print "-o, --options=OPTIONS\t\tThis string is literally tacked on to"
-    print "\t\t\t\tthe kernel line in your boot loader's"
-    print "\t\t\t\tconfiguration. This is the place you"
-    print "\t\t\t\twould want to stick a framebuffer"
-    print "\t\t\t\tline, or any other options you want"
-    print "\t\t\t\tyour kernel to have."
-    print ""
-
-    print "-b, --boot-splash=THEME\t\tVerifies the splash-utils are"
-    print "\t\t\t\tinstalled, and uses the THEME"
-    print "\t\t\t\tspecified."
-    print ""
-
-    print "-s, --sources=SOURCES\t\tSpecify the sources that will by used"
-    print "\t\t\t\tfor this kernel build. If not"
-    print "\t\t\t\tspecified, the gentoo sources will be"
-    print "\t\t\t\tused."
-    print ""
-
-    print "-e, --editor=EDITOR\t\tSpecify the editor to use for editing"
-    print "\t\t\t\tthe boot loader configuration"
-    print "\t\t\t\tfile after " + name + " has"
-    print "\t\t\t\talready modified it. The"
-    print "\t\t\t\tdefault editor is the one"
-    print "\t\t\t\tdefined by your ${EDITOR}"
-    print "\t\t\t\tenvironment variable."
-    print ""
-
-    print "-v, --verbose=LEVEL\t\tSets the verbosity level, and how many"
-    print "\t\t\t\tmessages are printed out as"
-    print "\t\t\t\t" + name + " runs. The values for"
-    print "\t\t\t\tLEVEL are: none, error, warning,"
-    print "\t\t\t\tand debug. By setting the level,"
-    print "\t\t\t\tyou are specifying the highest"
-    print "\t\t\t\tlevel that will be printed to the"
-    print "\t\t\t\tstandard output."
-    print ""
-
-    print "-r, --rebuild-modules\t\tMakes " + name + " use module-rebuild"
-    print "\t\t\t\tto rebuild the modules you have"
-    print "\t\t\t\tpulled in via portage for the new"
-    print "\t\t\t\tkernel."
-    print ""
-
-    print "-t, --time\t\t\tTimes the actual build of the kernel allowing"
-    print "\t\t\t\tone to determine if kernels are building faster or"
-    print "\t\t\t\tbased on different aspects of the machine."
-    print ""
-
-    print "-h, --help\t\t\tPrints out this help menu."
-    print ""
-
-    print "-k, --kernel=KERNEL\t\tSpecifies a varying amount of information"
-    print "\t\t\t\tabout the kernel you would like to"
-    print "\t\t\t\tbuild. Ranges from kernel version"
-    print "\t\t\t\tto the full gentoo specification."
 
 def main():
     if os.getuid() != 0:
         print "Superuser access is required!"
         return 1;
 
-    short_options = "c:i:o:b:s:e:vrthk:"
-    long_options = ['configurator=', 'initrd=', 'options=', 'boot-splash=',
-        'sources=', 'editor=', 'verbose=', 'rebuild-modules', 'time', 'help',
-        'kernel=']
+    usage = "usage: %prog [options] [kernel]"
 
-    configurator = 'menuconfig'
-    initrd = ''
-    kernel_options = ''
-    boot_splash = ''
-    sources = 'gentoo'
-    editor = os.getenv("EDITOR", "")
-    edit = False
-    verbosity = 0
-    rebuild_modules = False
-    time_build = False
-    kernel_name = ""
+    parser = optparse.OptionParser(usage=usage)
 
-    try:
-        options, arguments = getopt.gnu_getopt(sys.argv[1:], short_options, long_options)
-    except:
-        usage(sys.argv[0])
-        sys.exit(1)
+    configurators = [
+        "menuconfig",
+        "xconfig",
+        "gconfig",
+        "oldconfig",
+        "silentoldconfig",
+        "defconfig",
+        "allyesconfig",
+        "allmodconfig",
+        "allnoconfig",
+        "randconfig"
+        ]
 
-    for option in options:
-        if option[0] == '-c' or option[0] == '--configurator':
-            configurator = option[1]
-        elif option[0] == '-i' or option[0] == '--initrd':
-            initrd = option[1]
-        elif option[0] == '-o' or option[0] == '--options':
-            kernel_options = option[1]
-        elif option[0] == '-b' or option[0] == '--boot-splash':
-            boot_splash = option[1]
-        elif option[0] == '-s' or option[0] == '--sources':
-            sources = option[1]
-        elif option[0] == '-e' or option[0] == '--editor':
-            if len(option[1]) > 0:
-                editor = option[1]
-            edit = True
-        elif option[0] == '-v':
-            verbosity += 1
-        elif option[0] == '--verbose':
-            if option[1].lower() == "none":
-                verbosity = 0
-            elif option[1].lower() == "error":
-                verbosity = 1
-            elif option[1].lower() == "warning":
-                verbosity = 2
-            elif option[1].lower() == "debug":
-                verbosity = 3
-            else: pass
-        elif option[0] == '-r' or option[0] == '--rebuild-modules':
-            rebuild_modules = True
-        elif option[0] == '-t' or option[0] == '--time':
-            time_build = True
-        elif option[0] == '-h' or option[0] == '--help':
-            help(sys.argv[0])
-            sys.exit(0)
-        elif option[0] == '-k' or option[0] == '--kernel':
-            kernel_name = option[1]
+    configurator_help_list = [
+        "Specifies which configurator should be used to configure the kernel",
+        " sources. The configurator can be one of the following: ",
+        ", ".join(configurators),
+        " All the configurators are documented in the kernel source files."
+        ]
+    parser.add_option('--configurator', '-c', type='choice',
+        choices=configurators, default='menuconfig',
+        help=''.join(configurator_help_list))
+
+    initrd_help_list = [
+        "Specifies the initial ramdisk file to the boot loader configuration."
+        ]
+    parser.add_option('--initrd', '-i', help=''.join(initrd_help_list))
+
+    options_help_list = [
+        "This string is literally tacked on to the kernel line in your boot",
+        " loader's configuration. This is the place you would want to stick",
+        " a framebuffer line, or any other options you want your kernel to",
+        " have."
+        ]
+    parser.add_option('--options', '-o', dest='kernel_options',
+        help=''.join(options_help_list))
+
+    boot_splash_help_list = [
+        "Verifies the splash-utils are installed, and sets up the specified",
+        " boot splash theme to work on boot."
+        ]
+    parser.add_option('--boot-splash', '-b', dest='boot_splash',
+        help=''.join(boot_splash_help_list))
+
+    sources_help_list = [
+        "Specify the sources that will by used for this kernel build. If not",
+        " specified, the gentoo sources will be used."
+        ]
+    parser.add_option('--sources', '-s', default='gentoo',
+        help=''.join(sources_help_list))
+
+    editor_help_list = [
+        "Specify the editor to use for editing the boot loader configuration",
+        " file after " + sys.argv[0] + " has already modified it. The",
+        " default editor is the one defined by your ${EDITOR} environment",
+        " variable."
+        ]
+    parser.add_option('--editor', '-e', default=os.getenv("EDITOR", ""),
+        help=''.join(editor_help_list))
+
+    verbose_help_list = [
+        "Sets the verbosity level, and how many messages are printed out as ",
+        sys.argv[0] + " runs. The levels are: none, error, warning, and",
+        " debug. To set the level specify multiple -v, or --verbose flags.",
+        " By setting the level, you are specifying the highest level",
+        " that will be printed to the standard output."
+        ]
+    parser.add_option('--verbose', '-v', action='count', dest='verbosity',
+        help=''.join(verbose_help_list))
+
+    rebuild_modules_help_list = [
+        "Makes " + sys.argv[0] + " use module-rebuild to rebuild the modules",
+        " you have pulled in via portage for the new kernel."
+        ]
+    parser.add_option('--rebuild-modules', '-r', action='store_true',
+        default=False, dest='rebuild_modules',
+        help=''.join(rebuild_modules_help_list))
+
+    time_help_list = [
+        "Times the actual build of the kernel allowing one to determine if",
+        " kernels are building faster based on different aspects of the",
+        " machine."
+        ]
+    parser.add_option('--time', '-t', action='store_true', dest='time_build',
+        default=False, help=''.join(time_help_list))
+
+    kernel_help_list = [
+        "Specifies a varying amount of information about the kernel you",
+        " would like to build. Ranges from kernel version to the full gentoo",
+        " specification."
+        ]
+    parser.add_option('--kernel', '-k', dest='kernel_name',
+        help=''.join(kernel_help_list))
+
+    options, arguments = parser.parse_args()
 
     if len(arguments) != 0:
         kernel_name = arguments[0]
 
     try:
-        kernel = Kernel(configurator, kernel_name, sources, rebuild_modules)
-        kernel.configure(verbosity)
-        if (time_build): start_time = time.clock()
-        kernel.build(verbosity)
-        if (time_build): stop_time = time.clock()
-        kernel.install(verbosity)
+        kernel = Kernel(options.configurator, options.kernel_name,
+            options.sources, options.rebuild_modules)
+        kernel.configure(options.verbosity)
+        if (options.time_build): start_time = time.clock()
+        kernel.build(options.verbosity)
+        if (options.time_build): stop_time = time.clock()
+        kernel.install(options.verbosity)
 
-        boot_loader = create_bootloader(kernel, kernel_options, initrd, boot_splash)
+        boot_loader = create_bootloader(kernel, options.kernel_options, options.initrd, options.boot_splash)
         boot_loader.create_configuration()
         boot_loader.install_configuration()
 
-        if edit and len(editor) > 0:
+        if edit and len(options.editor) > 0:
             os.system(editor + " " + boot_loader.config)
 
-        print "The kernel has been successfully upgraded to " + kernel.name + ".\n"
-        if (time_build):
+        print "The kernel has been successfully upgraded to " + \
+            options.kernel.name + ".\n"
+        if (options.time_build):
             print "The time to build the kernel was " + str(stop_time - \
                 start_time) + "s.\n"
         output_list = [
