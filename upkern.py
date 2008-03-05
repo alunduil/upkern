@@ -148,8 +148,8 @@ def main():
     print "Sources:     " + options.sources
 
     try:
-        kernel = Kernel(options.configurator, options.kernel_name,
-            options.sources, options.rebuild_modules)
+        kernel = Kernel(options.configurator, options.kernel_name or \
+            kernel_name, options.sources, options.rebuild_modules)
         kernel.configure(options.verbosity)
         if (options.time_build): start_time = time.clock()
         kernel.build(options.verbosity)
