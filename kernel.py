@@ -107,6 +107,9 @@ class Kernel(object):
 
         self.__rebuild_modules = rebuild_modules
 
+        if self.__rebuild_modules:
+            self.__install_rebuild_modules()
+
         if not self.__are_sources_downloaded(): self.__download()
 
         self.__set_symlink()
@@ -452,3 +455,4 @@ class Kernel(object):
             os.system('mount /boot')
             self.install()
             os.system('umount /boot')
+
