@@ -158,8 +158,8 @@ def main():
         boot_loader.create_configuration()
         boot_loader.install_configuration()
 
-        if edit and len(options.editor) > 0:
-            os.system(editor + " " + boot_loader.config)
+        if options.editor:
+            os.system(options.editor + " " + boot_loader.config)
 
         print "The kernel has been successfully upgraded to " + \
             kernel.name + ".\n"
