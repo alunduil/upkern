@@ -173,7 +173,7 @@ def main():
             " process. It would be unfortunate if you were not able to boot the",
             " new kernel we just prepared."
             ]
-        for string in wrap(''.join(output_list)):
+        for string in textwrap.wrap(''.join(output_list)):
             print string
     except KernelException, error:
         error.print_message()
