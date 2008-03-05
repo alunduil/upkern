@@ -144,6 +144,9 @@ def main():
     if len(arguments) != 0:
         kernel_name = arguments[0]
 
+    print "Kernel Name: " + options.kernel_name
+    print "Sources:     " + options.sources
+
     try:
         kernel = Kernel(options.configurator, options.kernel_name,
             options.sources, options.rebuild_modules)
@@ -161,7 +164,7 @@ def main():
             os.system(editor + " " + boot_loader.config)
 
         print "The kernel has been successfully upgraded to " + \
-            options.kernel.name + ".\n"
+            kernel.name + ".\n"
         if (options.time_build):
             print "The time to build the kernel was " + str(stop_time - \
                 start_time) + "s.\n"
