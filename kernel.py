@@ -431,7 +431,7 @@ class Kernel(object):
 
         expression = re.compile('^i\d86$')
 
-        destination = '/boot' + self.__kernel_image + self.__kernel_suffix
+        destination = '/boot/' + self.__kernel_image + self.__kernel_suffix
 
         if is_boot_mounted():
             if expression.match(self.__architecture):
