@@ -325,3 +325,94 @@ class GRUB(BootLoader):
             os.system('mount /boot')
             self.install_configuration()
             os.system('umount /boot')
+
+class SILO(BootLoader):
+    """A specific bootloader, SILO, handler.
+
+    Specifies the generic bootloader interface for the SILO bootloader.
+
+    boot_loader = create_bootloader()
+
+    """
+
+    def __init__(self, kernel, kernel_options = "", initrd = "", \
+        splash_theme = "", root_partition = ""):
+        """Set up SILO specific information.
+
+        Prepare the bootloader to be ready to install a SILO configuration
+        file, and write a new one in place.
+
+        """
+
+        BootLoader.__init__(self, kernel, kernel_options, initrd, \
+            splash_theme, root_partition)
+
+        self.__config_location = '/etc/silo.conf'
+
+        self.config = self.__config_location
+
+        kernel_list = [
+            "\n# Kernel added on " + datetime.date.today().ctime() + ":\n",
+            "image = /boot/" + self._kernel_image + "\n",
+            "\tlabel = " + self._kernel_name + "\n"
+            ]
+        self.__kernel_string = ''.join(kernel_list)
+
+    def create_configuration(self):
+        """Create a new configuration file for the bootloader.
+
+        Create a temporary config file in the same location as the real
+        file that is ready to be installed.
+
+        """
+
+        if is_boot_mounted():
+            if not self._has_kernel(self.__config_location):
+                if os.access(self.__config_location, os.F_OK):
+                    old_configuration = open(self.__config_location, 'r')
+                    new_configuration = open(self.__config_location + '.tmp', \
+                        'w')
+
+                    matched = False
+                    expression = re.compile('image\s*=\s*.+$')
+
+                    for line in old_configuration:
+                        if expression.match(line) and not matched:
+                            new_configuration.write(self.__kernel_string)
+                            matched = True
+                        new_configuration.write(line)
+
+                    old_configuration.close()
+                    new_configuration.close()
+
+            else:
+                shutil.copy(self.__config_location, self.__config_location + \
+                    '.tmp')
+
+        else:
+            os.system('mount /boot')
+            self.create_configuration()
+            os.system('umount /boot')
+
+    def install_configuration(self):
+        """Install the newly created configuration file.
+
+        Overwrite the existing configuration with the one that has our new
+        kernel entry in it.
+
+        """
+
+        if is_boot_mounted():
+            if os.access(self.__config_location + '.tmp', os.F_OK):
+                shutil.move(self.__config_location + '.tmp',
+                    self.__config_location)
+                if self._boot_partition != self._root_partition:
+                    shutil.copy(self.__config_location,
+                        '/boot')
+                    os.system('/sbin/silo -C /boot/silo.conf')
+                else:
+                    os.system('/sbin/silo')
+        else:
+            os.system('mount /boot')
+            self.install_configuration()
+            os.system('umount /boot')

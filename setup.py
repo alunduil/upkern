@@ -26,6 +26,7 @@ setup(
     license="GPL-2",
     author="Alex Brandt",
     author_email="alunduil@alunduil.com",
+    url="http://www.alunduil.com/programs/python-kernel-updater",
     scripts=["upkern.py"],
-    py_modules=['kernel', 'bootloader']
+    py_modules=['kernel', 'bootloader', 'helpers']
     )
