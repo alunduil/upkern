@@ -480,6 +480,9 @@ class Kernel(object):
         directories.sort(reverse=True)
 
         for directory in directories:
+            print directory
+
+        for directory in directories:
             if not expression.match(directory):
                 return directory
         raise KernelException("Could not determine which kernel sources to use!")
