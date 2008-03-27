@@ -136,7 +136,7 @@ def main():
         " would like to build. Ranges from kernel version to the full gentoo",
         " specification."
         ]
-    parser.add_option('--kernel', '-k', dest='kernel_name',
+    parser.add_option('--kernel', '-k', dest='kernel_name', defualt="",
         help=''.join(kernel_help_list))
 
     options, arguments = parser.parse_args()
