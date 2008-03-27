@@ -41,7 +41,7 @@ def main():
         print "Superuser access is required!"
         return 1;
 
-    usage = "usage: %prog [options] [kernel]"
+    usage = "usage: %prog [options] kernel"
 
     parser = optparse.OptionParser(usage=usage)
 
