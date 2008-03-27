@@ -88,6 +88,8 @@ class Kernel(object):
                                                 # (i.e. gentoo, vanilla, etc.)
 
         self.__kernel_name = kernel_name
+        if len(self.__kernel_name) <= 0:
+            self.__kernel_name = self.__get_newest_kernel()
         self.__download_name, self.__kernel_name = self.__get_kernel_names()
 
         self.name = self.__kernel_name
@@ -354,6 +356,7 @@ class Kernel(object):
         Determine if the kernel will be a bzImage, image, vmlinux, etc.
 
         """
+
         expression = re.compile('^i\d86$')
 
         if expression.match(self.__architecture) or \
@@ -463,3 +466,21 @@ class Kernel(object):
 
         if not expression.match(output.readline()):
             os.system('emerge -v module-rebuild')
+
+    def __get_newest_kernel(self):
+        """Get the newest kernel from /usr/src.
+
+        Return the name of the newest kernel in src directory.
+
+        """
+
+        expression = re.compile('^(\..+)|(snort_dynamicsrc)$')
+
+        directories = os.listdir('/usr/src/')
+        directories.sort(reverse=True)
+
+        for directory in directories:
+            if not expression.match(directory):
+                return directory
+        raise KernelException("Could not determine which kernel sources to use!")
+
