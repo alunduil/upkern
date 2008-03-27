@@ -89,7 +89,9 @@ class Kernel(object):
 
         self.__kernel_name = kernel_name
         if len(self.__kernel_name) <= 0:
-            self.__kernel_name = self.__get_newest_kernel()
+            self.__kernel_name = \
+                self.__get_newest_kernel()[ \
+                operator.indexOf(self.__kernel_name, '-'):]
         self.__download_name, self.__kernel_name = self.__get_kernel_names()
 
         self.name = self.__kernel_name
@@ -478,9 +480,6 @@ class Kernel(object):
 
         directories = os.listdir('/usr/src/')
         directories.sort(reverse=True)
-
-        for directory in directories:
-            print directory
 
         for directory in directories:
             if not expression.match(directory):
