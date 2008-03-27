@@ -143,6 +143,11 @@ def main():
 
     if len(arguments) != 0:
         kernel_name = arguments[0]
+    else
+        kernel_name = options.kernel_name
+
+    if len(kernel_name) <= 0:
+        kernel_name = ""
 
     try:
         kernel = Kernel(options.configurator, options.kernel_name or \
