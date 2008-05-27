@@ -154,7 +154,7 @@ class BootLoader(object):
 
         """
 
-        expression = re.compile('^(?P<device>/dev/\w+)\s+/boot\s+.+$', \
+        expression = re.compile('^(?P<device>/dev/.+?)\s+/boot\s+.+$', \
             re.IGNORECASE)
 
         if os.access('/etc/fstab', os.F_OK):
