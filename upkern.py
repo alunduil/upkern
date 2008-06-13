@@ -139,10 +139,20 @@ def main():
     parser.add_option('--kernel', '-k', dest='kernel_name', default="",
         help=''.join(kernel_help_list))
 
+    version_help_list = [
+        "Specifies the currently installed version of upkern."
+        ]
+    parser.add_option('--version', '-V', action='store_true', dest='version',
+        default=False, help=''.join(version_help_list))
+
     options, arguments = parser.parse_args()
 
     if len(arguments) != 0:
         kernel_name = arguments[0]
+
+    if options.version:
+        print "upkern, version 2.0.5"
+        sys.exit(0)
 
     try:
         kernel = Kernel(options.configurator, options.kernel_name or \
