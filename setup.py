@@ -22,7 +22,7 @@ from distutils.core import setup
 setup(
     name='upkern',
     version='2.0.5',
-    description="Automated Gentoo kernel update script.",
+    description="Automated Gentoo kernel updater.",
     license="GPL-2",
     author="Alex Brandt",
     author_email="alunduil@alunduil.com",
