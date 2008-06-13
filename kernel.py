@@ -29,7 +29,7 @@ import operator
 import shutil
 from warnings import warn
 
-from helpers import is_boot_mounted
+from upkern_helpers import is_boot_mounted
 
 class KernelException(Exception):
     """Generic error class for a kernel problem.

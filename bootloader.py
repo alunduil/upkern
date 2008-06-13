@@ -31,7 +31,7 @@ import datetime
 from string import ascii_lowercase
 import shutil
 
-from helpers import is_boot_mounted
+from upkern_helpers import is_boot_mounted
 
 class BootLoaderException(Exception):
     """Generic error class for a bootloader problem.
@@ -137,7 +137,7 @@ class BootLoader(object):
                     break
             else:
                 output_list = [
-                    "Roto device name not found! Please, check that your",
+                    "Root device name not found! Please, check that your",
                     " /etc/fstab file is formatted properly."
                     ]
                 fstab.close()
@@ -303,8 +303,9 @@ class GRUB(BootLoader):
             '/dev/cciss/c0d(?P<drive_number>\d+)p(?P<part_number>\d+)')
         match = expression.match(self._boot_partition)
         if match:
-            return "(hd" + ascii_lowercase.find(match.group('drive_number')) \
-                + "," + match.group('part_number') + ")"
+            return "(hd" + \
+                str(ascii_lowercase.find(match.group('drive_number'))) \
+                + "," + str(match.group('part_number')) + ")"
 
         raise BootLoaderException("Couldn't determine the grub root string!",
             self._boot_partition)
