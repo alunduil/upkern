@@ -88,6 +88,10 @@ class Kernel(object):
                                                 # (i.e. gentoo, vanilla, etc.)
 
         self.__kernel_name = kernel_name
+
+        if len(self.__kernel_name) == 0:
+            self.__kernel_name = self.__get_newest_kernel()
+
         self.__download_name, self.__kernel_name = self.__get_kernel_names()
 
         self.name = self.__kernel_name
@@ -117,6 +121,21 @@ class Kernel(object):
         self.__copy_config()
 
         self.__make_opts = self.__get_make_opts()
+
+    def __get_newest_kernel(self):
+        """Get the newest kernel from /usr/src.
+
+        Returns the newest kernel version on the system if the user does not
+        provide one.
+
+        """
+        if not os.access('/usr/src/', os.F_OK):
+            raise KernelException("Could not access /usr/src")
+        source_list = os.listdir('/usr/src/')
+        source_list.sort()
+        source = source_list[-1]
+        print source[operator.indexOf(source, '-') + 1:]
+        return source[operator.indexOf(source, '-') + 1:]
 
     def __get_kernel_names(self):
         """Get the kernel name of the most up to date sources on the system.
