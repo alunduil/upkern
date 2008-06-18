@@ -134,7 +134,6 @@ class Kernel(object):
         source_list = os.listdir('/usr/src/')
         source_list.sort()
         source = source_list[-1]
-        print source[operator.indexOf(source, '-') + 1:]
         return source[operator.indexOf(source, '-') + 1:]
 
     def __get_kernel_names(self):
