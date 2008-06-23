@@ -149,7 +149,8 @@ def main():
 
     if len(arguments) != 0:
         kernel_name = arguments[0]
-    kernel_name = ""
+    else:
+        kernel_name = ""
 
     if options.version:
         print "upkern, version 2.0.5"
