@@ -122,6 +122,16 @@ class Kernel(object):
 
         self.__make_opts = self.__get_make_opts()
 
+    def __kernel_filter(self, kernel_name):
+        """Filters out none kernels from the kernel lists.
+
+        Returns true if the passed string is a true kernel name,
+        otherwise, it returns false.
+
+        """
+        expression = re.compile('^linux-.+$')
+        return expression.match(kernel_name)
+
     def __get_newest_kernel(self):
         """Get the newest kernel from /usr/src.
 
@@ -133,6 +143,7 @@ class Kernel(object):
             raise KernelException("Could not access /usr/src")
         source_list = os.listdir('/usr/src/')
         source_list.sort()
+        filter(self.__get_newest_kernel, source_list)
         source = source_list[-1]
         return source[operator.indexOf(source, '-') + 1:]
 
