@@ -27,6 +27,6 @@ setup(
     author="Alex Brandt",
     author_email="alunduil@alunduil.com",
     url="http://www.alunduil.com/programs/python-kernel-updater",
-    scripts=["upkern"],
+    scripts=["upkern.py"],
     py_modules=['upkern', 'kernel', 'bootloader', 'upkern_helpers']
     )
