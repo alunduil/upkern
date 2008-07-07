@@ -294,7 +294,7 @@ class Kernel(object):
                         '/usr/src/linux/.config')
                     break
             else:
-                warn("Old configuration not found! Using default!", "WARNING");
+                warn("Old configuration not found! Using default!");
         else:
             os.system('mount /boot')
             self.__copy_config()

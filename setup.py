@@ -21,12 +21,12 @@ from distutils.core import setup
 
 setup(
     name='upkern',
-    version='2.0.7',
+    version='2.0.8',
     description="Automated Gentoo kernel updater.",
     license="GPL-2",
     author="Alex Brandt",
     author_email="alunduil@alunduil.com",
     url="http://www.alunduil.com/programs/python-kernel-updater",
-    scripts=["upkern.py"],
-    py_modules=['kernel', 'bootloader', 'upkern_helpers']
+    scripts=["upkern"],
+    py_modules=['upkern', 'kernel', 'bootloader', 'upkern_helpers']
     )
