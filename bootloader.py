@@ -189,7 +189,7 @@ class BootLoader(object):
                 configuration = open(config_location, 'r')
             else:
                 output_list = [
-                    "Could not open the configuratino file for the boot",
+                    "Could not open the configuration file for the boot",
                     " loader!"
                     ]
                 raise BootLoaderException(''.join(output_list), \

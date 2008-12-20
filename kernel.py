@@ -130,7 +130,7 @@ class Kernel(object):
 
         """
         expression = re.compile('^linux-.+$')
-        return expression.match(kernel_name)
+        return bool(expression.match(kernel_name))
 
     def __get_newest_kernel(self):
         """Get the newest kernel from /usr/src.
@@ -143,7 +143,7 @@ class Kernel(object):
             raise KernelException("Could not access /usr/src")
         source_list = os.listdir('/usr/src/')
         source_list.sort()
-        filter(self.__kernel_filter, source_list)
+        source_list = filter(self.__kernel_filter, source_list)
         source = source_list[-1]
         return source[operator.indexOf(source, '-') + 1:]
 
