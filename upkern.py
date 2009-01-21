@@ -153,12 +153,12 @@ def main():
         kernel_name = ""
 
     if options.version:
-        print "upkern, version 2.0.5"
+        print "upkern, version 2.0.9"
         sys.exit(0)
 
     try:
         kernel = Kernel(options.configurator, options.kernel_name or \
-            kernel_name, options.sources, options.rebuild_modules)
+            kernel_name, options.sources, options.rebuild_modules, options.boot_splash)
         kernel.configure(options.verbosity)
         if (options.time_build): start_time = time.time()
         kernel.build(options.verbosity)

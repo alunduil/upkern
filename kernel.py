@@ -65,7 +65,7 @@ class Kernel(object):
     """
 
     def __init__(self, configurator = "menuconfig", kernel_name = "",
-        sources = "", rebuild_modules = True):
+        sources = "", rebuild_modules = True, boot_splash = ""):
         """Returns a Kernel object with properly initialized data.
 
         Get the necessary information about the system to know how to perform
@@ -110,9 +110,13 @@ class Kernel(object):
         self.image = self.__kernel_image + self.__kernel_suffix
 
         self.__rebuild_modules = rebuild_modules
+        self.__boot_splash = boot_splash
 
         if self.__rebuild_modules:
             self.__install_rebuild_modules()
+
+        if self.__boot_splash:
+            self.__install_boot_splash()
 
         if not self.__are_sources_downloaded(): self.__download()
 
@@ -174,14 +178,14 @@ class Kernel(object):
                     source_list_full.append(match2.group("source_type"))
 
             tmp_expression = [
-                '^(?P<version>((\d+\.){2}\d+))',
+                '^(?P<version>((\d+\.)+\d+))',
                 '(-(?P<source_type>.+?))?(?P<release>-r\d+)?$'
                 ]
             expression3 = re.compile(''.join(tmp_expression))
 
             tmp_expression = [
                 '^((?P<source_type>.+?)-)?(sources-)?',
-                '(?P<version>((\d+\.){2}\d+))(?P<release>-r\d+)?$'
+                '(?P<version>((\d+\.)+\d+))(?P<release>-r\d+)?$'
                 ]
             expression4 = re.compile(''.join(tmp_expression))
 
@@ -203,13 +207,16 @@ class Kernel(object):
             elif not match3:
                 raise KernelException("Kernel did not match any in portage!")
 
-            return ( \
-                (match3.group("source_type") or self.__sources or "gentoo") + \
+            ret1 = (match3.group("source_type") or self.__sources or "gentoo") + \
                 "-sources-" + match3.group("version") + \
-                (match3.group("release") or ""), "linux-" + \
-                match3.group("version") + "-" + \
-                (match3.group("source_type") or self.__sources or "gentoo") \
-                + (match3.group("release") or ""))
+                (match3.group("release") or "")
+            ret2 = "linux-" + match3.group("version")
+            if match3.group("source_type") != "vanilla":
+                ret2 += "-" + \
+                    (match3.group("source_type") or self.__sources or "gentoo") \
+                    + (match3.group("release") or "")
+
+            return ret1, ret2
 
     def __determine_architecture(self):
         """Determine the architecture of the running machine.
@@ -359,6 +366,37 @@ class Kernel(object):
             raise KernelException("Configurator not supported!", \
                 self.__configurator)
 
+        if self.__boot_splash:
+            error_list = [
+                'Bootsplash requires certain kernel configuration options',
+                'to be set:\n',
+                '\tSupport for frame buffer devices\n',
+                '\tVESA VGA graphics support\n',
+                '\tVESA driver type (vesafb-tng)\n',
+                '\tVideo mode selection support\n',
+                '\tFramebuffer Console support\n',
+                '\tSupport for the Framebuffer Console Decorations\n',
+                '\n',
+                'Make sure you didn\'t select tileblitting support.\n',
+                'If you are using an AMD64 processor, you should select',
+                'vesafb rather than vesafb-tng. Also note for x86 and AMD64',
+                'processors, the in-kernel nvidia framebuffer driver',
+                'conflicts with the binary driver provided by nVidia. If you',
+                'will be compiling your kernel for these CPUs, you must',
+                'completely remove support for the in-kernel driver as shown',
+                'above. See http://www.gentoo.org/doc/en/nvidia-guide.xml',
+                'for Details.\n',
+                '\n',
+                'Be sure to set your personal resolution@freq',
+                '(e.g. 1024x768@72) the default is 640x480@60. Now you\'ll',
+                'probably want to have both the initial ramdisk (initrd',
+                'which stores the image) to along with it\'s filesystem',
+                'loaded at boot.\n',
+                '\n',
+                '\tInitial RAM filesystem and RAM disk (initramfs/initrd) support\n'
+                ]
+            warn(' '.join(error_list))
+
     def __get_make_opts(self):
         """Get the MAKEOPTS defined in the /etc/make.conf file.
 
@@ -493,3 +531,14 @@ class Kernel(object):
 
         if not expression.match(output.readline()):
             os.system('emerge -v module-rebuild')
+
+    def __install_boot_splash(self):
+        expression = re.compile('^\[ebuild\s+(?P<status>N|R|U)\s+\]\s+(?P<package>.*?(splashutils|splash-themes-gentoo|splash-themes-livecd).*?)\s+.*?$')
+
+        output = os.popen('USE=fbcondecor emerge -p splashutils splash-themes-gentoo splash-themes-livecd')
+
+        for line in output:
+            match = expression.match(line)
+            if match:
+                if match.group("status") == "N":
+                    os.system('USE=fbcondecor emerge -v ' + match.group("package"))
