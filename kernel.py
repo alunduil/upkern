@@ -96,7 +96,7 @@ class Kernel(object):
 
         self.name = self.__kernel_name
 
-        expression = re.compile('^.+(?P<version>\d+\.\d+)\..+$')
+        expression = re.compile('^.+i-(?P<version>\d+\.\d+)\..+$')
         self.__kernel_version = \
             expression.match(self.__kernel_name).group("version")
 
