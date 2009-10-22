@@ -28,6 +28,7 @@ on. Will also provide a generic bootloader exception class.
 import re
 import os
 import datetime
+import time
 from string import ascii_lowercase
 import shutil
 
@@ -230,7 +231,7 @@ class GRUB(BootLoader):
         self.config = self.__config_location
 
         kernel_list = [
-            "\n# Kernel added on " + datetime.date.today().ctime() + ":\n",
+            "\n# Kernel added on " + time.strftime("%a %b %d %H:%M:%S %Y") + ":\n",
             "title=" + self._kernel_name + "\n",
             "\troot " + self.__determine_grub_root() + "\n",
             "\tkernel /boot/" + self._kernel_image + " root=" + self._root_partition,
