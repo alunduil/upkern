@@ -21,7 +21,7 @@ from distutils.core import setup
 
 setup(
     name='upkern',
-    version='2.0.10',
+    version='2.0.11',
     description="Automated Gentoo kernel updater.",
     license="GPL-2",
     author="Alex Brandt",

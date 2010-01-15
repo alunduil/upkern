@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ############################################################################
 #    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
 #                                                                          #
@@ -28,7 +29,6 @@ on. Will also provide a generic bootloader exception class.
 import re
 import os
 import datetime
-import time
 from string import ascii_lowercase
 import shutil
 
@@ -66,7 +66,7 @@ def create_bootloader(*args):
 
     for boot_loader in ("grub", "lilo", "silo"):
         output = os.popen('emerge -p ' + boot_loader + \
-            ' 2>/dev/null | tail -n1', 'r')
+            ' 2>/dev/null | grep ebuild', 'r')
         if expression.match(output.readline()):
             break;
     if boot_loader == "grub":
@@ -203,7 +203,7 @@ class BootLoader(object):
             return False
         else:
             os.system('mount /boot')
-            self._has_kernel()
+            self._has_kernel(config_location)
             os.system('umount /boot')
 
 class GRUB(BootLoader):
@@ -231,7 +231,7 @@ class GRUB(BootLoader):
         self.config = self.__config_location
 
         kernel_list = [
-            "\n# Kernel added on " + time.strftime("%a %b %d %H:%M:%S %Y") + ":\n",
+            "\n# Kernel added on " + datetime.date.today().ctime() + ":\n",
             "title=" + self._kernel_name + "\n",
             "\troot " + self.__determine_grub_root() + "\n",
             "\tkernel /boot/" + self._kernel_image + " root=" + self._root_partition,
