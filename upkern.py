@@ -153,7 +153,7 @@ def main():
         kernel_name = ""
 
     if options.version:
-        print "upkern, version 2.0.9"
+        print "upkern, version 2.0.11"
         sys.exit(0)
 
     try:
