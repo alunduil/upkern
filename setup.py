@@ -1,5 +1,5 @@
 ############################################################################
-#    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>   #
+#    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
 #                                                                          #
 #    This program is free software; you can redistribute it and#or modify  #
 #    it under the terms of the GNU General Public License as published by  #
@@ -21,12 +21,13 @@ from distutils.core import setup
 
 setup(
     name='upkern',
-    version='2.0.11',
+    version='3.0.0',
     description="Automated Gentoo kernel updater.",
     license="GPL-2",
     author="Alex Brandt",
     author_email="alunduil@alunduil.com",
-    url="http://www.alunduil.com/programs/python-kernel-updater",
+    url="http://www.alunduil.com/programs/upkern/",
     scripts=["upkern.py"],
     py_modules=['upkern', 'kernel', 'bootloader', 'upkern_helpers']
     )
+

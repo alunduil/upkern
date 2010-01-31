@@ -1,8 +1,0 @@
-# ChangeLog for app-admin/upkern
-# Copyright 2002-2008 Gentoo Foundation; Distributed under the GPL v2
-# $Header: $
-
-  18 Jun 2008; John Harris <harrisj@mnstate.edu>
-  upkern-2.0.6.ebuild:
-  Created the new 2.0.6 build, and added the feature so that when no
-  kernel is passed the newest downloaded sources will be rebuilt.
