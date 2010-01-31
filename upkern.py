@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 ############################################################################
 #    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
@@ -18,23 +19,6 @@
 #    Free Software Foundation, Inc.,                                       #
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
-
-"""Kernel update automater for Gentoo.
-
-Python script that updates a kernel for the sysadmin in a way that is
-conducive to the Gentoo environment. This script will only work on a system
-that has portage installed, but should only raise a warning if other
-non-necessary modules from the portage system are utilized.
-
-"""
-
-import optparse
-import sys
-import textwrap
-import time
-
-from kernel import *
-from bootloader import *
 
 def main():
     if os.getuid() != 0:
@@ -195,5 +179,18 @@ def main():
 
     sys.exit(0)
 
+class Upkern:
+
+
 if __name__ == '__main__':
-    main()
+    try:
+        Upkern application(sys.argv)
+        application->Run()
+    except UpkernArgumentException, error:
+        if (len(error.GetMessage()) > 0): upkernoutput.error(error.GetMessage())
+        print error.GetDescription()
+        return 1
+    except UpkernException, error:
+        if (len(error.GetMessage()) > 0): upkernoutput.error(error.GetMessage())
+        return 1
+    return 0
