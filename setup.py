@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ############################################################################
 #    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
 #                                                                          #
@@ -28,6 +29,5 @@ setup(
     author_email="alunduil@alunduil.com",
     url="http://www.alunduil.com/programs/upkern/",
     scripts=["upkern.py"],
-    py_modules=['upkern', 'kernel', 'bootloader', 'upkern_helpers']
+    py_modules=['kernel', 'bootloader', 'upkern_helpers']
     )
-

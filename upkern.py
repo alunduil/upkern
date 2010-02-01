@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -t3
 # -*- coding: utf-8 -*-
 
 ############################################################################
@@ -22,6 +22,10 @@
 
 import time
 import sys
+import optparse
+
+import kernel
+import bootloader
 
 class Upkern:
     def __init__(self, argv):
@@ -67,7 +71,7 @@ class Upkern:
             kernel.Build()
             if self._time_build: stop_time = time.time()
             kernel.Install()
-        except KernelException, error:
+        except kernel.KernelException, error:
             raise UpkernException(error.GetMessage())
 
         try:
@@ -83,7 +87,7 @@ class Upkern:
             if len(self._editor) < 1:
                 self._editor = os.getenv("EDITOR", "")
             output_string_list = [
-                self._editor + " " + boot_loader.GetConfigurationFile())
+                self._editor + " " + boot_loader.GetConfigurationFile()
                 ]
             os.system("".join(output_string_list))
 
@@ -97,9 +101,9 @@ class Upkern:
             seconds = int((stop_time - start_time) % 60)
             final_output_message_list[len(final_output_message_list):] = [
                 "The time to build the kernel was: " + hours + ":",
-                minutes + ":" + seconds "."
+                minutes + ":" + seconds + "."
                 ]
-        final_output_message_list[len(final_output_message_list:] = [
+        final_output_message_list[len(final_output_message_list):] = [
             "Please, check that all config files are in the ",
             "appropriate place and that there are no errors in the ",
             "configuration of the boot process.  It would be ",
@@ -150,6 +154,13 @@ class Upkern:
             default=False, dest='verbose',
             help=''.join(verbose_help_list))
 
+        debug_help_list = [
+            "Sets debugging output."
+            ]
+        parser.add_option('--debug', '-d', action='store_true',
+            default=False, dest='debug',
+            help=''.join(debug_help_list))
+
         rebuild_modules_help_list = [
             "Makes " + sys.argv[0] + " use module-rebuild to rebuild ",
             "the modules you have pulled in via portage for the new ",
@@ -185,21 +196,31 @@ class Upkern:
 
         return parser.parse_args()
 
-class UpkernArgumentException:
-
 class UpkernException:
+    def __init__(self, message):
+        self._message = message
+
+    def GetMessage(self):
+        return self._message
+
+class UpkernArgumentException(UpkernException):
+    def __init__(self, message, options):
+        super(message)
+        self._options = options
+
+    def GetOptions(self):
+        return self._options
 
 if __name__ == '__main__':
     try:
-        Upkern application(sys.argv)
-        application->Run()
+        application = Upkern(sys.argv)
+        application.Run()
     except UpkernArgumentException, error:
         if (len(error.GetMessage()) > 0):
             upkernoutput.error(error.GetMessage())
         print error.GetDescription()
-        return 1
+        sys.exit(1)
     except UpkernException, error:
         if (len(error.GetMessage()) > 0):
             upkernoutput.error(error.GetMessage())
-        return 1
-    return 0
+        sys.exit(1)
