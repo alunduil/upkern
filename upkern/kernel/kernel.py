@@ -1,30 +1,24 @@
 #!/usr/bin/env python -t3
 # -*- coding: utf-8 -*-
 
-############################################################################
-#    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
-#                                                                          #
-#    This program is free software; you can redistribute it and#or modify  #
-#    it under the terms of the GNU General Public License as published by  #
-#    the Free Software Foundation; either version 2 of the License, or     #
-#    (at your option) any later version.                                   #
-#                                                                          #
-#    This program is distributed in the hope that it will be useful,       #
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-#    GNU General Public License for more details.                          #
-#                                                                          #
-#    You should have received a copy of the GNU General Public License     #
-#    along with this program; if not, write to the                         #
-#    Free Software Foundation, Inc.,                                       #
-#    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
-############################################################################
-
-"""Contains necessary classes and functions to work with the kernel sources.
-
-Will provide a Kernel class, and a generic kernel exception class.
-
-"""
+########################################################################
+# Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>            #
+#                                                                      #
+# This program is free software; you can redistribute it and#or modify #
+# it under the terms of the GNU General Public License as published by #
+# the Free Software Foundation; either version 2 of the License, or    #
+# (at your option) any later version.                                  #
+#                                                                      #
+# This program is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        #
+# GNU General Public License for more details.                         #
+#                                                                      #
+# You should have received a copy of the GNU General Public License    #
+# along with this program; if not, write to the                        #
+# Free Software Foundation, Inc.,                                      #
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
+########################################################################
 
 import os
 import re
@@ -34,14 +28,15 @@ import shutil
 class Kernel:
     """A kernel handler object.
 
-    Specifies an interface that allows the programmer to easily work with the
-    kernel sources that the object gets bound to. This allows easy building,
-    installing, and general manipulation of a kernel source directory.
+    Specifies an interface that allows the programmer to easily work
+    with the kernel sources that the object gets bound to. This allows 
+    easy building, installing, and general manipulation of a kernel
+    source directory. 
 
-    All references to how things should be called make an attempt to coincide
-    with the documentation provided in the relevant kernel sources. This
-    interface will attempt to stay in touch with the most recent kernel
-    sources provided by the Gentoo Portage tree.
+    All references to how things should be called make an attempt to 
+    coincide with the documentation provided in the relevant kernel
+    sources. This interface will attempt to stay in touch with the most
+    recent kernel sources provided by the Gentoo Portage tree.
 
     See the following URL for a list of current kernels:
     http://packages.gentoo.org/package/sys-kernel/gentoo-sources
@@ -54,9 +49,9 @@ class Kernel:
         rebuild_modules = True, debug = False, verbose = False):
         """Returns a Kernel object with properly initialized data.
 
-        Get the necessary information about the system to know how to perform
-        basic kernel actions. We should be ready to configure, build, and
-        install the kernel when this call completes.
+        Get the necessary information about the system to know how to
+        perform basic kernel actions. We should be ready to configure,
+        build, and install the kernel when this call completes.
 
         Post Conditions:
         The Kernel object is initialized, and the information has been
@@ -69,7 +64,6 @@ class Kernel:
 
         self._debug = debug
         self._verbose = verbose
-
         self._configurator = configurator
 
         if self._verbose: print "Configurator: %s" % self._configurator
@@ -77,8 +71,8 @@ class Kernel:
         self._kernel_name, self._download_name = \
             self._get_kernel_names(kernel_name)
 
-        if self._debug: print "DEBUG: Kernel Names: %s %s" % \
-            self._kernel_name self._download_name
+        if self._debug: print "DEBUG: Kernel Names: %s - %s" \
+            % self._kernel_name, self._download_name
 
         self._kernel_suffix, self._kernel_version = \
             self._split_kernel_name(self._kernel_name)
@@ -103,6 +97,9 @@ class Kernel:
         the emerge atom name.
 
         """
+        if os.access('/usr/src/', os.F_OK):
+            source_list = []
+            source_list_full = []
 
 
     def __kernel_filter(self, kernel_name):
