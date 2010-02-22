@@ -1,3 +1,6 @@
+#!/usr/bin/env python -t3
+# -*- coding: utf-8 -*-
+
 ############################################################################
 #    Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
 #                                                                          #
@@ -27,25 +30,8 @@ import os
 import re
 import operator
 import shutil
-from warnings import warn
 
-from upkern_helpers import is_boot_mounted
-
-class KernelException(Exception):
-    """Generic error class for a kernel problem.
-
-    Specifies an error condition in the kernel module.
-
-    """
-
-    def __init__(self, message, *args):
-        Exception.__init__(self, *args)
-        self.message = message
-
-    def print_message(self):
-        print self.message
-
-class Kernel(object):
+class Kernel:
     """A kernel handler object.
 
     Specifies an interface that allows the programmer to easily work with the
@@ -65,7 +51,7 @@ class Kernel(object):
     """
 
     def __init__(self, configurator = "menuconfig", kernel_name = "",
-        sources = "", rebuild_modules = True, boot_splash = ""):
+        rebuild_modules = True, debug = False, verbose = False):
         """Returns a Kernel object with properly initialized data.
 
         Get the necessary information about the system to know how to perform
@@ -81,50 +67,43 @@ class Kernel(object):
 
         """
 
-        self.__configurator = configurator
+        self._debug = debug
+        self._verbose = verbose
 
-        self.__sources = sources                # The sources as specified in
-                                                # the gentoo portage tree.
-                                                # (i.e. gentoo, vanilla, etc.)
+        self._configurator = configurator
 
-        self.__kernel_name = kernel_name
+        if self._verbose: print "Configurator: %s" % self._configurator
 
-        if len(self.__kernel_name) == 0:
-            self.__kernel_name = self.__get_newest_kernel()
+        self._kernel_name, self._download_name = \
+            self._get_kernel_names(kernel_name)
 
-        self.__download_name, self.__kernel_name = self.__get_kernel_names()
+        if self._debug: print "DEBUG: Kernel Names: %s %s" % \
+            self._kernel_name self._download_name
 
-        self.name = self.__kernel_name
+        self._kernel_suffix, self._kernel_version = \
+            self._split_kernel_name(self._kernel_name)
+        self._architecture = self._determine_architecture()
 
-        expression = re.compile('^.+-(?P<version>\d+\.\d+)\..+$')
-        self.__kernel_version = \
-            expression.match(self.__kernel_name).group("version")
+        self._install_image_name = self._get_install_image_name()
 
-        self.__kernel_suffix = \
-            self.__kernel_name[operator.indexOf(self.__kernel_name, '-'):]
+        self._rebuild_modules = False
+        if rebuild_modules and self._have_rebuild_modules():
+            self._rebuild_modules = rebuild_modules
 
-        self.__architecture = self.__determine_architecture()
+        if not self._have_sources(): self._install_sources()
 
-        self.__kernel_image = self.__get_image_name()
+        self._set_symlink()
+        self._copy_config()
+        self._make_opts = self._get_make_opts()
 
-        self.image = self.__kernel_image + self.__kernel_suffix
+    def _get_kernel_names(self, kernel_name):
+        """Gets the names for this kernel.
 
-        self.__rebuild_modules = rebuild_modules
-        self.__boot_splash = boot_splash
+        Returns a tuple containing the /usr/src/<blah> name as well as
+        the emerge atom name.
 
-        if self.__rebuild_modules:
-            self.__install_rebuild_modules()
+        """
 
-        if self.__boot_splash:
-            self.__install_boot_splash()
-
-        if not self.__are_sources_downloaded(): self.__download()
-
-        self.__set_symlink()
-
-        self.__copy_config()
-
-        self.__make_opts = self.__get_make_opts()
 
     def __kernel_filter(self, kernel_name):
         """Filters out none kernels from the kernel lists.
