@@ -20,7 +20,8 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
-from upkern import Upkern, Output
+from upkern import Upkern
 from bootloader import BootLoader
 from kernel import Kernel
+from output import Output
 
