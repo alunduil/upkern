@@ -29,5 +29,5 @@ setup(
     author_email="alunduil@alunduil.com",
     url="http://www.alunduil.com/programs/upkern/",
     scripts=["upkern.py"],
-    py_modules=['kernel', 'bootloader', 'upkern_helpers']
+    py_modules=['upkern']
     )
