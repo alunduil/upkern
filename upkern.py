@@ -30,11 +30,13 @@ if __name__ == '__main__':
         application.Run()
     except UpkernArgumentException, e:
         if (len(e.GetMessage()) > 0):
-            print >> sys.stderr, Output.LIGHTRED + e.GetMessage() + Output.GRAY
+            print >> sys.stderr, Output.LIGHTRED + e.GetMessage() + \
+                Output.GRAY
         print >> sys.stderr, error.GetDescription()
         sys.exit(1)
     except UpkernException, e:
         if (len(e.GetMessage()) > 0):
-            print >> sys.stderr, Output.LIGHTRED + e.GetMessage() + Output.GRAY
+            print >> sys.stderr, Output.LIGHTRED + e.GetMessage() + \
+                Output.GRAY
         sys.exit(1)
 

@@ -20,10 +20,8 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
-import os
+import portage.config
 import re
-import operator
-import shutil
 
 class Kernel:
     """A kernel handler object.
@@ -66,19 +64,14 @@ class Kernel:
         self._verbose = verbose
         self._configurator = configurator
 
-        if self._verbose: print "Configurator: %s" % self._configurator
-
-        self._kernel_name, self._download_name = \
-            self._get_kernel_names(kernel_name)
-
-        if self._debug: print "DEBUG: Kernel Names: %s - %s" \
-            % self._kernel_name, self._download_name
+        self._qualified_package_name = \
+            self._get_package_name(kernel_name)
 
         self._kernel_suffix, self._kernel_version = \
-            self._split_kernel_name(self._kernel_name)
+            self._split_kernel_name(self._kernel_directory)
         self._architecture = self._determine_architecture()
 
-        self._install_image_name = self._get_install_image_name()
+        self._install_image = self._get_install_image()
 
         self._rebuild_modules = False
         if rebuild_modules and self._have_rebuild_modules():
@@ -88,45 +81,51 @@ class Kernel:
 
         self._set_symlink()
         self._copy_config()
-        self._make_opts = self._get_make_opts()
 
-    def _get_kernel_names(self, kernel_name):
+        self._emerge_config = portage.config()
+
+    def _get_package_name(self, kernel_name):
         """Gets the names for this kernel.
 
-        Returns a tuple containing the /usr/src/<blah> name as well as
-        the emerge atom name.
+        Returns the qualified package name (emerge's name).
 
         """
-        if os.access('/usr/src/', os.F_OK):
-            source_list = []
-            source_list_full = []
+        emerge_expression_list = [
+            '(?:sys-kernel/)?', # Just in case people want to pipe it
+                                # in from portage.
+            '(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+_-]*?)-sources-)?',
+            '(?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)'
+            ]
+        emerge_expression = re.compile("".join(emerge_expression_list)
+        emerge_match = emerge_expression.match(kernel_name)
+
+        sources = "gentoo"
+
+        qualified_package_name = "sys-kernel/"
+        if emerge_match:
+            if emerge_match.group("sources"):
+                sources = emerge_match.group("sources")
+            qualified_package_name += sources
+            qualified_package_name += "-sources-"
+            qualified_package_name += emerge_match.group("version")
+            if self._debug:
+                print >> sys.stderr, 
+                    "%s:%s: DEBUG: qualified_package_name -> %s" % \
+                    __file__, __line__, qualified_package_name
+            # Get the directory name now.
 
 
-    def __kernel_filter(self, kernel_name):
-        """Filters out none kernels from the kernel lists.
+        else:
+            # Look at the installed sources for one to use.
+            if not os.access('/usr/src/', os.F_OK):
+                raise KernelExcpetion("Could not access /usr/src/")
+            src_list = os.listdir('/usr/src/')
+            src_list = filter(lambda x: re.match('linux-.+$', x), src_list)
+            src_list.sort()
+            directory_name = src_list[-1]
+            equery
 
-        Returns true if the passed string is a true kernel name,
-        otherwise, it returns false.
-
-        """
-        expression = re.compile('^linux-.+$')
-        return bool(expression.match(kernel_name))
-
-    def __get_newest_kernel(self):
-        """Get the newest kernel from /usr/src.
-
-        Returns the newest kernel version on the system if the user does not
-        provide one.
-
-        """
-        if not os.access('/usr/src/', os.F_OK):
-            raise KernelException("Could not access /usr/src")
-        source_list = os.listdir('/usr/src/')
-        source_list.sort()
-        source_list = filter(self.__kernel_filter, source_list)
-        source = source_list[-1]
-        return source[operator.indexOf(source, '-') + 1:]
-
+            
     def __get_kernel_names(self):
         """Get the kernel name of the most up to date sources on the system.
 

@@ -24,8 +24,8 @@ import time
 import sys
 import optparse
 
-import kernel
-import bootloader
+from kernel import Kernel
+from bootloader import BootLoader
 
 class Upkern:
     def __init__(self, argv):
