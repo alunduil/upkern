@@ -68,7 +68,9 @@ class Kernel:
         self._verbose = verbose
         self._dry_run = dry_run
         self._configurator = configurator
-        output.verbose("Configurator: %s", self._configurator)
+
+        if self._verbose: 
+            output.verbose("Configurator: %s", self._configurator)
 
         output.status("Getting information about kernel (this could take a while) ...")
 
@@ -425,6 +427,6 @@ class KernelException(Exception):
         super(KernelException, self).__init__(args)
         self._message = message
 
-    def GetMessage(self):
+    def get_message(self):
         return self._message
 
