@@ -252,8 +252,8 @@ class Kernel:
             emerge_name += sources
             emerge_name += "-sources-"
             emerge_name += emerge_match.group("version")
-            if self._debug: Output.debug(__file__, __line__, 
-                "emerge_name", emerge_name)
+            if self._debug: 
+                output.debug(__file__, {"emerge_name":emerge_name})
             
             # Get the directory name now.
             from gentoolkit.helpers import find_installed_packages
@@ -270,7 +270,14 @@ class Kernel:
                 opts = ""
                 if self._verbose: opts = "-v"
                 command_list = ["emerge", opts, "="+emerge_name]
-                os.system(" ".join(command_list))
+                # @todo Any better way to do this?
+                if not self._dry_run and os.getuid != 0:
+                    raise KernelException("Insufficient priveleges to continue!")
+                if self._dry_run:
+                    output.verbose(" ".join(command_list))
+                    raise KernelException("Cannot continue dry run without sources")
+                else:
+                    os.system(" ".join(command_list))
 
             directories = self._get_kernel_directories()
             from gentoolkit.helpers import FileOwner
