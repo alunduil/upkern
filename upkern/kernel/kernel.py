@@ -70,6 +70,8 @@ class Kernel:
         self._configurator = configurator
         output.verbose("Configurator: %s", self._configurator)
 
+        output.status("Getting information about kernel (this could take a while) ...")
+
         self._directory_name, self._emerge_name = \
             self._get_kernel_names(kernel_name)
 
@@ -374,14 +376,14 @@ class Kernel:
             ]
         if self._dry_run:
             output.verbose("cp %s%s /boot/%s%s", 
-                "".join(source_dir_list), self._kernel_image, 
-                self._kernel_image, suffix)
+                "".join(source_dir_list), self._install_image, 
+                self._install_image, suffix)
             output.verbose("cp .config /boot/config%s", suffix)
             output.verbose("cp System.map /boot/System.map%s", suffix)
             output.verbose("cp System.map /System.map")
         else:
-            shutil.copy("".join(source_dir_list) + self._kernel_image,
-                '/boot/' + self._kernel_image + suffix)
+            shutil.copy("".join(source_dir_list) + self._install_image,
+                '/boot/' + self._install_image + suffix)
             shutil.copy('.config', '/boot/config' + suffix)
             shutil.copy('System.map', '/boot/System.map' + suffix)
             shutil.copy('System.map', '/System.map')

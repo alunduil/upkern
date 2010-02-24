@@ -47,6 +47,12 @@ def verbose(msg, *args):
     else: output += msg
     print output + Colors.GRAY
 
+def status(msg, *args):
+    output = Colors.LIGHT_GREEN
+    if len(args) > 0: output += msg % args
+    else: output += msg
+    print output + Colors.GRAY
+
 def error(msg, *args):
     output = Colors.LIGHT_RED + "ERROR: "
     if len(args) > 0: ouput += msg % args

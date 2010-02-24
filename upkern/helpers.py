@@ -18,6 +18,7 @@
 ############################################################################
 
 import os
+import re
 
 def is_boot_mounted():
     """Determines if the system's boot partition is mounted.
