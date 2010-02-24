@@ -282,15 +282,23 @@ class Kernel:
         """
         if not os.access('/usr/src/linux', os.X_OK):
             raise KernelException("Can't access the kernel source!")
-        opwd = os.getcwd()
-        os.chdir('/usr/src/linux')
+
+        if self._dry_run:
+            output.verbose("pushd /usr/src/linux")
+        else:
+            opwd = os.getcwd()
+            os.chdir('/usr/src/linux')
 
         command_list = [
             "make", self._emerge_config["MAKEOPTS"], 
             self._configurator
             ]
-        os.system(" ".join(command_list))
-        os.chdir(opwd)
+        if self._dry_run:
+            output.verbose(" ".join(command_list))
+            output.verbose("popd")
+        else:
+            os.system(" ".join(command_list))
+            os.chdir(opwd)
 
     def build(self):
         """Build the kernel.
@@ -302,18 +310,32 @@ class Kernel:
         """
         if not os.access('/usr/src/linux', os.X_OK):
             raise KernelException("Can't access the kernel source!")
-        opwd = os.getcwd()
-        os.chdir('/usr/src/linux')
+
+        if self._dry_run:
+            output.verbose("pushd /usr/src/linux")
+        else:
+            opwd = os.getcwd()
+            os.chdir('/usr/src/linux')
 
         command_list = [
             "make", self._emerge_config["MAKEOPTS"], "&& make",
             self._emerge_config["MAKEOPTS"], "modules_install"
             ]
-        os.system(" ".join(command_list))
+
+        if self._dry_run:
+            output.verbose(" ".join(command_list))
+        else:
+            os.system(" ".join(command_list))
 
         if self._rebuild_modules:
-            os.system('module-rebuild -X rebuild')
-        os.chdir(opwd)
+            if self._dry_run:
+                output.verbose("module-rebuild -x rebuild")
+            else:
+                os.system('module-rebuild -X rebuild')
+        if self._dry_run:
+            output.verbose("popd")
+        else:
+            os.chdir(opwd)
 
     def install(self):
         """Install the kernel into /boot
@@ -323,32 +345,56 @@ class Kernel:
         """
         if not os.access('/usr/src/linux', os.X_OK):
             raise KernelException("Can't access the kernel source!")
-        opwd = os.getcwd()
-        os.chdir('/usr/src/linux')
+
+        if self._dry_run:
+            output.verbose("pushd /usr/src/linux")
+        else:
+            opwd = os.getcwd()
+            os.chdir('/usr/src/linux')
 
         arch_dir = platform.machine()
         # The following should be necessary on x86 machines.
         # This needs to be double checked.
         if re.match('i\d86', arch_dir): arch_dir = "i386"
 
+        if self._verbose: output.verbose("Architecture: %s", arch_dir)
+
         suffix = self._directory_name.partition('-')[2]
 
         boot_mounted = False
-        if not helpers.is_boot_mounted(): 
-            os.system('mount /boot')
+        if not helpers.is_boot_mounted():
+            if self._dry_run:
+                output.verbose("mount /boot")
+            else:
+                os.system('mount /boot')
             boot_mounted = True
 
         source_dir_list = [
             "arch/", arch_dir, "/boot/"
             ]
-        shutil.copy("".join(source_dir_list) + self._kernel_image, 
-            '/boot/' + self._kernel_image + suffix)
-        shutil.copy('.config', '/boot/config' + suffix)
-        shutil.copy('System.map', '/boot/System.map' + suffix)
-        shutil.copy('System.map', '/System.map')
+        if self._dry_run:
+            output.verbose("cp %s%s /boot/%s%s", 
+                "".join(source_dir_list), self._kernel_image, 
+                self._kernel_image, suffix)
+            output.verbose("cp .config /boot/config%s", suffix)
+            output.verbose("cp System.map /boot/System.map%s", suffix)
+            output.verbose("cp System.map /System.map")
+        else:
+            shutil.copy("".join(source_dir_list) + self._kernel_image,
+                '/boot/' + self._kernel_image + suffix)
+            shutil.copy('.config', '/boot/config' + suffix)
+            shutil.copy('System.map', '/boot/System.map' + suffix)
+            shutil.copy('System.map', '/System.map')
 
-        if boot_mounted: os.system('umount /boot')
-        os.chdir(opwd)
+        if boot_mounted: 
+            if self._dry_run:
+                output.verbose("umount /boot")
+            else:
+                os.system('umount /boot')
+        if self._dry_run:
+            output.verbose("popd")
+        else:
+            os.chdir(opwd)
 
 class KernelException(Exception):
     def __init__(self, message, *args):
