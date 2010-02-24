@@ -45,13 +45,14 @@ class Grub(BaseBootLoader):
         self._config_url = '/boot/grub/grub.conf'
         self._configuration = []
 
+        # @todo Some good way to do this?
         kernel_list = [
-            "\n# Kernel added on ", str(datetime.datetime.now()), ":\n",
-            "title=", self._kernel.get_name(), "\n",
-            "  root ", self._get_grub_root(), "\n",
-            "  kernel /boot/", self._kernel.get_image(), "-",
-            self._kernel.get_suffix(), " root=", self._root_partition,
-            " ", kernel_options
+            ["# Kernel added on " + str(datetime.datetime.now()) + ":"],
+            ["title=" + self._kernel.get_name()],
+            ["  root " + self._get_grub_root()],
+            ["  kernel /boot/" + self._kernel.get_image() + "-" + \
+            self._kernel.get_suffix() + " root=" + \
+            self._root_partition + " " + kernel_options]
             ]
         kernel_string = "".join(kernel_list)
 
@@ -130,7 +131,13 @@ class Grub(BaseBootLoader):
                 else:
                     tmp_configuration.append(line)
 
-            tmp_configuration.append(self._kernel_string + kernel_options)
+            self._kernel_string[-1] += kernel_options
+
+            if self._debug:
+                for line in self._kernel_string:
+                    output.debug(__file__, {"line":line})
+
+            tmp_configuration.extend(self._kernel_string)
 
             if self._debug:
                 for line in tmp_configuration:
@@ -166,7 +173,13 @@ class Grub(BaseBootLoader):
                 self.create_configuration()
                 os.system('umount /boot')
         else:
-            if self._dry_run: pass
-            else: pass
-            pass
+            if self._dry_run:
+                output.verbose("echo -en \"%s\" > /boot/grub/grub.conf" % "\n".join(self._configuration))
+            else:
+                if not os.access(self._config_url, os.W_OK):
+                    raise BootLoaderException("Cannot write to /boot/grub/grub.conf")
+                c = open(self._config_url, 'w')
+                c.write("\n".join(self._configuration))
+                c.flush()
+                c.close()
 
