@@ -56,16 +56,10 @@ def BootLoader(*args):
     raise BootLoaderException(" ".join(error_list))
 
 class BootLoaderException(Exception):
-    """Generic error class for a bootloader problem.
-
-    Specifies an error condition in the bootloader module.
-
-    """
-
     def __init__(self, message, *args):
         Exception.__init__(self, *args)
         self.message = message
 
-    def print_message(self):
-        print self.message
+    def get_message(self):
+        return self.message
 

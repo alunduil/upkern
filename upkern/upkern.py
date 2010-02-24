@@ -68,15 +68,15 @@ class Upkern:
             if self._time_build: stop_time = time.time()
             kernel.install()
         except KernelException, e:
-            raise UpkernException(e.GetMessage())
+            raise UpkernException(e.get_message())
 
         try:
             # Handle the boot loader stuffs.
             boot_loader = BootLoader(kernel, self._kernel_options)
             boot_loader.create_configuration()
             boot_loader.install_configuration()
-        except BootLoaderException, error:
-            raise UpkernException(error.GetMessage())
+        except BootLoaderException, e:
+            raise UpkernException(e.get_message())
 
         if self._editor:
             if len(self._editor) < 1:
