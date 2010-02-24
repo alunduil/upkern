@@ -199,7 +199,7 @@ class Kernel:
             "http://bugzilla.alunduil.com with your architecture and",
             "the image that is created by default."
             ]
-        raise KernelException(" ".join())
+        raise KernelException(" ".join(error_list))
 
     def _get_kernel_names(self, kernel_name):
         """Gets the names for this kernel.
@@ -401,7 +401,7 @@ class Kernel:
 
 class KernelException(Exception):
     def __init__(self, message, *args):
-        super(args)
+        super(KernelException, self).__init__(args)
         self._message = message
 
     def GetMessage(self):

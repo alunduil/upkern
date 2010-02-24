@@ -196,7 +196,7 @@ class Upkern:
 
 class UpkernException(Exception):
     def __init__(self, message, *args):
-        super(args)
+        super(UpkernException, self).__init__(args)
         self._message = message
 
     def GetMessage(self):
