@@ -24,19 +24,19 @@ import sys
 
 from upkern import Upkern, Output
 
-if __name__ == '__main__':
+def main(args):
     try:
-        application = Upkern(sys.argv)
+        Output.debug(__file__, __line__, "args", args)
+        application = Upkern(args)
         application.Run()
     except UpkernArgumentException, e:
         if (len(e.GetMessage()) > 0):
-            print >> sys.stderr, Output.LIGHTRED + e.GetMessage() + \
-                Output.GRAY
-        print >> sys.stderr, error.GetDescription()
-        sys.exit(1)
+            Output.error(e.GetMessage())
+        Output.error(e.GetDescription())
+        return 1
     except UpkernException, e:
         if (len(e.GetMessage()) > 0):
-            print >> sys.stderr, Output.LIGHTRED + e.GetMessage() + \
-                Output.GRAY
-        sys.exit(1)
+            Output.error(e.GetMessage())
+        return 1
+    return 0
 
