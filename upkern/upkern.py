@@ -24,8 +24,8 @@ import time
 import sys
 import optparse
 
-from kernel import Kernel
-from bootloader import BootLoader
+from kernel import Kernel, KernelException
+from bootloader import BootLoader, BootLoaderException
 
 class Upkern:
     def __init__(self, argv):
@@ -39,17 +39,13 @@ class Upkern:
         self._editor = ""
 
         usage = "usage: %prog [options] kernel"
-
         parser = optparse.OptionParser(usage=usage)
-
         variables, arguments = self._parseOptions(argv, parser)
 
         self._debug = variables.debug
         # If we have debugging turned on we should also have verbose.
         if self._debug: self._verbose = True
         else: self._verbose = variables.verbose
-
-        if variables.version: raise UpkernArgumentException("Upkern, version 3.0.0")
 
         if len(arguments) > 0: self._kernel_name = arguments[0]
 
@@ -58,20 +54,21 @@ class Upkern:
         self._time_build = variables.time_build
         self._kernel_options = variables.kernel_options
         self._editor = variables.editor
+        self._dry_run = variables.dry_run
 
     def Run(self):
         try:
             # Handle the kernel parts.
-            kernel = kernel.Kernel(self._configurator,
+            kernel = Kernel(self._configurator,
                 self._kernel_name, self._rebuild_modules, self._debug,
-                self._verbose)
-            kernel.Configure()
+                self._verbose, self._dry_run)
+            kernel.configure()
             if self._time_build: start_time = time.time()
-            kernel.Build()
+            kernel.build()
             if self._time_build: stop_time = time.time()
-            kernel.Install()
-        except kernel.KernelException, error:
-            raise UpkernException(error.GetMessage())
+            kernel.install()
+        except KernelException, e:
+            raise UpkernException(e.GetMessage())
 
         try:
             # Handle the boot loader stuffs.
@@ -186,12 +183,15 @@ class Upkern:
         parser.add_option('--kernel', '-k', dest='kernel_name',
             default="", help=''.join(kernel_help_list))
 
-        version_help_list = [
-            "Specifies the currently installed version of upkern."
+        dry_run_help_list = [
+            "Specifies that none of the actions that can modify the ",
+            "filesystem should occur, but they should be printed to ",
+            "the screen instead.  This way it can be seen what will ",
+            "happen without actually doing it."
             ]
-        parser.add_option('--version', '-V', action='store_true',
-            dest='version', default=False,
-            help=''.join(version_help_list))
+        parser.add_option('--dry-run', '-D', action='store_true', 
+            dest='dry_run', default=False, 
+            help=''.join(dry_run_help_list))
 
         return parser.parse_args()
 
@@ -203,24 +203,3 @@ class UpkernException(Exception):
     def GetMessage(self):
         return self._message
 
-class UpkernArgumentException(UpkernException):
-    def __init__(self, message, options):
-        super(message)
-        self._options = options
-
-    def GetOptions(self):
-        return self._options
-
-if __name__ == '__main__':
-    try:
-        application = Upkern(sys.argv)
-        application.Run()
-    except UpkernArgumentException, error:
-        if (len(error.GetMessage()) > 0):
-            upkernoutput.error(error.GetMessage())
-        print error.GetDescription()
-        sys.exit(1)
-    except UpkernException, error:
-        if (len(error.GetMessage()) > 0):
-            upkernoutput.error(error.GetMessage())
-        sys.exit(1)

@@ -23,6 +23,8 @@
 import portage
 import re
 import platform
+import os
+from upkern import output
 
 class Kernel:
     """A kernel handler object.
@@ -45,7 +47,8 @@ class Kernel:
     """
 
     def __init__(self, configurator = "menuconfig", kernel_name = "",
-        rebuild_modules = True, debug = False, verbose = False):
+        rebuild_modules = True, debug = False, verbose = False, 
+        dry_run = False):
         """Returns a Kernel object with properly initialized data.
 
         Get the necessary information about the system to know how to
@@ -63,22 +66,34 @@ class Kernel:
 
         self._debug = debug
         self._verbose = verbose
+        self._dry_run = dry_run
         self._configurator = configurator
+        output.verbose("Configurator: %s", self._configurator)
 
         self._directory_name, self._emerge_name = \
             self._get_kernel_names(kernel_name)
 
-        self._kernel_suffix, self._kernel_version = \
-            self._split_kernel_name(self._kernel_directory)
+        output.verbose("Directory Name: %s", self._directory_name)
+        output.verbose("Package Name: %s", self._emerge_name)
 
         self._install_image = self._get_install_image()
+
+        output.verbose("Install Image: %s", self._install_image)
 
         self._rebuild_modules = False
         if rebuild_modules and self._have_module_rebuild():
             self._rebuild_modules = rebuild_modules
 
-        self._set_symlink()
-        self._copy_config()
+        output.verbose("Rebuild Modules: %s", self._rebuild_modules)
+
+        if not self._dry_run and os.getuid() != 0:
+            raise KernelException("Insufficient priveleges to continue!")
+
+        if self._dry_run: self._dry_set_symlink()
+        else: self._set_symlink()
+
+        if self._dry_run: self._dry_copy_config()
+        else: self._copy_config()
 
         self._emerge_config = portage.config()
 
@@ -98,20 +113,44 @@ class Kernel:
             os.system('umount /boot')
         else:
             config_list = os.listdir('/boot')
-            config_list = filter(lambda x: re.match('config-.+$', x), 
+            config_list = filter(lambda x: re.match('config-.+', x), 
                 config_list)
             config_list.sort()
             if len(config_list) > 0:
                 shutil.copy('/boot/' + config_list[-1], 
                     '/usr/src/linux/.config')
 
+    def _dry_copy_config(self):
+        """Dry run of _copy_config.
+
+        """
+        if not helpers.is_boot_mounted():
+            output.verbose("mount /boot")
+            output.verbose("umount /boot")
+        else:
+            config_list = os.listdir('/boot')
+            config_list = filter(lambda x: re.match('config-.+', x),
+                config_list)
+            config_list.sort()
+            if len(config_list) > 0:
+                output.verbose("cp /boot/%s /usr/src/linux/.config", 
+                    config_list[-1])
+
     def _set_symlink(self):
         """Sets the symlink to the new kernel directory.
 
         """
-        if os.path.islink('/usr/src/linux'): 
+        if os.path.islink('/usr/src/linux'):
             os.remove('/usr/src/linux')
         os.symlink(self._directory_name, '/usr/src/linux')
+
+    def _dry_set_symlink(self):
+        """Dry run of _set_symlink.
+
+        """
+        if os.path.islink('/usr/src/linux'): 
+            output.verbose("rm /usr/src/linux")
+        output.verbose("ln -s %s /usr/src/linux", self._directory_name)
 
     def _have_module_rebuild(self):
         """Determine if module-rebuild is installed or not.
@@ -215,10 +254,8 @@ class Kernel:
             emerge_name = finder((directory_name,))[0][0]
 
         if self._debug: 
-            Output.debug(__file__, __line__, "directory_name", 
-                directory_name)
-            Output.debug(__file__, __line__, "emerge_name", 
-                emerge_name)
+            output.debug(__file__, {"directory_name":directory_name})
+            output.debug(__file__, {"emerge_name":emerge_name})
         return (directory_name, emerge_name)
 
     def _get_kernel_directories(self):
@@ -309,4 +346,12 @@ class Kernel:
 
         if boot_mounted: os.system('umount /boot')
         os.chdir(opwd)
+
+class KernelException(Exception):
+    def __init__(self, message, *args):
+        super(args)
+        self._message = message
+
+    def GetMessage(self):
+        return self._message
 

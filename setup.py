@@ -33,3 +33,4 @@ setup(
     scripts=["upkern.py"],
     py_modules=['upkern']
     )
+

@@ -20,23 +20,17 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
-import sys
+from sys import argv, exit
 
-from upkern import Upkern, Output
+from upkern import Upkern, UpkernException
+from upkern.output import error
 
-def main(args):
+if __name__ == "__main__":
     try:
-        Output.debug(__file__, __line__, "args", args)
-        application = Upkern(args)
+        application = Upkern(argv)
         application.Run()
-    except UpkernArgumentException, e:
-        if (len(e.GetMessage()) > 0):
-            Output.error(e.GetMessage())
-        Output.error(e.GetDescription())
-        return 1
     except UpkernException, e:
-        if (len(e.GetMessage()) > 0):
-            Output.error(e.GetMessage())
-        return 1
-    return 0
+        if (len(e.GetMessage()) > 0): error(e.GetMessage())
+        exit(1)
+    exit(0)
 
