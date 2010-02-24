@@ -190,8 +190,10 @@ class Kernel:
 
         """
         arch = platform.machine()
+        output.debug(__file__, {'arch':arch})
 
         if arch == "x86_64": return "bzImage"
+        elif arch == "i686": return "bzImage"
 
         error_list = [
             "We do not know the output for your architecture. ",
