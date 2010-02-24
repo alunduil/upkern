@@ -19,10 +19,11 @@
 #########################################################################
 
 from basebootloader import BaseBootLoader
-from upkern import output
+from upkern import output, helpers
 
 import datetime
 import re
+import os
 
 class Grub(BaseBootLoader):
     """A specific boot loader, GRUB, handler.
@@ -41,7 +42,7 @@ class Grub(BaseBootLoader):
         BaseBootLoader.__init__(self, kernel, kernel_options, debug, 
             verbose, dry_run)
 
-        self._config_location = '/boot/grub/grub.conf'
+        self._config_url = '/boot/grub/grub.conf'
 
         kernel_list = [
             "\n# Kernel added on ", str(datetime.datetime.now()), ":\n",
@@ -82,38 +83,59 @@ class Grub(BaseBootLoader):
 
         """
 
-        if is_boot_mounted():
-            if not self._has_kernel(self.__config_location):
-                if os.access(self.__config_location, os.F_OK):
-                    old_configuration = open(self.__config_location, 'r')
-                    new_configuration = open(self.__config_location + '.tmp', \
-                        'w')
-
-                    expression = re.compile(
-                        '^(default\s+)(?P<kernel_number>\d+)\s*$')
-
-                    for line in old_configuration:
-                        match = expression.match(line)
-                        if match:
-                            new_configuration.write(match.group(1) + \
-                                str(int(match.group("kernel_number")) + 1) + \
-                                "\n")
-                        else:
-                            new_configuration.write(line)
-
-                    new_configuration.write(self.__kernel_string)
-
-                    old_configuration.close()
-                    new_configuration.close()
-
-            else:
-                shutil.copy(self.__config_location, self.__config_location + \
-                    '.tmp')
-
-        else:
+        if not helpers.is_boot_mounted():
             os.system('mount /boot')
             self.create_configuration()
             os.system('umount /boot')
+        else:
+            if not os.access(self._config_url, os.R_OK):
+                raise BootLoaderException("Could not read %s" % self._configuration_url)
+
+            c = open(self._config_url)
+            self._configuration = c.readlines()
+            c.close()
+
+            if self._already_have_kernel(): return
+           
+            tmp_configuration = []
+            kernel_options = ""
+            default_expr = re.compile("(default\s+)(?P<number>\d+)\s*")
+            kernel_expr = re.compile("kernel.*?root=[\w\d/]+\s+(.+?)\s*")
+            for line in self._configuration:
+                default = default_expr.match(line)
+                kernel = kernel_expr.match(line)
+                if default:
+                    new_line_list = [
+                        default.group(1), 
+                        str(int(default.group("number")) + 1)
+                        ]
+                    if self._debug:
+                        output.debug(__file__, 
+                            {"default_line":"".join(new_line_list)})
+                    tmp_configuration.append("".join(new_line_list))
+                elif kernel:
+                    kernel_options = kernel.group(1)
+                    if self._debug:
+                        output.debug(__file__, 
+                            {"kernel_options":kernel_options})
+                else:
+                    tmp_configuration.append(line)
+
+            tmp_configuration.append(self._kernel_string + kernel_options)
+
+            if self._debug:
+                for line in tmp_configuration:
+                    output.debug(__file__, {"line":line})
+
+            self._configuration = tmp_configuration
+
+    def _already_have_kernel(self):
+        """Determine if our new kernel is already listed.
+
+        """
+        results = filter(lambda x: re.search(self._kernel.get_name(), x), self._configuration)
+        if len(results) > 0: return True
+        return False
 
     def install_configuration(self):
         """Install the newly created configuration file.
