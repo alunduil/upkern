@@ -41,6 +41,12 @@ def debug(file, dict):
     output += " " + " ".join(extension_list[1:]) + Colors.GRAY
     print >> stderr, output
 
+def verbose(msg, *args):
+    output = Colors.LIGHT_BLUE
+    if len(args) > 0: output += msg % args
+    else: output += msg
+    print output + Colors.GRAY
+
 def error(msg, *args):
     output = Colors.LIGHT_RED + "ERROR: "
     if len(args) > 0: ouput += msg % args

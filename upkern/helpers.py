@@ -25,10 +25,10 @@ def is_boot_mounted():
     Just returns true if it finds a file in the /boot area, false otherwise.
 
     """
-
+    if os.path.ismount('/boot'): return True
+    # Otherwise, we have more checking to do.
     files = os.listdir('/boot/')
-
-    for file in files:
-        if file != "boot":
-            return True
+    files = filter(lambda x: re.match('^(?!boot).*$', x), files)
+    if len(files) > 0: return True
     return False
+

@@ -24,7 +24,7 @@ import portage
 import re
 import platform
 import os
-from upkern import output
+from upkern import output, helpers
 
 class Kernel:
     """A kernel handler object.
@@ -126,6 +126,7 @@ class Kernel:
         """
         if not helpers.is_boot_mounted():
             output.verbose("mount /boot")
+            output.error("--dry-run requires that you manually mount /boot")
             output.verbose("umount /boot")
         else:
             config_list = os.listdir('/boot')
@@ -142,7 +143,8 @@ class Kernel:
         """
         if os.path.islink('/usr/src/linux'):
             os.remove('/usr/src/linux')
-        os.symlink(self._directory_name, '/usr/src/linux')
+        os.symlink('/usr/src/' + self._directory_name, 
+            '/usr/src/linux')
 
     def _dry_set_symlink(self):
         """Dry run of _set_symlink.
@@ -150,7 +152,8 @@ class Kernel:
         """
         if os.path.islink('/usr/src/linux'): 
             output.verbose("rm /usr/src/linux")
-        output.verbose("ln -s %s /usr/src/linux", self._directory_name)
+        output.verbose("ln -s /usr/src/%s /usr/src/linux", 
+            self._directory_name)
 
     def _have_module_rebuild(self):
         """Determine if module-rebuild is installed or not.
@@ -328,7 +331,7 @@ class Kernel:
         # This needs to be double checked.
         if re.match('i\d86', arch_dir): arch_dir = "i386"
 
-        suffix = self._directory_name.partition('-')[3]
+        suffix = self._directory_name.partition('-')[2]
 
         boot_mounted = False
         if not helpers.is_boot_mounted(): 
