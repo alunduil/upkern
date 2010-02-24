@@ -18,7 +18,9 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
-from bootloader import BootLoaderException
+import bootloader
+import re
+
 from upkern import output
 
 class BaseBootLoader():
@@ -59,7 +61,7 @@ class BaseBootLoader():
         root = self._get_partition(r'^/dev/[\w\d/]+\s+/\s+.+$').expandtabs(1).partition(" ")[0]
         output.debug(__file__, {'root':root})
         if len(root) < 1: 
-            raise BootLoaderException("Could not determine root device")
+            raise bootloader.BootLoaderException("Could not determine root device")
         return root
         
     def _get_partition(self, regex, flags = re.I):
