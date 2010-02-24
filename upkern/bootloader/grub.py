@@ -43,6 +43,7 @@ class Grub(BaseBootLoader):
             verbose, dry_run)
 
         self._config_url = '/boot/grub/grub.conf'
+        self._configuration = []
 
         kernel_list = [
             "\n# Kernel added on ", str(datetime.datetime.now()), ":\n",
@@ -84,18 +85,26 @@ class Grub(BaseBootLoader):
         """
 
         if not helpers.is_boot_mounted():
-            os.system('mount /boot')
-            self.create_configuration()
-            os.system('umount /boot')
+            if self._dry_run:
+                output.verbose('mount /boot')
+                output.error('--dry-run requires that you manually mount /boot')
+                output.verbose('umount /boot')
+            else:
+                os.system('mount /boot')
+                self.create_configuration()
+                os.system('umount /boot')
         else:
             if not os.access(self._config_url, os.R_OK):
-                raise BootLoaderException("Could not read %s" % self._configuration_url)
+                raise BootLoaderException("Could not read %s" % self._config_url)
 
             c = open(self._config_url)
             self._configuration = c.readlines()
             c.close()
 
-            if self._already_have_kernel(): return
+            if self._already_have_kernel(): 
+                if self._verbose or self._dry_run:
+                    output.verbose("Kernel entry already in %s" % self._config_url)
+                return
            
             tmp_configuration = []
             kernel_options = ""
@@ -145,12 +154,19 @@ class Grub(BaseBootLoader):
 
         """
 
-        if is_boot_mounted():
-            if os.access(self.__config_location + '.tmp', os.F_OK):
-                shutil.move(self.__config_location + '.tmp',
-                    self.__config_location)
+        if self._already_have_kernel(): return
+
+        if not helpers.is_boot_mounted():
+            if self._dry_run:
+                output.verbose('mount /boot')
+                output.error('--dry-run requires that you manually mount /boot')
+                output.verbose('umount /boot')
+            else:
+                os.system('mount /boot')
+                self.create_configuration()
+                os.system('umount /boot')
         else:
-            os.system('mount /boot')
-            self.install_configuration()
-            os.system('umount /boot')
+            if self._dry_run: pass
+            else: pass
+            pass
 

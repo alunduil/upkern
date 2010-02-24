@@ -23,6 +23,7 @@
 import time
 import sys
 import optparse
+import textwrap
 
 from kernel import Kernel, KernelException
 from bootloader import BootLoader, BootLoaderException
@@ -88,8 +89,8 @@ class Upkern:
             os.system("".join(output_string_list))
 
         final_output_message_list = [
-            "The kernel has been successfully upgraded to ",
-            kernel.GetKernelName() + "."
+            "The kernel, ", kernel.get_name(), 
+            ", has been successfully installed.",
             ]
         if self._time_build:
             hours = int((stop_time - start_time)/3600)
@@ -100,13 +101,13 @@ class Upkern:
                 minutes + ":" + seconds + "."
                 ]
         final_output_message_list[len(final_output_message_list):] = [
-            "Please, check that all config files are in the ",
+            "  Please, check that all config files are in the ",
             "appropriate place and that there are no errors in the ",
             "configuration of the boot process.  It would be ",
             "unfortunate if you were not able to boot the kernel we ",
             "just prepared."
             ]
-        for string in textwrap.wrap(''.join(output_list)):
+        for string in textwrap.wrap(''.join(final_output_message_list)):
             print string
 
     def _parseOptions(self, argv, parser):

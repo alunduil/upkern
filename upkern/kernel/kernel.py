@@ -246,6 +246,7 @@ class Kernel:
         sources = "gentoo"
 
         emerge_name = "sys-kernel/"
+        directory_name = ""
         if emerge_match:
             if emerge_match.group("sources"):
                 sources = emerge_match.group("sources")
