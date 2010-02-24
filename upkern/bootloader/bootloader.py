@@ -34,50 +34,42 @@ import shutil
 
 from upkern_helpers import is_boot_mounted
 
-class BootLoaderException(Exception):
-    """Generic error class for a bootloader problem.
+from bootloader import Grub
 
-    Specifies an error condition in the bootloader module.
-
-    """
-
-    def __init__(self, message, *args):
-        Exception.__init__(self, *args)
-        self.message = message
-
-    def print_message(self):
-        print self.message
-
-def create_bootloader(*args):
+def BootLoader(*args):
     """Factory method for getting the appropriate BootLoader object.
 
     Returns the correct BootLoader object for the system currently running.
 
+    @note Unkown behaviour if multiple bootloaders are installed.
+    @todo Make this not a function that looks like a class but a class.
+
     Post Conditions:
-    We know the boot loader the system uses, and will now attempt to configure
-    that boot loader exclusively and correctly.
+    We know the boot loader the system uses, and will now attempt to 
+    configure that boot loader exclusively and correctly.
 
     Returns:
     The correct BootLoader child object.
 
     """
 
-    expression = re.compile('^\[ebuild\s+(R|U)\s+\].+$')
+    from gentoolkit.helpers import get_installed_cpvs
+    p = lambda x: x.startswith('sys-boot')
+    for package in get_installed_cpvs(p):
+        boot_loader = package
+        break
+    else
+        raise BootLoaderException("No bootloader installed!")
 
-    for boot_loader in ("grub", "lilo", "silo"):
-        output = os.popen('emerge -p ' + boot_loader + \
-            ' 2>/dev/null | grep ebuild', 'r')
-        if expression.match(output.readline()):
-            break;
-    if boot_loader == "grub":
-        return GRUB(*args)
-    elif boot_loader == "lilo":
-        return LILO(*args)
-    elif boot_loader == "silo":
-        return SILO(*args)
-    else:
-        raise BootLoaderException(
-            "Could not determine the boot loader on this system!")
+    if boot_loader == "grub": return Grub(*args)
+    error_list = [
+        "The bootloader you have installed: %s is not supported by",
+        "upkern.  If you would like support for this bootloader added",
+        "please submit a bug report to http://bugzilla.alunduil.com.",
+        "We will try to add support for the bootloader as fast as",
+        "possible."
+        ]
+    raise BootLoaderException(" ".join(error_list))
 
 class BootLoader(object):
     """A boot loader handling object.
@@ -418,3 +410,18 @@ class SILO(BootLoader):
             os.system('mount /boot')
             self.install_configuration()
             os.system('umount /boot')
+
+class BootLoaderException(Exception):
+    """Generic error class for a bootloader problem.
+
+    Specifies an error condition in the bootloader module.
+
+    """
+
+    def __init__(self, message, *args):
+        Exception.__init__(self, *args)
+        self.message = message
+
+    def print_message(self):
+        print self.message
+

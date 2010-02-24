@@ -367,6 +367,7 @@ class Kernel:
         if not helpers.is_boot_mounted():
             if self._dry_run:
                 output.verbose("mount /boot")
+                output.error("--dry-run requires that you manually mount /boot")
             else:
                 os.system('mount /boot')
             boot_mounted = True
