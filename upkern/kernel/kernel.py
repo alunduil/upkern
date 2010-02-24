@@ -77,19 +77,22 @@ class Kernel:
         self._directory_name, self._emerge_name = \
             self._get_kernel_names(kernel_name)
 
-        output.verbose("Directory Name: %s", self._directory_name)
-        output.verbose("Package Name: %s", self._emerge_name)
+        if self._verbose:
+            output.verbose("Directory Name: %s", self._directory_name)
+            output.verbose("Package Name: %s", self._emerge_name)
 
         self._install_image = self._get_install_image()
         self._suffix = self._directory_name.partition('-')[2]
 
-        output.verbose("Install Image: %s", self._install_image)
+        if self._verbose:
+            output.verbose("Install Image: %s", self._install_image)
 
         self._rebuild_modules = False
         if rebuild_modules and self._have_module_rebuild():
             self._rebuild_modules = rebuild_modules
 
-        output.verbose("Rebuild Modules: %s", self._rebuild_modules)
+        if self._verbose:
+            output.verbose("Rebuild Modules: %s", self._rebuild_modules)
 
         if not self._dry_run and os.getuid() != 0:
             raise KernelException("Insufficient priveleges to continue!")
@@ -211,7 +214,7 @@ class Kernel:
 
         """
         arch = platform.machine()
-        output.debug(__file__, {'arch':arch})
+        if self._debug: output.debug(__file__, {'arch':arch})
 
         if arch == "x86_64": return "bzImage"
         elif arch == "i686": return "bzImage"
