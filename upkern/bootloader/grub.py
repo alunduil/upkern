@@ -47,19 +47,19 @@ class Grub(BaseBootLoader):
 
         # @todo Some good way to do this?
         kernel_list = [
-            ["# Kernel added on " + str(datetime.datetime.now()) + ":"],
-            ["title=" + self._kernel.get_name()],
-            ["  root " + self._get_grub_root()],
-            ["  kernel /boot/" + self._kernel.get_image() + "-" + \
+            "",
+            "# Kernel added on " + str(datetime.datetime.now()) + ":",
+            "title=" + self._kernel.get_name(),
+            "  root " + self._get_grub_root(),
+            "  kernel /boot/" + self._kernel.get_image() + "-" + \
             self._kernel.get_suffix() + " root=" + \
-            self._root_partition + " " + kernel_options]
+            self._root_partition + " " + kernel_options
             ]
-        kernel_string = "".join(kernel_list)
-
         if self._debug:
-            output.debug(__file__, {'kernel_string':kernel_string})
+            for line in kernel_list:
+                output.debug(__file__, {'line':line})
 
-        self._kernel_string = kernel_string
+        self._kernel_string = kernel_list # @todo Fix this up.
 
     def _get_grub_root(self):
         """Using the root partition found we create a GRUB root string.
@@ -129,7 +129,7 @@ class Grub(BaseBootLoader):
                         output.debug(__file__, 
                             {"kernel_options":kernel_options})
                 else:
-                    tmp_configuration.append(line)
+                    tmp_configuration.append(line.strip())
 
             self._kernel_string[-1] += kernel_options
 
