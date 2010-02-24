@@ -58,7 +58,7 @@ def BootLoader(*args):
     for package in get_installed_cpvs(p):
         boot_loader = package
         break
-    else
+    else:
         raise BootLoaderException("No bootloader installed!")
 
     if boot_loader == "grub": return Grub(*args)
