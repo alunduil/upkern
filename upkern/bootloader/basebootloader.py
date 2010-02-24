@@ -20,6 +20,7 @@
 
 import bootloader
 import re
+import os
 
 from upkern import output
 
@@ -46,9 +47,13 @@ class BaseBootLoader():
         all set appropriately for the machine run on.
 
         """
+        self._debug = debug
+        self._verbose = verbose
+        self._dry_run = dry_run
 
         self._kernel = kernel
         self._root_partition = self._get_root_partition()
+        self._boot_partition = self._get_boot_partition()
         self._kernel_options = kernel_options
 
     def _get_root_partition(self):
@@ -58,11 +63,25 @@ class BaseBootLoader():
         machine we are currenlty running on.
 
         """
-        root = self._get_partition(r'^/dev/[\w\d/]+\s+/\s+.+$').expandtabs(1).partition(" ")[0]
-        output.debug(__file__, {'root':root})
+        root = self._get_partition(r'^/dev/[\w\d/]+\s+/\s+.+$')
+        root = root[0].expandtabs(1).partition(" ")[0]
+        if self._debug: output.debug(__file__, {'root':root})
         if len(root) < 1: 
             raise bootloader.BootLoaderException("Could not determine root device")
         return root
+
+    def _get_boot_partition(self):
+        """Get the boot partition of the machine.
+
+        Return the full device path to the boot partition of the
+        machine we are currently running on.
+
+        """
+        boot = self._get_partition(r'^/dev/[\w\d/]+\s+/boot\s+.+$')
+        boot = boot[0].expandtabs(1).partition(" ")[0]
+        if self._debug: output.debug(__file__, {'boot':boot})
+        if len(boot) < 0: return self._root_partition
+        return boot
         
     def _get_partition(self, regex, flags = re.I):
         """Get the line from fstab that matches filter.

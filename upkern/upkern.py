@@ -72,7 +72,8 @@ class Upkern:
 
         try:
             # Handle the boot loader stuffs.
-            boot_loader = BootLoader(kernel, self._kernel_options)
+            boot_loader = BootLoader(kernel, self._kernel_options, 
+                self._debug, self._verbose, self._dry_run)
             boot_loader.create_configuration()
             boot_loader.install_configuration()
         except BootLoaderException, e:

@@ -45,6 +45,9 @@ def BootLoader(*args):
     else:
         raise BootLoaderException("No bootloader installed!")
 
+    from gentoolkit.helpers import split_cpv
+    boot_loader = split_cpv(boot_loader)[1]
+
     if boot_loader == "grub": return Grub(*args)
     error_list = [
         "The bootloader you have installed: %s is not supported by",
@@ -53,7 +56,7 @@ def BootLoader(*args):
         "We will try to add support for the bootloader as fast as",
         "possible."
         ]
-    raise BootLoaderException(" ".join(error_list))
+    raise BootLoaderException(" ".join(error_list) % boot_loader)
 
 class BootLoaderException(Exception):
     def __init__(self, message, *args):

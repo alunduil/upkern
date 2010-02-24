@@ -79,6 +79,7 @@ class Kernel:
         output.verbose("Package Name: %s", self._emerge_name)
 
         self._install_image = self._get_install_image()
+        self._suffix = self._directory_name.partition('-')[2]
 
         output.verbose("Install Image: %s", self._install_image)
 
@@ -98,6 +99,24 @@ class Kernel:
         else: self._copy_config()
 
         self._emerge_config = portage.config()
+
+    def get_name(self):
+        """Get the kernel name to put in the bootloader.
+
+        """
+        return self._directory_name
+
+    def get_image(self):
+        """Get the kernel image.
+
+        """
+        return self._install_image
+
+    def get_suffix(self):
+        """Get the suffix for the kernel.
+
+        """
+        return self._suffix
 
     def _copy_config(self):
         """Copy the configuration file into the source.
@@ -363,8 +382,6 @@ class Kernel:
 
         if self._verbose: output.verbose("Architecture: %s", arch_dir)
 
-        suffix = self._directory_name.partition('-')[2]
-
         boot_mounted = False
         if not helpers.is_boot_mounted():
             if self._dry_run:
@@ -380,15 +397,17 @@ class Kernel:
         if self._dry_run:
             output.verbose("cp %s%s /boot/%s%s", 
                 "".join(source_dir_list), self._install_image, 
-                self._install_image, suffix)
-            output.verbose("cp .config /boot/config%s", suffix)
-            output.verbose("cp System.map /boot/System.map%s", suffix)
+                self._install_image, self._suffix)
+            output.verbose("cp .config /boot/config%s", self._suffix)
+            output.verbose("cp System.map /boot/System.map%s", 
+                self._suffix)
             output.verbose("cp System.map /System.map")
         else:
             shutil.copy("".join(source_dir_list) + self._install_image,
-                '/boot/' + self._install_image + suffix)
-            shutil.copy('.config', '/boot/config' + suffix)
-            shutil.copy('System.map', '/boot/System.map' + suffix)
+                '/boot/' + self._install_image + self._suffix)
+            shutil.copy('.config', '/boot/config' + self._suffix)
+            shutil.copy('System.map', '/boot/System.map' + \
+                self._suffix)
             shutil.copy('System.map', '/System.map')
 
         if boot_mounted: 

@@ -19,6 +19,10 @@
 #########################################################################
 
 from basebootloader import BaseBootLoader
+from upkern import output
+
+import datetime
+import re
 
 class Grub(BaseBootLoader):
     """A specific boot loader, GRUB, handler.
@@ -34,28 +38,47 @@ class Grub(BaseBootLoader):
         information.
 
         """
-        BootLoader.__init__(self, kernel, kernel_options, debug, 
+        BaseBootLoader.__init__(self, kernel, kernel_options, debug, 
             verbose, dry_run)
 
         self._config_location = '/boot/grub/grub.conf'
 
         kernel_list = [
-            "\n# Kernel added on %s:\n",
-            "title=%s\n",
-            "  root %s\n",
-            "  kernel /boot/%s%s root= %s ", kernel_options
+            "\n# Kernel added on ", str(datetime.datetime.now()), ":\n",
+            "title=", self._kernel.get_name(), "\n",
+            "  root ", self._get_grub_root(), "\n",
+            "  kernel /boot/", self._kernel.get_image(), "-",
+            self._kernel.get_suffix(), " root=", self._root_partition,
+            " ", kernel_options
             ]
-        self.__kernel_string = ''.join(kernel_list) % \
-            datetime.date.now(), self._kernel.get_name(), \
-            self._get_grub_root(), self._kernel.get_image(), \
-            self._kernel.get_suffix(), self._root_partition
+        kernel_string = "".join(kernel_list)
+
+        if self._debug:
+            output.debug(__file__, {'kernel_string':kernel_string})
+
+        self._kernel_string = kernel_string
+
+    def _get_grub_root(self):
+        """Using the root partition found we create a GRUB root string.
+
+        """
+        match = re.match('/dev/.d(?P<letter>\w)(?P<number>\d+)', 
+            self._boot_partition)
+
+        if not match: 
+            raise BootLoaderException("Device %s not supported" % self._boot_partition)
+
+        from string import ascii_lowercase
+        return "(hd" + \
+            str(ascii_lowercase.find(match.group("letter"))) + "," + \
+            str(int(match.group("number")) - 1) + ")"
 
     def create_configuration(self):
         """Create a new configuration file for the boot loader.
 
-        Create a new configuration file in a temporary location for the boot
-        loader. We'll use <normal location>.tmp as it should be pretty
-        obvious that it is not meant to stick around.
+        Create a new configuration file in a temporary location for the
+        boot loader. We'll use <normal location>.tmp as it should be
+        pretty obvious that it is not meant to stick around.
 
         """
 
@@ -91,33 +114,6 @@ class Grub(BaseBootLoader):
             os.system('mount /boot')
             self.create_configuration()
             os.system('umount /boot')
-
-    def __determine_grub_root(self):
-        """Get the root as grub needs it.
-
-        Return the (hd0,0) style string for the boot partition that grub has
-        come to use.
-
-        """
-
-        expression = re.compile(
-            '/dev/.d(?P<drive_letter>.)(?P<part_number>\d+)')
-        match = expression.match(self._boot_partition)
-        if match:
-            return "(hd" + \
-                str(ascii_lowercase.find(match.group('drive_letter'))) \
-                + "," + str(int(match.group('part_number')) - 1) + ")"
-
-        expression = re.compile(
-            '/dev/cciss/c0d(?P<drive_number>\d+)p(?P<part_number>\d+)')
-        match = expression.match(self._boot_partition)
-        if match:
-            return "(hd" + \
-                str(ascii_lowercase.find(match.group('drive_number'))) \
-                + "," + str(match.group('part_number')) + ")"
-
-        raise BootLoaderException("Couldn't determine the grub root string!",
-            self._boot_partition)
 
     def install_configuration(self):
         """Install the newly created configuration file.
