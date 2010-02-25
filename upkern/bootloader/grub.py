@@ -51,14 +51,10 @@ class Grub(BaseBootLoader):
             "# Kernel added on " + str(datetime.datetime.now()) + ":",
             "title=" + self._kernel.get_name(),
             "  root " + self._get_grub_root(),
-            "  kernel /boot/" + self._kernel.get_image() + "-" + \
+            "  kernel /boot/" + self._kernel.get_image() + \
             self._kernel.get_suffix() + " root=" + \
             self._root_partition + " " + kernel_options
             ]
-        if self._debug:
-            for line in kernel_list:
-                output.debug(__file__, {'line':line})
-
         self._kernel_string = kernel_list # @todo Fix this up.
 
     def _get_grub_root(self):
@@ -129,18 +125,16 @@ class Grub(BaseBootLoader):
                         output.debug(__file__, 
                             {"kernel_options":kernel_options})
                 else:
-                    tmp_configuration.append(line.strip())
+                    tmp_configuration.append(line.rstrip())
 
             self._kernel_string[-1] += kernel_options
 
             if self._debug:
-                for line in self._kernel_string:
+                for line in tmp_configuration:
                     output.debug(__file__, {"line":line})
 
-            tmp_configuration.extend(self._kernel_string)
-
             if self._debug:
-                for line in tmp_configuration:
+                for line in self._kernel_string:
                     output.debug(__file__, {"line":line})
 
             self._configuration = tmp_configuration
@@ -163,6 +157,8 @@ class Grub(BaseBootLoader):
 
         if self._already_have_kernel(): return
 
+        self._configuration.extend(self._kernel_string)
+
         if not helpers.is_boot_mounted():
             if self._dry_run:
                 output.verbose('mount /boot')
@@ -174,7 +170,7 @@ class Grub(BaseBootLoader):
                 os.system('umount /boot')
         else:
             if self._dry_run:
-                output.verbose("echo -en \"%s\" > /boot/grub/grub.conf" % "\n".join(self._configuration))
+                output.verbose("echo -en \n%s\n > /boot/grub/grub.conf" % "\n".join(self._configuration))
             else:
                 if not os.access(self._config_url, os.W_OK):
                     raise BootLoaderException("Cannot write to /boot/grub/grub.conf")

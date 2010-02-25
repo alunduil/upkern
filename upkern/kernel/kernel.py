@@ -82,7 +82,7 @@ class Kernel:
             output.verbose("Package Name: %s", self._emerge_name)
 
         self._install_image = self._get_install_image()
-        self._suffix = self._directory_name.partition('-')[2]
+        self._suffix = "-" + self._directory_name.partition('-')[2]
 
         if self._verbose:
             output.verbose("Install Image: %s", self._install_image)
