@@ -24,6 +24,8 @@ import portage
 import re
 import platform
 import os
+import shutil
+
 from upkern import output, helpers
 
 class Kernel:

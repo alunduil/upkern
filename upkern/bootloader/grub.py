@@ -160,8 +160,6 @@ class Grub(BaseBootLoader):
 
         if self._already_have_kernel(): return
 
-        self._configuration.extend(self._kernel_string)
-
         if not helpers.is_boot_mounted():
             if self._dry_run:
                 output.verbose('mount /boot')
@@ -169,9 +167,11 @@ class Grub(BaseBootLoader):
                 output.verbose('umount /boot')
             else:
                 os.system('mount /boot')
-                self.create_configuration()
+                self.install_configuration()
                 os.system('umount /boot')
         else:
+            self._configuration.extend(self._kernel_string)
+
             if self._dry_run:
                 output.verbose("echo -en \n%s\n > /boot/grub/grub.conf" % "\n".join(self._configuration))
             else:
