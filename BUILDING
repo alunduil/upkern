@@ -1,5 +1,0 @@
-Building a new version of the tarball requires the following:
-
-1. Update the version in setup.py
-2. run: python setup.py sdist --formats=bztar
-

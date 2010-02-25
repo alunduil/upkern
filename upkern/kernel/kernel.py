@@ -239,17 +239,23 @@ class Kernel:
         emerge_expression_list = [
             '(?:sys-kernel/)?', # Just in case people want to pipe it
                                 # in from portage.
-            '(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+_-]*?)-sources-)?',
+            '(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+_-]*)-sources-)?',
             '(?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)'
             ]
         emerge_expression = re.compile("".join(emerge_expression_list))
         emerge_match = emerge_expression.match(kernel_name)
+
+        if self._debug:
+            output.debug(__file__, {
+                'emerge_match':emerge_match.group(0)
+                })
 
         sources = "gentoo"
 
         emerge_name = "sys-kernel/"
         directory_name = ""
         if emerge_match:
+            
             if emerge_match.group("sources"):
                 sources = emerge_match.group("sources")
             emerge_name += sources
@@ -261,6 +267,10 @@ class Kernel:
             # Get the directory name now.
             from gentoolkit.helpers import find_installed_packages
             installed = find_installed_packages(emerge_name)
+            if self._debug:
+                output.debug(__file__, {
+                    "installed":installed
+                    })
             if len(installed) < 1: 
                 # @todo Make this more efficient.
                 # Install the package requested.
@@ -283,11 +293,19 @@ class Kernel:
                     os.system(" ".join(command_list))
 
             directories = self._get_kernel_directories()
+            directories.reverse()
             from gentoolkit.helpers import FileOwner
             finder = FileOwner()
             for directory in directories:
-                if finder((directory,))[0][0] == emerge_name:
+                if self._debug:
+                    output.debug(__file__, {
+                        "directory":directory,
+                        "finder(directory)":finder((directory,))[0][0],
+                        "emerge_name":emerge_name
+                        })
+                if unicode(finder((directory,))[0][0]) == emerge_name.strip():
                     directory_name = directory
+                    break
         else:
             directory_name = self._get_kernel_directories()[-1]
             from gentoolkit.helpers import FileOwner
@@ -393,7 +411,7 @@ class Kernel:
         arch_dir = platform.machine()
         # The following should be necessary on x86 machines.
         # This needs to be double checked.
-        if re.match('i\d86', arch_dir): arch_dir = "i386"
+        if re.match('i\d86', arch_dir): arch_dir = "x86"
 
         if self._verbose: output.verbose("Architecture: %s", arch_dir)
 

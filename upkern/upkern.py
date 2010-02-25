@@ -179,14 +179,6 @@ class Upkern:
             dest='time_build', default=False,
             help=''.join(time_help_list))
 
-        kernel_help_list = [
-            "Specifies a varying amount of information about the ",
-            "kernel you would like to build.  Ranges from kernel ",
-            "version to the full gentoo specification."
-            ]
-        parser.add_option('--kernel', '-k', dest='kernel_name',
-            default="", help=''.join(kernel_help_list))
-
         dry_run_help_list = [
             "Specifies that none of the actions that can modify the ",
             "filesystem should occur, but they should be printed to ",
