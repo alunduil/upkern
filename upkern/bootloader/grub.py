@@ -53,9 +53,11 @@ class Grub(BaseBootLoader):
             "  root " + self._get_grub_root(),
             "  kernel /boot/" + self._kernel.get_image() + \
             self._kernel.get_suffix() + " root=" + \
-            self._root_partition + " " + kernel_options
+            self._root_partition
             ]
         self._kernel_string = kernel_list # @todo Fix this up.
+        if len(kernel_options) > 0: 
+            self._kernel_string[-1] += " " + kernel_options
 
     def _get_grub_root(self):
         """Using the root partition found we create a GRUB root string.
@@ -106,7 +108,7 @@ class Grub(BaseBootLoader):
             tmp_configuration = []
             kernel_options = ""
             default_expr = re.compile("(default\s+)(?P<number>\d+)\s*")
-            kernel_expr = re.compile("kernel.*?root=[\w\d/]+\s+(.+?)\s*")
+            kernel_expr = re.compile("\s*kernel.*?root=[\w\d/]+\s+(.+)")
             for line in self._configuration:
                 default = default_expr.match(line)
                 kernel = kernel_expr.match(line)
@@ -120,14 +122,15 @@ class Grub(BaseBootLoader):
                             {"default_line":"".join(new_line_list)})
                     tmp_configuration.append("".join(new_line_list))
                 elif kernel:
-                    kernel_options = kernel.group(1)
+                    tmp_configuration.append(line.rstrip())
+                    kernel_options = kernel.group(1).rstrip()
                     if self._debug:
                         output.debug(__file__, 
                             {"kernel_options":kernel_options})
                 else:
                     tmp_configuration.append(line.rstrip())
 
-            self._kernel_string[-1] += kernel_options
+            self._kernel_string[-1] += " " + kernel_options
 
             if self._debug:
                 for line in tmp_configuration:

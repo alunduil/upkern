@@ -56,6 +56,9 @@ class BaseBootLoader():
         self._boot_partition = self._get_boot_partition()
         self._kernel_options = kernel_options
 
+    def get_config_url(self):
+        return self._config_url
+
     def _get_root_partition(self):
         """Get the root partition of the machine.
 
@@ -96,9 +99,9 @@ class BaseBootLoader():
 
         return filter(lambda x: re.match(regex, x, flags), lines)
 
-    def _has_kernel(self):
+    def _already_has_kernel(self):
         """Determine if the bootloader's configuration has the kernel.
 
         """
-        raise UnboundLocalError('_has_kernel')
+        raise UnboundLocalError('_already_has_kernel')
 

@@ -24,6 +24,7 @@ import time
 import sys
 import optparse
 import textwrap
+import os
 
 from kernel import Kernel, KernelException
 from bootloader import BootLoader, BootLoaderException
@@ -54,7 +55,7 @@ class Upkern:
         self._rebuild_modules = variables.rebuild_modules
         self._time_build = variables.time_build
         self._kernel_options = variables.kernel_options
-        self._editor = variables.editor
+        #self._editor = variables.editor # @todo Make this sane.
         self._dry_run = variables.dry_run
 
     def Run(self):
@@ -81,12 +82,10 @@ class Upkern:
             raise UpkernException(e.get_message())
 
         if self._editor:
-            if len(self._editor) < 1:
-                self._editor = os.getenv("EDITOR", "")
-            output_string_list = [
-                self._editor + " " + boot_loader.GetConfigurationFile()
+            command_list = [
+                self._editor, boot_loader.get_config_url()
                 ]
-            os.system("".join(output_string_list))
+            os.system(" ".join(command_list))
 
         final_output_message_list = [
             "The kernel, ", kernel.get_name(), 
@@ -96,10 +95,9 @@ class Upkern:
             hours = int((stop_time - start_time)/3600)
             minutes = int(((stop_time - start_time) % 3600)/60)
             seconds = int((stop_time - start_time) % 60)
-            final_output_message_list[len(final_output_message_list):] = [
-                "The time to build the kernel was: " + hours + ":",
-                minutes + ":" + seconds + "."
-                ]
+            final_output_message_list.append( \
+                "  The time to build the kernel was: " + str(hours) + \
+                ":" + str(minutes) + ":" + str(seconds) + ".")
         final_output_message_list[len(final_output_message_list):] = [
             "  Please, check that all config files are in the ",
             "appropriate place and that there are no errors in the ",
@@ -135,14 +133,19 @@ class Upkern:
         parser.add_option('--options', '-o', dest='kernel_options',
             default='', help=''.join(options_help_list))
 
+        """
+        @todo Make this work correctly.
+
         editor_help_list = [
             "Specify the editor to use for editing the boot loader ",
             "configuration file after " + argv[0] + " has already ",
             "modified it.  The default editor is the one defined by ",
             "your ${EDITOR} environment variable."
             ]
-        parser.add_option('--editor', '-e',
+        parser.add_option('--editor', '-e', 
+            default=os.getenv("EDITOR", ""), 
             help=''.join(editor_help_list))
+        """
 
         verbose_help_list = [
             "Sets verbose output."
@@ -152,7 +155,7 @@ class Upkern:
             help=''.join(verbose_help_list))
 
         debug_help_list = [
-            "Sets debugging output."
+            "Sets debugging output (implies verbose output)."
             ]
         parser.add_option('--debug', '-d', action='store_true',
             default=False, dest='debug',
