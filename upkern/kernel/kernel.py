@@ -48,8 +48,8 @@ class Kernel:
     """
 
     def __init__(self, configurator = "menuconfig", kernel_name = "",
-        rebuild_modules = True, debug = False, verbose = False, 
-        dry_run = False):
+        rebuild_modules = True, configuration = "", debug = False, 
+        verbose = False, dry_run = False):
         """Returns a Kernel object with properly initialized data.
 
         Get the necessary information about the system to know how to

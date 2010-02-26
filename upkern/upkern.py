@@ -54,6 +54,7 @@ class Upkern:
         self._rebuild_modules = variables.rebuild_modules
         self._time_build = variables.time_build
         self._kernel_options = variables.kernel_options
+        self._configuration = variables.configuration
         #self._editor = variables.editor # @todo Make this sane.
         self._dry_run = variables.dry_run
 
@@ -61,8 +62,9 @@ class Upkern:
         try:
             # Handle the kernel parts.
             kernel = Kernel(self._configurator,
-                self._kernel_name, self._rebuild_modules, self._debug,
-                self._verbose, self._dry_run)
+                self._kernel_name, self._rebuild_modules, 
+                self._configuration, self._debug,self._verbose, 
+                self._dry_run)
             kernel.configure()
             if self._time_build: start_time = time.time()
             kernel.build()
@@ -131,6 +133,13 @@ class Upkern:
             ]
         parser.add_option('--options', '-o', dest='kernel_options',
             default='', help=''.join(options_help_list))
+
+        config_file_help_list = [
+            "This specifies the configuration file to load into the ",
+            "kernel before configuration."
+            ]
+        parser.add_option('--configuration', '-C', default='',
+            help=''.join(config_file_help_list))
 
         """
         @todo Make this work correctly.
