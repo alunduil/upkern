@@ -22,15 +22,14 @@
 
 from distutils.core import setup
 
-setup(
-    name='upkern',
+setup(name='upkern',
     version='3.0.0',
     description="Automated kernel updater for Gentoo.",
-    license="GPL-2",
     author="Alex Brandt",
     author_email="alunduil@alunduil.com",
     url="http://www.alunduil.com/programs/upkern/",
+    license="GPL-2",
     scripts=["upkern.py"],
-    py_modules=['upkern'],
+    packages=['upkern'],
     )
 
