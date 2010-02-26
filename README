@@ -1,0 +1,76 @@
+----
+About
+----
+
+Author: Alex Brandt <alunduil@alunduil.com>
+Date: 2010/02/25
+Web URL: http://www.alunduil.com/programs/upkern
+Bugzilla URL: http://bugzilla.alunduil.com
+
+----
+Description
+----
+
+This utility is a batch kernel updating utility written specifically
+for the Gentoo Linux (TM).  
+
+This program was written on a machine with the following software:
+ * Gentoo (default/linux/amd64/10.0/desktop) x86_64
+ * Portage 2.1.7.17 
+ * dev-lang/python:      2.6.4-r1, 3.1.1-r1                                                                
+ * sys-apps/baselayout:  2.0.1                                                                             
+ * sys-apps/openrc:      0.6.0-r1                                                                          
+ * sys-apps/sandbox:     2.2                                                                               
+ * sys-devel/binutils:   2.20                                                                              
+ * sys-devel/gcc:        4.4.3                                                                             
+ * sys-devel/gcc-config: 1.4.1                                                                            
+ * sys-devel/libtool:    2.2.6b                                                                            
+ * sys-lib/glibc:        2.11-r1
+ * virtual/os-headers:   2.6.32
+
+----
+Installation
+----
+
+$python setup.py install
+
+----
+Dependencies
+----
+
+Python packages not provided but needed by the script:
+ - datetime
+ - gentoolkit (>=0.3)
+ - inspect
+ - optparse
+ - os
+ - platform
+ - portage
+ - re
+ - shutil
+ - string
+ - sys
+ - textwrap
+ - time
+
+----
+Example input and output
+----
+
+Input :: upkern [options] [sources]
+ - sources must fit inside the following regex: 
+   '(?:sys-kernel/)?
+    (?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+_-]*)-sources-)?
+    (?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)'
+ - examples:
+   'sys-kernel/gentoo-sources-2.6.32-r6'
+   'gentoo-sources-2.6.23-r6'
+   '2.6.33-r6' (gentoo-sources will be assumed)
+   'vanilla-sources-2.6.33' (other sources can be specified as well)
+
+Output :: 
+ - there are three output styles available: 
+   * verbose
+   * debug
+   * dry-run
+

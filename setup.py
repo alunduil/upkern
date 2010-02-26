@@ -30,6 +30,7 @@ setup(name='upkern',
     url="http://www.alunduil.com/programs/upkern/",
     license="GPL-2",
     scripts=["upkern.py"],
-    packages=['upkern'],
+    packages=['upkern', 'upkern.kernel', 'upkern.bootloader'],
+    data_files=[("", ['COPYING'])]
     )
 
