@@ -21,7 +21,7 @@
 
 import unittest
 
-import kerneltest
+import test_kernel
 
-suite = unittest.TestLoader().loadTestsFromTestCase(kerneltest.KernelTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(test_kernel.KernelTest)
 

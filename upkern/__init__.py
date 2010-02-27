@@ -20,6 +20,6 @@
 ########################################################################
 
 from upkern import Upkern, UpkernException
-from bootloader import BootLoader
-from kernel import Kernel
+from bootloader import BootLoader, BootLoaderException
+from kernel import Kernel, KernelException
 

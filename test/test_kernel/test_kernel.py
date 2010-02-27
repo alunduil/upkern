@@ -19,18 +19,35 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
-from upkern import Kernel
+from upkern import Kernel, KernelException
 
 import unittest
 
 class KernelTest(unittest.TestCase):
     def setUp(self):
         self.kernelA = Kernel("menuconfig", "", True, "", False, True, True, True)
-        self.kernelB = Kernel("menuconfig", "git-sources-2.6.33", True, "", False, True, True, True)
-        self.kernelC = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", True, "", True, True, True, True)
+        self.kernelB = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", True, "", False, True, True, True)
 
     def tearDown(self):
         pass
+
+    def testInitWithoutSources(self):
+        try:
+            Kernel("menuconfig", "git-sources-2.6.33", True, "", False, True, True, True)
+        except KernelException:
+            self.assertTrue(True, "did not error when sources were not found")
+
+    def testInitWithNoSpecifiedSources(self):
+        try:
+            Kernel("menuconfig", "", True, "", False, True, True, True)
+        except KernelException:
+            self.assertTrue(False, "errored when sources weren't specified")
+
+    def testInitWithSpecifiedSources(self):
+        try:
+            Kernel("oldconfig", "gentoo-sources-2.6.32-r6", True, "", True, True, True, True)
+        except KernelException:
+            self.assertTrue(False, "errored when sources were specified and found")
 
     def testGetName(self):
         # This is system specific and should be changed for the system
@@ -47,16 +64,15 @@ class KernelTest(unittest.TestCase):
     def testGetSuffix(self):
         # This is system specific and should be changed for the system
         # being run on.
-        self.assertEqual(self.kernelA.get_name(), "-2.6.33-gentoo", "incorrect directory")
-        self.assertEqual(self.kernelB.get_name(), "-2.6.33-gentoo", "incorrect directory")
-        self.assertEqual(self.kernelC.get_name(), "-2.6.32-gentoo-r6", "incorrect directory")
+        self.assertEqual(self.kernelA.get_suffix(), "-2.6.33-gentoo", "incorrect suffix")
+        self.assertEqual(self.kernelB.get_suffix(), "-2.6.32-gentoo-r6", "incorrect suffix")
 
     # Unfortunately a lot of this class is not obviously unit testable.
 
     def testHaveModuleRebuild(self):
         # This is system specific and should be changed for the system
         # being run on.
-        self.assertEqual(self.kernelA._have_module_rebuild(), True, "incorrect determination of rebuild-modules")
+        self.assertEqual(self.kernel._have_module_rebuild(), True, "incorrect determination of rebuild-modules")
 
     def testGetInstallImage(self):
         import platform

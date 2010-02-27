@@ -30,15 +30,12 @@ class Colors:
     LIGHT_GREEN = "\033[01;32m"
 
 def debug(file, dict):
-    # @todo Turn this into a formatted string.
-    # @todo I think this is ugly and thus we should find a better way.
-    output = Colors.YELLOW + file + ":" + str(stack()[1][2]) + \
-        ": DEBUG:"
-    extension_list = []
     for key, value in dict.iteritems():
-        extension_list.extend([" ", str(key), '->', str(value)])
-    output += " " + " ".join(extension_list[1:]) + Colors.GRAY
-    print >> stderr, output
+        output = [
+            Colors.YELLOW, file, ":", str(stack()[1][2]), ": DEBUG: ",
+            unicode(key), " -> ", unicode(value), Colors.GRAY
+            ]
+        print >> stderr, "".join(output)
 
 def verbose(msg, *args):
     output = Colors.LIGHT_BLUE
