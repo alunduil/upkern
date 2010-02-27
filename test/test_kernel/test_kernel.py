@@ -1,0 +1,101 @@
+# -*- coding: utf-8 -*-
+
+########################################################################
+# Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>            #
+#                                                                      #
+# This program is free software; you can redistribute it and#or modify #
+# it under the terms of the GNU General Public License as published by #
+# the Free Software Foundation; either version 2 of the License, or    #
+# (at your option) any later version.                                  #
+#                                                                      #
+# This program is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        #
+# GNU General Public License for more details.                         #
+#                                                                      #
+# You should have received a copy of the GNU General Public License    #
+# along with this program; if not, write to the                        #
+# Free Software Foundation, Inc.,                                      #
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
+########################################################################
+
+from upkern import Kernel
+
+import unittest
+
+class KernelTest(unittest.TestCase):
+    def setUp(self):
+        self.kernelA = Kernel()
+        self.kernelB = Kernel("menuconfig", "", False, True)
+        self.kernelC = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", True)
+
+    def tearDown(self):
+        pass
+
+    """
+    def testConstructorSetProperties(self):
+        self.assertEqual(self.kernelA._configurator, "menuconfig", "incorrect default configurator")
+        self.assertEqual(self.kernelB._configurator, "menuconfig", "incorrectly passed configurator")
+        self.assertEqual(self.kernelC._configurator, "oldconfig", "incorrectly passed configurator")
+
+        self.assertEqual(self.kernelA._debug, False, "incorrect default debug")
+        self.assertEqual(self.kernelB._debug, False, "incorrect default debug")
+        self.assertEqual(self.kernelC._debug, True, "incorrect default debug")
+
+        self.assertEqual(self.kernelA._verbose, False, "incorrect default verbose")
+        self.assertEqual(self.kernelB._verbose, True, "incorrect default verbose")
+        self.assertEqual(self.kernelC._verbose, False, "incorrect default verbose")
+
+        self.assertEqual(self.kernelA._quiet, False, "incorrect default quiet")
+        self.assertEqual(self.kernelB._quiet, False, "incorrect default quiet")
+        self.assertEqual(self.kernelC._quiet, False, "incorrect default quiet")
+
+        # These tests are system dependent and should be updated when
+        # new kernels are released etc.
+        self.assertEqual(self.kernelA._directory_name, "linux-2.6.33-gentoo", "incorrect directory name")
+        self.assertEqual(self.kernelB._directory_name, "linux-2.6.33-gentoo", "incorrect directory name")
+        self.assertEqual(self.kernelC._directory_name, "linux-2.6.33", "incorrect directory name")
+    """
+
+    def testGetName(self):
+        # This is system specific and should be changed for the system
+        # being run on.
+        self.assertEqual(self.kernelA.get_name(), "linux-2.6.33-gentoo", "incorrect directory")
+        self.assertEqual(self.kernelB.get_name(), "linux-2.6.33-gentoo", "incorrect direcotry")
+        self.assertEqual(self.kernelC.get_name(), "linux-2.6.32-gentoo-r6", "incorrect directory")
+
+    def testGetImage(self):
+        import platform
+        if platform.machine() == "x86_64":
+            self.assertEqual(self.kernelA.get_image(), "bzImage", "incorrect image")
+
+    def testGetSuffix(self):
+        # This is system specific and should be changed for the system
+        # being run on.
+        self.assertEqual(self.kernelA.get_name(), "-2.6.33-gentoo", "incorrect directory")
+        self.assertEqual(self.kernelB.get_name(), "-2.6.33-gentoo", "incorrect directory")
+        self.assertEqual(self.kernelC.get_name(), "-2.6.32-gentoo-r6", "incorrect directory")
+
+    # Unfortunately a lot of this class is not obviously unit testable.
+
+    def testHaveModuleRebuild(self):
+        # This is system specific and should be changed for the system
+        # being run on.
+        self.assertEqual(self.kernelA._have_module_rebuild(), True, "incorrect determination of rebuild-modules")
+
+    def testGetInstallImage(self):
+        import platform
+        if platform.machine() == "x86_64" or platform.machine() == "i686":
+            self.assertEqual(self.kernelA._get_install_image(), "bzImage", "incorrect image")
+
+    def testGetKernelNames(self):
+        self.assertEqual(self.kernelA._get_kernel_name("2.6.33"), ("linux-2.6.33-gentoo", "sys-kernel/gentoo-sources-2.6.33"), "incorrect directory name or package name")
+
+    def testGetKernelDirectories(self):
+        # Again, system specific.  These need to be written in a more
+        # agnostic fashion.
+        directory_list = [
+            ""
+            ]
+        self.assertEqual(self.kernelA._get_kernel_directories(), directory_list, "incorrect directory listing")
+
