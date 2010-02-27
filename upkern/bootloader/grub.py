@@ -32,7 +32,7 @@ class Grub(BaseBootLoader):
 
     """
     def __init__(self, kernel, kernel_options = "", debug = False, 
-        verbose = False, dry_run = False):
+        verbose = False, quiet = False, dry_run = False):
         """Set up GRUB specific information.
 
         Finalize the boot loader initialization with grub specific 
@@ -40,7 +40,7 @@ class Grub(BaseBootLoader):
 
         """
         BaseBootLoader.__init__(self, kernel, kernel_options, debug, 
-            verbose, dry_run)
+            verbose, quiet, dry_run)
 
         self._config_url = '/boot/grub/grub.conf'
         self._configuration = []

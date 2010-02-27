@@ -36,6 +36,7 @@ class Upkern:
         self._configurator = ""
         self._rebuild_modules = False
         self._time_build = False
+        self._quiet = False
         self._kernel_options = ""
         self._editor = ""
 
@@ -43,10 +44,13 @@ class Upkern:
         parser = optparse.OptionParser(usage=usage)
         variables, arguments = self._parseOptions(argv, parser)
 
+        self._quiet = variables.quiet
         self._debug = variables.debug
         # If we have debugging turned on we should also have verbose.
         if self._debug: self._verbose = True
         else: self._verbose = variables.verbose
+        # If we have verbose we shouldn't be quiet.
+        if self._verbose: self._quiet = False
 
         if len(arguments) > 0: self._kernel_name = arguments[0]
 
@@ -63,8 +67,8 @@ class Upkern:
             # Handle the kernel parts.
             kernel = Kernel(self._configurator,
                 self._kernel_name, self._rebuild_modules, 
-                self._configuration, self._debug,self._verbose, 
-                self._dry_run)
+                self._configuration, self._debug, self._verbose, 
+                self._quiet, self._dry_run)
             kernel.configure()
             if self._time_build: start_time = time.time()
             kernel.build()
@@ -76,7 +80,7 @@ class Upkern:
         try:
             # Handle the boot loader stuffs.
             boot_loader = BootLoader(kernel, self._kernel_options, 
-                self._debug, self._verbose, self._dry_run)
+                self._debug, self._verbose, self._quiet, self._dry_run)
             boot_loader.create_configuration()
             boot_loader.install_configuration()
         except BootLoaderException, e:
@@ -159,15 +163,20 @@ class Upkern:
             "Sets verbose output."
             ]
         parser.add_option('--verbose', '-v', action='store_true',
-            default=False, dest='verbose',
-            help=''.join(verbose_help_list))
+            default=False, help=''.join(verbose_help_list))
 
         debug_help_list = [
             "Sets debugging output (implies verbose output)."
             ]
         parser.add_option('--debug', '-d', action='store_true',
-            default=False, dest='debug',
-            help=''.join(debug_help_list))
+            default=False, help=''.join(debug_help_list))
+
+        quiet_help_list = [
+            "Sets output to be a bit quieter.  If either debug or ",
+            "verbose are set this option has no effect."
+            ]
+        parser.add_option('--quiet', '-q', action='store_true',
+            default=False, help=''.join(quiet_help_list))
 
         rebuild_modules_help_list = [
             "Makes " + sys.argv[0] + " use module-rebuild to rebuild ",

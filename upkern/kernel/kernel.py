@@ -49,7 +49,7 @@ class Kernel:
 
     def __init__(self, configurator = "menuconfig", kernel_name = "",
         rebuild_modules = True, configuration = "", debug = False, 
-        verbose = False, dry_run = False):
+        verbose = False, quiet = False, dry_run = False):
         """Returns a Kernel object with properly initialized data.
 
         Get the necessary information about the system to know how to
@@ -67,13 +67,15 @@ class Kernel:
 
         self._debug = debug
         self._verbose = verbose
+        self._quiet = quiet
         self._dry_run = dry_run
         self._configurator = configurator
 
         if self._verbose: 
             output.verbose("Configurator: %s", self._configurator)
 
-        output.status("Getting information about kernel (this could take a while) ...")
+        if not self._quiet:
+            output.status("Getting information about kernel (this could take a while) ...")
 
         self._directory_name, self._emerge_name = \
             self._get_kernel_names(kernel_name)
@@ -372,9 +374,11 @@ class Kernel:
             opwd = os.getcwd()
             os.chdir('/usr/src/linux')
 
+        makeopts = self._emerge_config["MAKEOPTS"]
+        if self._quiet: makeopts += " -s"
+
         command_list = [
-            "make", self._emerge_config["MAKEOPTS"], "&& make",
-            self._emerge_config["MAKEOPTS"], "modules_install"
+            "make", makeopts, "&& make", makeopts, "modules_install"
             ]
 
         if self._dry_run:
@@ -384,7 +388,7 @@ class Kernel:
 
         if self._rebuild_modules:
             if self._dry_run:
-                output.verbose("module-rebuild -x rebuild")
+                output.verbose("module-rebuild -X rebuild")
             else:
                 os.system('module-rebuild -X rebuild')
         if self._dry_run:

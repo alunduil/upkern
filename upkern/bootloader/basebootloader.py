@@ -40,7 +40,7 @@ class BaseBootLoader():
     """
 
     def __init__(self, kernel, kernel_options = "", debug = False, 
-        verbose = False, dry_run = False):
+        verbose = False, quiet = False, dry_run = False):
         """Create a bootloader with generic options.
 
         Returns a generic bootloader with options that are common to 
@@ -50,6 +50,7 @@ class BaseBootLoader():
         self._debug = debug
         self._verbose = verbose
         self._dry_run = dry_run
+        self._quiet = quiet
 
         self._kernel = kernel
         self._root_partition = self._get_root_partition()
