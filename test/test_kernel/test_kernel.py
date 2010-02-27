@@ -25,37 +25,12 @@ import unittest
 
 class KernelTest(unittest.TestCase):
     def setUp(self):
-        self.kernelA = Kernel()
-        self.kernelB = Kernel("menuconfig", "", False, True)
-        self.kernelC = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", True)
+        self.kernelA = Kernel("menuconfig", "", True, "", False, True, True, True)
+        self.kernelB = Kernel("menuconfig", "git-sources-2.6.33", True, "", False, True, True, True)
+        self.kernelC = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", True, "", True, True, True, True)
 
     def tearDown(self):
         pass
-
-    """
-    def testConstructorSetProperties(self):
-        self.assertEqual(self.kernelA._configurator, "menuconfig", "incorrect default configurator")
-        self.assertEqual(self.kernelB._configurator, "menuconfig", "incorrectly passed configurator")
-        self.assertEqual(self.kernelC._configurator, "oldconfig", "incorrectly passed configurator")
-
-        self.assertEqual(self.kernelA._debug, False, "incorrect default debug")
-        self.assertEqual(self.kernelB._debug, False, "incorrect default debug")
-        self.assertEqual(self.kernelC._debug, True, "incorrect default debug")
-
-        self.assertEqual(self.kernelA._verbose, False, "incorrect default verbose")
-        self.assertEqual(self.kernelB._verbose, True, "incorrect default verbose")
-        self.assertEqual(self.kernelC._verbose, False, "incorrect default verbose")
-
-        self.assertEqual(self.kernelA._quiet, False, "incorrect default quiet")
-        self.assertEqual(self.kernelB._quiet, False, "incorrect default quiet")
-        self.assertEqual(self.kernelC._quiet, False, "incorrect default quiet")
-
-        # These tests are system dependent and should be updated when
-        # new kernels are released etc.
-        self.assertEqual(self.kernelA._directory_name, "linux-2.6.33-gentoo", "incorrect directory name")
-        self.assertEqual(self.kernelB._directory_name, "linux-2.6.33-gentoo", "incorrect directory name")
-        self.assertEqual(self.kernelC._directory_name, "linux-2.6.33", "incorrect directory name")
-    """
 
     def testGetName(self):
         # This is system specific and should be changed for the system
