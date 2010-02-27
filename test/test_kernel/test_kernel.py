@@ -26,7 +26,7 @@ import unittest
 class KernelTest(unittest.TestCase):
     def setUp(self):
         self.kernelA = Kernel("menuconfig", "", True, "", False, True, True, True)
-        self.kernelB = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", True, "", False, True, True, True)
+        self.kernelB = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", False, "", False, True, True, True)
 
     def tearDown(self):
         pass
@@ -53,8 +53,7 @@ class KernelTest(unittest.TestCase):
         # This is system specific and should be changed for the system
         # being run on.
         self.assertEqual(self.kernelA.get_name(), "linux-2.6.33-gentoo", "incorrect directory")
-        self.assertEqual(self.kernelB.get_name(), "linux-2.6.33-gentoo", "incorrect direcotry")
-        self.assertEqual(self.kernelC.get_name(), "linux-2.6.32-gentoo-r6", "incorrect directory")
+        self.assertEqual(self.kernelB.get_name(), "linux-2.6.32-gentoo-r6", "incorrect directory")
 
     def testGetImage(self):
         import platform
@@ -72,7 +71,8 @@ class KernelTest(unittest.TestCase):
     def testHaveModuleRebuild(self):
         # This is system specific and should be changed for the system
         # being run on.
-        self.assertEqual(self.kernel._have_module_rebuild(), True, "incorrect determination of rebuild-modules")
+        self.assertEqual(self.kernelA._have_module_rebuild(), True, "incorrect determination of rebuild-modules")
+        self.assertEqual(self.kernelB._have_module_rebuild(), True, "incorrect determination of rebuild-modules")
 
     def testGetInstallImage(self):
         import platform
@@ -80,13 +80,14 @@ class KernelTest(unittest.TestCase):
             self.assertEqual(self.kernelA._get_install_image(), "bzImage", "incorrect image")
 
     def testGetKernelNames(self):
-        self.assertEqual(self.kernelA._get_kernel_name("2.6.33"), ("linux-2.6.33-gentoo", "sys-kernel/gentoo-sources-2.6.33"), "incorrect directory name or package name")
+        self.assertEqual(self.kernelA._get_kernel_names("2.6.33"), ("linux-2.6.33-gentoo", "sys-kernel/gentoo-sources-2.6.33"), "incorrect directory name or package name")
 
     def testGetKernelDirectories(self):
         # Again, system specific.  These need to be written in a more
         # agnostic fashion.
         directory_list = [
-            ""
+            "linux-2.6.33-gentoo"
             ]
-        self.assertEqual(self.kernelA._get_kernel_directories(), directory_list, "incorrect directory listing")
+        for directory in directory_list:
+            self.assertEqual(self.kernelA._get_kernel_directories().count(directory), 1, "incorrect directory listing")
 
