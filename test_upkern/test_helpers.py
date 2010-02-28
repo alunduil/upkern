@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 ########################################################################
@@ -20,12 +19,19 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
+from upkern import helpers
+
 import unittest
+import os
 
-import test_upkern
+class HelpersTest(unittest.TestCase):
+    def setUp(self):
+        pass
 
-suite = unittest.TestSuite(test_upkern.suite)
+    def tearDown(self):
+        pass
 
-if __name__ == "__main__":
-    unittest.TextTestRunner(verbosity=9).run(alltests)
+    def testIsBootMounted(self):
+        if os.path.ismount('/boot'):
+            self.assertTrue(helpers.is_boot_mounted())
 

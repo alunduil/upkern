@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 ########################################################################
@@ -20,12 +19,14 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
+from upkern import Upkern, UpkernException
+
 import unittest
 
-import test_upkern
+class UpkernTest(unittest.TestCase):
+    def setUp(self):
+        pass
 
-suite = unittest.TestSuite(test_upkern.suite)
-
-if __name__ == "__main__":
-    unittest.TextTestRunner(verbosity=9).run(alltests)
+    def tearDown(self):
+        pass
 

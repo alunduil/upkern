@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 ########################################################################
@@ -22,10 +21,7 @@
 
 import unittest
 
-import test_upkern
+import test_bootloader
 
-suite = unittest.TestSuite(test_upkern.suite)
-
-if __name__ == "__main__":
-    unittest.TextTestRunner(verbosity=9).run(alltests)
+suite = unittest.TestLoader().loadTestsFromTestCase(test_bootloader.BootLoaderTest)
 

@@ -19,5 +19,15 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            #
 ########################################################################
 
+import unittest
+
 import test_kernel
+import test_helpers
+import test_bootloader
+
+suite_list = [
+    unittest.TestLoader().loadTestsFromTestCase(test_kernel.KernelTest),
+    unittest.TestLoader().loadTestsFromTestCase(test_helpers.HelpersTest)
+    ]
+suite = unittest.TestSuite(suite_list)
 
