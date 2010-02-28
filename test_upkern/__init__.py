@@ -24,10 +24,13 @@ import unittest
 import test_kernel
 import test_helpers
 import test_bootloader
+import test_upkern
 
 suite_list = [
-    unittest.TestLoader().loadTestsFromTestCase(test_kernel.KernelTest),
-    unittest.TestLoader().loadTestsFromTestCase(test_helpers.HelpersTest)
+    test_kernel.suite,
+    unittest.TestLoader().loadTestsFromTestCase(test_helpers.HelpersTest),
+    test_bootloader.suite,
+    unittest.TestLoader().loadTestsFromTestCase(test_upkern.UpkernTest)
     ]
 suite = unittest.TestSuite(suite_list)
 
