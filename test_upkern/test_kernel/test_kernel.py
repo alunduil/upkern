@@ -23,10 +23,36 @@ from upkern import Kernel, KernelException
 
 import unittest
 
+import platform
+import re
+
 class KernelTest(unittest.TestCase):
     def setUp(self):
         self.kernelA = Kernel("menuconfig", "", True, "", False, True, True, True)
-        self.kernelB = Kernel("oldconfig", "gentoo-sources-2.6.32-r6", False, "", False, True, True, True)
+        # Default what kernel we look for ...
+        self.running_kernel_name = "gentoo-sources-2.6.33"
+        self.running_directory_name = "linux-2.6.33-gentoo"
+        # Getting the kernel version currently running for some tests.
+        pattern = [
+            '(?P<version>(?:\d+\.)+\d+)',
+            '(?P<sources>\w+)?',
+            '(?P<revision>r\d+)?'
+            ]
+        match = re.search('-'.join(pattern), platform.release())
+        if match: 
+            self.running_kernel_name = "-".join([
+                match.group("sources"),
+                "sources",
+                match.group("version"),
+                match.group("revision")
+                ])
+            self.running_directory_name = "-".join([
+                "linux",
+                match.group("version"),
+                match.group("sources"),
+                match.group("revision")
+                ])
+        self.kernelB = Kernel("oldconfig", self.running_kernel_name, False, "", False, True, True, True)
 
     def tearDown(self):
         pass
@@ -53,7 +79,7 @@ class KernelTest(unittest.TestCase):
         # This is system specific and should be changed for the system
         # being run on.
         self.assertEqual(self.kernelA.get_name(), "linux-2.6.33-gentoo", "incorrect directory")
-        self.assertEqual(self.kernelB.get_name(), "linux-2.6.32-gentoo-r6", "incorrect directory")
+        self.assertEqual(self.kernelB.get_name(), self.running_directory_name, "incorrect directory")
 
     def testGetImage(self):
         import platform
