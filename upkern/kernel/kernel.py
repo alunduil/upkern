@@ -285,7 +285,7 @@ class Kernel:
                 if self._verbose: opts = "-v"
                 command_list = ["emerge", opts, "="+emerge_name]
                 # @todo Any better way to do this?
-                if not self._dry_run and os.getuid != 0:
+                if not self._dry_run and os.getuid() != 0:
                     raise KernelException("Insufficient priveleges to continue!")
                 if self._dry_run:
                     output.verbose(" ".join(command_list))
