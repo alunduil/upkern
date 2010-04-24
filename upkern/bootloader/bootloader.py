@@ -45,7 +45,7 @@ def BootLoader(*args):
     else:
         raise BootLoaderException("No bootloader installed!")
 
-    from gentoolkit.helpers import split_cpv
+    from gentoolkit.cpv import split_cpv
     boot_loader = split_cpv(boot_loader)[1]
 
     if boot_loader == "grub": return Grub(*args)

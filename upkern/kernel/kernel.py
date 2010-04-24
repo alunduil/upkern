@@ -191,9 +191,9 @@ class Kernel:
         if module-rebuild is installed on this system or not.
 
         """
-        from gentoolkit.helpers import find_installed_packages
+        from gentoolkit.query import Query
         installed = \
-            find_installed_packages("sys-kernel/module-rebuild")
+            Query("sys-kernel/module-rebuild").find_installed()
         if len(installed) < 1: return False
         return True
 
@@ -266,8 +266,8 @@ class Kernel:
                 output.debug(__file__, {"emerge_name":emerge_name})
             
             # Get the directory name now.
-            from gentoolkit.helpers import find_installed_packages
-            installed = find_installed_packages(emerge_name)
+            from gentoolkit.query import Query
+            installed = Query(emerge_name).find_installed()
             if self._debug:
                 output.debug(__file__, {
                     "installed":installed
