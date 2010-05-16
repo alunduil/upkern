@@ -61,6 +61,7 @@ class Upkern:
         self._configuration = variables.configuration
         #self._editor = variables.editor # @todo Make this sane.
         self._dry_run = variables.dry_run
+        self._remove = variables.remove
 
     def Run(self):
         try:
@@ -69,11 +70,15 @@ class Upkern:
                 self._kernel_name, self._rebuild_modules, 
                 self._configuration, self._debug, self._verbose, 
                 self._quiet, self._dry_run)
-            kernel.configure()
-            if self._time_build: start_time = time.time()
-            kernel.build()
-            if self._time_build: stop_time = time.time()
-            kernel.install()
+
+            if self._remove:
+                kernel.remove()
+            else:
+                kernel.configure()
+                if self._time_build: start_time = time.time()
+                kernel.build()
+                if self._time_build: stop_time = time.time()
+                kernel.install()
         except KernelException, e:
             raise UpkernException(e.get_message())
 
@@ -205,6 +210,15 @@ class Upkern:
         parser.add_option('--dry-run', '-D', action='store_true', 
             dest='dry_run', default=False, 
             help=''.join(dry_run_help_list))
+
+        remove_help_list = [
+            "Will completely remove the specified kernel from the ",
+            "system.  This will not remove the sources from the ",
+            "world file."
+            ]
+        parser.add_option('--remove', '-R', action='store_true',
+            dest='remove', default=False, 
+            help=''.join(remove_help_list))
 
         return parser.parse_args()
 

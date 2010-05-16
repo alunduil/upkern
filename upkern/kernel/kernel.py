@@ -70,12 +70,13 @@ class Kernel:
         self._quiet = quiet
         self._dry_run = dry_run
         self._configurator = configurator
+        self._configuration = configuration
 
         if self._verbose: 
             output.verbose("Configurator: %s", self._configurator)
 
         if not self._quiet:
-            output.status("Getting information about kernel (this could take a while) ...")
+            output.status("Getting information about kernel (this could take a while) ...\b")
 
         self._directory_name, self._emerge_name = \
             self._get_kernel_names(kernel_name)
@@ -246,7 +247,7 @@ class Kernel:
         emerge_expression = re.compile("".join(emerge_expression_list))
         emerge_match = emerge_expression.match(kernel_name)
 
-        if self._debug:
+        if self._debug and emerge_match:
             output.debug(__file__, {
                 'emerge_match':emerge_match.group(0)
                 })
@@ -281,9 +282,9 @@ class Kernel:
                 #    split_cpv(emerge_name)
                 #merge(category, pkg_name+version+revision
                 # @note The following is ugly!
-                opts = ""
-                if self._verbose: opts = "-v"
-                command_list = ["emerge", opts, "="+emerge_name]
+                opts = []
+                if self._verbose: opts.append("-v")
+                command_list = ["emerge", " ".join(opts), "="+emerge_name]
                 # @todo Any better way to do this?
                 if not self._dry_run and os.getuid() != 0:
                     raise KernelException("Insufficient priveleges to continue!")
@@ -396,6 +397,116 @@ class Kernel:
         else:
             os.chdir(opwd)
 
+    def _get_modules_directory(self):
+        """Get the modules directory of the kernel.
+
+        """
+        return "/lib/modules/" + self._directory_name.split("/")[-1]
+
+    def remove(self):
+        """Remove the kernel from the system.
+
+        Remove the kernel by removing the following things:
+         * /usr/src/<sources>
+         * /lib/modules/<sources>
+         * /boot/<stuff>
+         * GRUB entry
+
+        """
+        
+        # Determine if we are running the kernel we just removed:
+        running = Kernel(self._configurator, 
+            self._get_running_kernel_cpv(), self._rebuild_modules,
+            self._configuration, False, False, True, True)
+
+        if self.get_name() == running.get_name():
+            output.status("Will not remove the running kernel.  Please install a different kernel and boot into it before proceeding.")
+            raise KernelException("Cowardly refusing to remove the currently working kernel!")
+
+        # @todo Make this more efficient.
+        # Install the package requested.
+        #from portage import merge
+        #from gentoolkit import split_cpv
+        #category, pkg_name, version, revision = \
+        #    split_cpv(emerge_name)
+        #merge(category, pkg_name+version+revision
+        # @note The following is ugly!
+        opts = ["-C"]
+        if self._verbose: opts.append("-v")
+        command_list = ["emerge", " ".join(opts), "="+self._emerge_name]
+
+        # @todo Any better way to do this?
+        if not self._dry_run and os.getuid() != 0:
+            raise KernelException("Insufficient priveleges to continue!")
+
+        if self._dry_run:
+            output.verbose(" ".join(command_list))
+            output.verbose("rm -rf /usr/src/%s" % self._directory_name)
+            output.verbose("rm -rf %s" % self._get_modules_directory())
+        else:
+            os.system(" ".join(command_list))
+            helpers.recursive_remove("/usr/src/" + self._directory_name)
+            helpers.recursive_remove(self._get_modules_directory())
+        
+        boot_mounted = False
+        if not helpers.is_boot_mounted():
+            if self._dry_run:
+                output.verbose("mount /boot")
+                output.error("--dry-run requires that you manually mount /boot")
+            else:
+                os.system('mount /boot')
+            boot_mounted = True
+
+        if self._dry_run:
+            output.verbose("rm /boot/%s%s", self._install_image, 
+                self._suffix)
+            output.verbose("rm /boot/config%s", self._suffix)
+            output.verbose("rm /boot/System.map%s", self._suffix)
+        else:
+            os.remove('/boot/' + self._install_image + self._suffix)
+            os.remove('/boot/config' + self._suffix)
+            os.remove('/boot/System.map' + self._suffix)
+
+        if boot_mounted: 
+            if self._dry_run:
+                output.verbose("umount /boot")
+            else:
+                os.system('umount /boot')
+
+        # re-symlink the kernel so we leave the system consistent ...
+        if self._dry_run:
+            if os.path.islink('/usr/src/linux'): 
+                output.verbose("rm /usr/src/linux")
+            output.verbose("ln -s /usr/src/%s /usr/src/linux", 
+                running.get_name())
+        else:
+            if os.path.islink('/usr/src/linux'):
+                os.remove('/usr/src/linux')
+            os.symlink('/usr/src/' + running.get_name(), 
+                '/usr/src/linux')
+
+        # Remove from bootloader handled in bootloader?
+        # For now let's say yes.
+
+    def _get_running_kernel_cpv(self):
+        """Get the current running kernel's CPV for portage searches.
+
+        """
+        import platform
+        system, node, release, version, machine, processor = platform.uname()
+        if self._debug: output.debug(__file__, {'release':release})
+        tmp = release.split('-')
+        kernel_cpv = [tmp[0]]
+        if re.search("^rc", tmp[1]):
+            kernel_cpv[0] = "vanilla-sources-" + kernel_cpv[0]
+            kernel_cpv.append(tmp[1])
+            join_char = "_"
+        else:
+            kernel_cpv.extend([tmp[1], tmp[2]])
+            join_char = "-"
+
+        return join_char.join(kernel_cpv)
+        
     def install(self):
         """Install the kernel into /boot
 
