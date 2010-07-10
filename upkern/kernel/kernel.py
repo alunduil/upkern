@@ -284,6 +284,7 @@ class Kernel:
                 # @note The following is ugly!
                 opts = []
                 if self._verbose: opts.append("-v")
+                if self._quiet: opts.append("-q")
                 command_list = ["emerge", " ".join(opts), "="+emerge_name]
                 # @todo Any better way to do this?
                 if not self._dry_run and os.getuid() != 0:
