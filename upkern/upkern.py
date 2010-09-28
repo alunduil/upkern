@@ -26,7 +26,7 @@ import textwrap
 import os
 
 from kernel import Kernel, KernelException
-from bootloader import BootLoader, BootLoaderException
+from bootloader import BootLoader, BootLoaderException, GrubException
 
 class Upkern:
     def __init__(self, argv):
@@ -89,6 +89,8 @@ class Upkern:
             boot_loader.create_configuration()
             boot_loader.install_configuration()
         except BootLoaderException, e:
+            raise UpkernException(e.get_message())
+        except GrubException, e:
             raise UpkernException(e.get_message())
 
         if self._editor:

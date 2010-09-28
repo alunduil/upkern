@@ -20,5 +20,5 @@
 ########################################################################
 
 from bootloader import BootLoader, BootLoaderException
-from grub import Grub
+from grub import Grub, GrubException
 

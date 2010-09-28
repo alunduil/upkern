@@ -67,7 +67,7 @@ class Grub(BaseBootLoader):
             self._boot_partition)
 
         if not match: 
-            raise BootLoaderException("Device %s not supported" % self._boot_partition)
+            raise GrubException("Device %s not supported" % self._boot_partition)
 
         from string import ascii_lowercase
         return "(hd" + \
@@ -94,7 +94,7 @@ class Grub(BaseBootLoader):
                 os.system('umount /boot')
         else:
             if not os.access(self._config_url, os.R_OK):
-                raise BootLoaderException("Could not read %s" % self._config_url)
+                raise GrubException("Could not read %s" % self._config_url)
 
             c = open(self._config_url)
             self._configuration = c.readlines()
@@ -176,9 +176,17 @@ class Grub(BaseBootLoader):
                 output.verbose("echo -en \n%s\n > /boot/grub/grub.conf" % "\n".join(self._configuration))
             else:
                 if not os.access(self._config_url, os.W_OK):
-                    raise BootLoaderException("Cannot write to /boot/grub/grub.conf")
+                    raise GrubException("Cannot write to /boot/grub/grub.conf")
                 c = open(self._config_url, 'w')
                 c.write("\n".join(self._configuration))
                 c.flush()
                 c.close()
+
+class GrubException(Exception):
+    def __init__(self, message, *args):
+        Exception.__init__(self, *args)
+        self.message = message
+
+    def get_message(self):
+        return self.message
 

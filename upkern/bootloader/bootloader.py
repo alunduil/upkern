@@ -18,7 +18,7 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-from grub import Grub
+from grub import Grub, GrubException
 
 def BootLoader(*args):
     """Factory method for getting the appropriate BootLoader object.
