@@ -222,7 +222,17 @@ class Upkern:
             dest='remove', default=False, 
             help=''.join(remove_help_list))
 
+        version_help_list = [
+            "Print version information about upkern."
+            ]
+        parser.add_option('--version', '-V', action='callback',
+            callback=self._version, help=''.join(version_help_list))
+
         return parser.parse_args()
+
+    def _version(self, option, opt_str, value, parser):
+        print "upkern-3.1.2"
+        sys.exit(0)
 
 class UpkernException(Exception):
     def __init__(self, message, *args):
