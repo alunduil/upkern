@@ -328,8 +328,34 @@ class Kernel:
             raise KernelException("Could not access /usr/src/")
         src_list = os.listdir('/usr/src')
         src_list = filter(lambda x: re.match('linux-.+$', x), src_list)
-        src_list.sort()
-        return src_list
+
+        keys = map(self._create_kernel_key, src_list)
+        kernel_dict = dict(zip(keys, src_list))
+
+        output.debug(__file__, {"keys": keys, "src_list": src_list, "kernel_dict": kernel_dict})
+
+        result_list = map(lambda x: kernel_dict[x], sorted(kernel_dict.keys()))
+        output.debug(__file__, {"result_list": result_list})
+        
+        return result_list
+
+    def _create_kernel_key(self, kernel_string):
+        """Convert a kernel string into majorminorpatch.revision notation
+        """
+        output.debug(__file__, {"kernel_string": kernel_string})
+        
+        regex = '.*?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)-[^-]*(?:-r(?P<revision>\d+))?'
+        output.debug(__file__, {"regex": regex})
+        m = re.match(regex, kernel_string)
+        
+        revision = 0
+        if m.group("revision"): revision = int(m.group("revision"))
+        output.debug(__file__, {"revision": revision})
+        
+        key = "%s%s%s.%03d" % (m.group("major"), m.group("minor"), m.group("patch"), int(m.group("revision")))
+        output.debug(__file__, {"key": key})
+        
+        return key
             
     def configure(self):
         """Configure the kernel sources.
