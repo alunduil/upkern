@@ -31,6 +31,6 @@ setup(name='upkern',
     license="GPL-2",
     scripts=["upkern.py"],
     packages=['upkern', 'upkern.kernel', 'upkern.bootloader'],
-    data_files=[("", ['COPYING'])]
+    data_files=[("", ['COPYING']), ("doc/man", ["doc/man/upkern.8"])]
     )
 
