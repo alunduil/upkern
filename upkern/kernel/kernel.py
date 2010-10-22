@@ -145,7 +145,17 @@ class Kernel:
             config_list = os.listdir('/boot')
             config_list = filter(lambda x: re.match('config-.+', x), 
                 config_list)
-            config_list.sort()
+
+            keys = map(self._create_kernel_key, config_list)
+            config_dict = dict(zip(keys, config_list))
+
+            if self._debug: output.debug(__file__, {"keys": keys, "config_list": config_list, "config_dict": config_dict})
+
+            result_list = map(lambda x: config_dict[x], sorted(config_dict.keys()))
+            if self._debug: output.debug(__file__, {"result_list": result_list})
+
+            config_list = result_list
+
             if len(config_list) > 0:
                 shutil.copy('/boot/' + config_list[-1], 
                     '/usr/src/linux/.config')
@@ -162,7 +172,17 @@ class Kernel:
             config_list = os.listdir('/boot')
             config_list = filter(lambda x: re.match('config-.+', x),
                 config_list)
-            config_list.sort()
+
+            keys = map(self._create_kernel_key, config_list)
+            config_dict = dict(zip(keys, config_list))
+
+            if self._debug: output.debug(__file__, {"keys": keys, "config_list": config_list, "config_dict": config_dict})
+
+            result_list = map(lambda x: config_dict[x], sorted(config_dict.keys()))
+            if self._debug: output.debug(__file__, {"result_list": result_list})
+
+            config_list = result_list
+
             if len(config_list) > 0:
                 output.verbose("cp /boot/%s /usr/src/linux/.config", 
                     config_list[-1])
