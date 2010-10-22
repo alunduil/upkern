@@ -372,7 +372,7 @@ class Kernel:
         if m.group("revision"): revision = int(m.group("revision"))
         output.debug(__file__, {"revision": revision})
         
-        key = "%s%s%s.%03d" % (m.group("major"), m.group("minor"), m.group("patch"), int(m.group("revision")))
+        key = "%s%s%s.%03d" % (m.group("major"), m.group("minor"), m.group("patch"), revision)
         output.debug(__file__, {"key": key})
         
         return key
