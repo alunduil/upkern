@@ -17,16 +17,18 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-from distutils.core import setup
+import os
 
-setup(
-    name='upkern',
-    version='2.0.11',
-    description="Automated Gentoo kernel updater.",
-    license="GPL-2",
-    author="Alex Brandt",
-    author_email="alunduil@alunduil.com",
-    url="http://www.alunduil.com/programs/python-kernel-updater",
-    scripts=["upkern.py"],
-    py_modules=['upkern', 'kernel', 'bootloader', 'upkern_helpers']
-    )
+def is_boot_mounted():
+    """Determines if the system's boot partition is mounted.
+
+    Just returns true if it finds a file in the /boot area, false otherwise.
+
+    """
+
+    files = os.listdir('/boot/')
+
+    for file in files:
+        if file != "boot":
+            return True
+    return False
