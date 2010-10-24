@@ -146,10 +146,34 @@ class Kernel(object):
         if not os.access('/usr/src/', os.F_OK):
             raise KernelException("Could not access /usr/src")
         source_list = os.listdir('/usr/src/')
-        source_list.sort()
         source_list = filter(self.__kernel_filter, source_list)
+
+	keys = map(self._create_kernel_key, src_list)
+	kernel_dict = dict(zip(keys, src_list))
+	result_list = map(lambda x: kernel_dict[x], sorted(kernel_dict.keys()))
+
+	source_list = result_list
         source = source_list[-1]
         return source[operator.indexOf(source, '-') + 1:]
+
+    def _create_kernel_key(self, kernel_string):
+        """Convert a kernel string into majorminorpatch.revision notation
+        """
+        output.debug(__file__, {"kernel_string": kernel_string})
+
+        regex = '.*?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)-[^-]*(?:-r(?P<revision>\d+))?'
+        output.debug(__file__, {"regex": regex})
+        m = re.match(regex, kernel_string)
+
+        revision = 0
+        if m.group("revision"): revision = int(m.group("revision"))
+        output.debug(__file__, {"revision": revision})
+
+        key = "%s%s%s.%03d" % (m.group("major"), m.group("minor"), m.group("patch"), revision)
+        output.debug(__file__, {"key": key})
+
+        return key
+
 
     def __get_kernel_names(self):
         """Get the kernel name of the most up to date sources on the system.
