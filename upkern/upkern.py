@@ -92,6 +92,8 @@ class Upkern:
             raise UpkernException(e.get_message())
         except GrubException, e:
             raise UpkernException(e.get_message())
+        except IOError, e:
+            raise UpkernException("No more space available on /boot!")
 
         if self._editor:
             command_list = [
