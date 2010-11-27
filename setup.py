@@ -23,7 +23,7 @@
 from distutils.core import setup
 
 setup(name='upkern',
-    version='3.1.5',
+    version='3.1.6',
     description="Automated kernel updater for Gentoo.",
     author="Alex Brandt",
     author_email="alunduil@alunduil.com",
