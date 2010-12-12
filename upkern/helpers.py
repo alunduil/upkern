@@ -19,6 +19,7 @@
 
 import os
 import re
+import itertools
 
 def is_boot_mounted():
     """Determines if the system's boot partition is mounted.
@@ -29,8 +30,7 @@ def is_boot_mounted():
     """
     if os.path.ismount('/boot'): return True
     # Otherwise, we have more checking to do.
-    files = os.listdir('/boot/')
-    files = filter(lambda x: re.match('^(?!boot).*$', x), files)
+    files = [ f for f in list(itertools.chain(*[ [ os.path.join(x[0], fs) for fs in x[2] ] for x in os.walk("/boot") ] )) if not re.search("^/boot/(?:boot|.keep)", f) ]
     if len(files) > 0: return True
     return False
 

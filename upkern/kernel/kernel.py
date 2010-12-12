@@ -137,7 +137,9 @@ class Kernel:
         /boot.
 
         """
+        if self._debug: output.debug(__file__, {"helpers.is_boot_mounted()":helpers.is_boot_mounted()})
         if not helpers.is_boot_mounted():
+            if self._verbose: output.verbose("Mounting Boot for Configuration File")
             os.system('mount /boot')
             self._copy_config() # @todo Update params.
             os.system('umount /boot')
@@ -156,6 +158,8 @@ class Kernel:
 
             config_list = result_list
 
+            if self._verbose: pycolorize.verbose("Configuration file: %s", config_list[-1])
+
             if len(config_list) > 0:
                 shutil.copy('/boot/' + config_list[-1], 
                     '/usr/src/linux/.config')
@@ -164,7 +168,9 @@ class Kernel:
         """Dry run of _copy_config.
 
         """
+        if self._debug: output.debug(__file__, {"helpers.is_boot_mounted()":helpers.is_boot_mounted()})
         if not helpers.is_boot_mounted():
+            if self._verbose: output.verbose("Mounting Boot for Configuration File")
             output.verbose("mount /boot")
             output.error("--dry-run requires that you manually mount /boot")
             output.verbose("umount /boot")
