@@ -370,15 +370,24 @@ class Kernel:
         """
         if self._debug: output.debug(__file__, {"kernel_string": kernel_string})
         
-        regex = '.*?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)-[^-]*(?:-r(?P<revision>\d+))?'
+        regex = '.*?(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))?-[^-]*(?:-r(?P<revision>\d+))?'
         if self._debug: output.debug(__file__, {"regex": regex})
         m = re.match(regex, kernel_string)
         
-        revision = 0
-        if m.group("revision"): revision = int(m.group("revision"))
+        revision = major = minor = patch = 0
+        if m:
+            if m.group("revision"): 
+                revision = int(m.group("revision"))
+            if m.group("major"):
+                major = int(m.group("major"))
+            if m.group("minor"):
+                minor = int(m.group("minor"))
+            if m.group("patch"):
+                patch = int(m.group("patch"))
+
         if self._debug: output.debug(__file__, {"revision": revision})
-        
-        key = "%s%s%s.%03d" % (m.group("major"), m.group("minor"), m.group("patch"), revision)
+       
+        key = "%03d%03d%03d.%03d" % (major, minor, patch, revision)
         if self._debug: output.debug(__file__, {"key": key})
         
         return key
