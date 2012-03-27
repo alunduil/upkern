@@ -40,9 +40,10 @@ setup_params['data_files'] = [
             "COPYING",
             "README",
             ]),
-        ("share/man/man1", [
-            "doc/man/man1/upkern.1",
-            ]),
+        # TODO Uncomment when the dynamic man page is added.
+        #("share/man/man1", [
+        #    "doc/man/man1/upkern.1",
+        #    ]),
         ]
 setup_params['requires'] = [
         "gentoolkit",
