@@ -23,6 +23,8 @@ upkern application.
 
 """
 
+import argparse
+
 VERSION = "4.0.0"
 
 class UpkernApplication(object):
