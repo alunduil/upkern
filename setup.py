@@ -36,7 +36,7 @@ setup_params['packages'] = [
         "upkern.bootloader",
         ]
 setup_params['data_files'] = [
-        ("share/doc/%s%s" % (setup_params['name'], setup_params['version']), [
+        ("share/doc/%s-%s" % (setup_params['name'], setup_params['version']), [
             "COPYING",
             "README",
             ]),
