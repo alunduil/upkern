@@ -23,6 +23,8 @@ upkern application.
 
 """
 
+VERSION = "4.0.0"
+
 class UpkernApplication(object):
     """Main application class for upkern."""
 
@@ -31,17 +33,22 @@ class UpkernApplication(object):
         self._verbose = False
         self._quiet = False
 
-        parser = self._get_arg_parser()
-        arguments = parser.
+        arguments = UpkernOptions("upkern").parsed_args
 
-        self._quiet = variables.quiet
-        self._debug = variables.debug
+        self._quiet = arguments.quiet
+        self._debug = arguments.debug
+
         # If we have debugging turned on we should also have verbose.
-        if self._debug: self._verbose = True
-        else: self._verbose = variables.verbose
-        # If we have verbose we shouldn't be quiet.
-        if self._verbose: self._quiet = False
+        if self._debug: 
+            self._verbose = True
+        else: 
+            self._verbose = arguments.verbose
 
+        # If we have verbose we shouldn't be quiet.
+        if self._verbose: 
+            self._quiet = False
+
+        # Other option handling ...
         helpers.COLORIZE = arguments.color
 
         self._configurator = variables.configurator
@@ -49,7 +56,6 @@ class UpkernApplication(object):
         self._time_build = variables.time_build
         self._kernel_options = variables.kernel_options
         self._configuration = variables.configuration
-        #self._editor = variables.editor # @todo Make this sane.
         self._dry_run = variables.dry_run
         self._remove = variables.remove
 
@@ -127,7 +133,30 @@ class UpkernApplication(object):
         for line in textwrap.wrap(''.join(conclusion_list)):
             print line
 
-    def _parseOptions(self, argv, parser):
+class UpkernOptions(object):
+    """Options for the upkern application."""
+
+    def __init__(self, name):
+        """Create the option parser."""
+        self._parser = argparse.ArgumentParser(prog = name)
+        self._parser = self._add_args()
+
+    @property
+    def parser(self):
+        """Return the option parser."""
+        return self._parser
+
+    @property
+    def parsed_args(self):
+        """Return the parsed arguments."""
+        return self._parser.parse_args()
+
+    def _add_args(self):
+        """Add the options to the parser."""
+
+        self._parser.add_argument("--version", action = "version", 
+                version = "%(prog)s %(VERSION)s")
+
         configurators = ["config", "menuconfig", "xconfig", "gconfig",
             "oldconfig", "silentoldconfig", "defconfig",
             "${PLATFORM}_defconfig", "allyesconfig", "allmodconfig",
@@ -139,7 +168,7 @@ class UpkernApplication(object):
             "following: " + ", ".join(configurators) + ".  All the ",
             "configurators are documented in the kernel source files."
             ]
-        parser.add_option('--configurator', '-c', type='choice',
+        self._parser.add_argument('--configurator', '-c', type='choice',
             choices=configurators, default='menuconfig',
             help=''.join(configurator_help_list))
 
@@ -149,14 +178,14 @@ class UpkernApplication(object):
             "place you would want to stick a framebuffer line, or any ",
             "other options you want your kernel to have."
             ]
-        parser.add_option('--options', '-o', dest='kernel_options',
+        self._parser.add_argument('--options', '-o', dest='kernel_options',
             default='', help=''.join(options_help_list))
 
         config_file_help_list = [
             "This specifies the configuration file to load into the ",
             "kernel before configuration."
             ]
-        parser.add_option('--configuration', '-C', default='',
+        self._parser.add_argument('--configuration', '-C', default='',
             help=''.join(config_file_help_list))
 
         """
@@ -168,7 +197,7 @@ class UpkernApplication(object):
             "modified it.  The default editor is the one defined by ",
             "your ${EDITOR} environment variable."
             ]
-        parser.add_option('--editor', '-e', 
+        self._parser.add_argument('--editor', '-e', 
             default=os.getenv("EDITOR", ""), 
             help=''.join(editor_help_list))
         """
@@ -176,20 +205,20 @@ class UpkernApplication(object):
         verbose_help_list = [
             "Sets verbose output."
             ]
-        parser.add_option('--verbose', '-v', action='store_true',
+        self._parser.add_argument('--verbose', '-v', action='store_true',
             default=False, help=''.join(verbose_help_list))
 
         debug_help_list = [
             "Sets debugging output (implies verbose output)."
             ]
-        parser.add_option('--debug', '-d', action='store_true',
+        self._parser.add_argument('--debug', '-d', action='store_true',
             default=False, help=''.join(debug_help_list))
 
         quiet_help_list = [
             "Sets output to be a bit quieter.  If either debug or ",
             "verbose are set this option has no effect."
             ]
-        parser.add_option('--quiet', '-q', action='store_true',
+        self._parser.add_argument('--quiet', '-q', action='store_true',
             default=False, help=''.join(quiet_help_list))
 
         rebuild_modules_help_list = [
@@ -197,7 +226,7 @@ class UpkernApplication(object):
             "the modules you have pulled in via portage for the new ",
             "kernel."
             ]
-        parser.add_option('--rebuild-modules', '-r', action='store_true',
+        self._parser.add_argument('--rebuild-modules', '-r', action='store_true',
             default=False, dest='rebuild_modules',
             help=''.join(rebuild_modules_help_list))
 
@@ -206,7 +235,7 @@ class UpkernApplication(object):
             "determine if kernels are building faster based on ",
             "different aspects of the machine."
             ]
-        parser.add_option('--time', '-t', action='store_true',
+        self._parser.add_argument('--time', '-t', action='store_true',
             dest='time_build', default=False,
             help=''.join(time_help_list))
 
@@ -216,7 +245,7 @@ class UpkernApplication(object):
             "the screen instead.  This way it can be seen what will ",
             "happen without actually doing it."
             ]
-        parser.add_option('--dry-run', '-D', action='store_true', 
+        self._parser.add_argument('--dry-run', '-D', action='store_true', 
             dest='dry_run', default=False, 
             help=''.join(dry_run_help_list))
 
@@ -225,27 +254,15 @@ class UpkernApplication(object):
             "system.  This will not remove the sources from the ",
             "world file."
             ]
-        parser.add_option('--remove', '-R', action='store_true',
+        self._parser.add_argument('--remove', '-R', action='store_true',
             dest='remove', default=False, 
             help=''.join(remove_help_list))
 
         version_help_list = [
             "Print version information about upkern."
             ]
-        parser.add_option('--version', '-V', action='callback',
+        self._parser.add_argument('--version', '-V', action='callback',
             callback=self._version, help=''.join(version_help_list))
 
-        return parser.parse_args()
-
-    def _version(self, option, opt_str, value, parser):
-        print "upkern-3.1.2"
-        sys.exit(0)
-
-class UpkernException(Exception):
-    def __init__(self, message, *args):
-        super(UpkernException, self).__init__(args)
-        self._message = message
-
-    def GetMessage(self):
-        return self._message
+        return self._parser
 

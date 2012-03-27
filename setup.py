@@ -18,10 +18,11 @@
 # Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from distutils.core import setup
+from upkern.application import VERSION
 
 setup_params = {}
 setup_params['name'] = "upkern"
-setup_params['version'] = "3.2.0"
+setup_params['version'] = VERSION
 setup_params['description'] = "Automated kernel updater for Gentoo."
 setup_params['author'] = "Alex Brandt"
 setup_params['author_email'] = "alunduil@alunduil.com"
