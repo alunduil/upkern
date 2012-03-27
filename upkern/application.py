@@ -159,20 +159,18 @@ class UpkernOptions(object):
         self._parser.add_argument("--version", action = "version", 
                 version = "%(prog)s %(VERSION)s")
 
-        configurators = ["config", "menuconfig", "xconfig", "gconfig",
-            "oldconfig", "silentoldconfig", "defconfig",
-            "${PLATFORM}_defconfig", "allyesconfig", "allmodconfig",
-            "allnoconfig", "randconfig"
-            ]
-        configurator_help_list = [
-            "Specifies which configurator should be used to configure ",
-            "the kernel sources.  The configurator can be one of the ",
-            "following: " + ", ".join(configurators) + ".  All the ",
-            "configurators are documented in the kernel source files."
-            ]
-        self._parser.add_argument('--configurator', '-c', type='choice',
-            choices=configurators, default='menuconfig',
-            help=''.join(configurator_help_list))
+        # --configurator, -c
+        help_list = [
+                "Specifies which configurator should be used to configure ",
+                "the kernel sources.  The configurator can be on of the ",
+                "following: ",
+                ", ".join(kernel.configurators),
+                ".  All the configurators are documented in the kernel ",
+                "source files.",
+                ]
+        self._parser.add_argument("--configurator", "-c", 
+                choices = kernel.configurators, default = "menuconfig",
+                help = "".join(help_list))
 
         options_help_list = [
             "This string is literally tacked onto the kernel options ",
