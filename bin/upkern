@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2011 by Alex Brandt <alunduil@alunduil.com>
@@ -16,5 +17,22 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from application import UpkernApplication
+"""Main application launcher for upkern."""
+
+import sys
+import os
+
+try:
+    from upkern import UpkernApplication
+except ImportError:
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+    from upkern import UpkernApplication
+
+def main():
+    """Main method for calling upkern as an application."""
+    app = UpkernApplication(sys.argv)
+    app.run()
+
+if __name__ == "__main__":
+    main()
 

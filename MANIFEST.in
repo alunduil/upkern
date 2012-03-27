@@ -1,6 +1,0 @@
-include *.txt
-include COPYING
-recursive-include examples *.txt *.py
-recursive-include doc *
-prune examples/sample?/build
-

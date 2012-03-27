@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2011 by Alex Brandt <alunduil@alunduil.com>
@@ -16,5 +17,17 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from application import UpkernApplication
+"""Main application for running unit tests for upkern."""
+         
+import unittest
+
+import test_upkern
+
+def main():
+    """Set us upthe test ..."""
+    suite = unittest.TestSuite(test_upkern.suite)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+if __name__ == "__main__":
+    main()
 

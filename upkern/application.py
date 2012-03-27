@@ -1,48 +1,38 @@
 # -*- coding: utf-8 -*-
 
-#########################################################################
-# Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
-#                                                                       #
-# This program is free software; you can redistribute it and#or modify  #
-# it under the terms of the GNU General Public License as published by  #
-# the Free Software Foundation; either version 2 of the License, or     #
-# (at your option) any later version.                                   #
-#                                                                       #
-# This program is distributed in the hope that it will be useful,       #
-# but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-# GNU General Public License for more details.                          #
-#                                                                       #
-# You should have received a copy of the GNU General Public License     #
-# along with this program; if not, write to the                         #
-# Free Software Foundation, Inc.,                                       #
-# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
-#########################################################################
+# Copyright (C) 2011 by Alex Brandt <alunduil@alunduil.com>             
+#                                                                    
+# This program is free software; you can redistribute it andor modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#                                                                    
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#                                                           
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+# Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import time
-import sys
-import optparse
-import textwrap
-import os
+"""Upkern application class
 
-from kernel import Kernel, KernelException
-from bootloader import BootLoader, BootLoaderException, GrubException
+This module provides the application class (for programmatic execution) for the
+upkern application.
 
-class Upkern:
+"""
+
+class UpkernApplication(object):
+    """Main application class for upkern."""
+
     def __init__(self, argv):
         self._debug = False
         self._verbose = False
-        self._kernel_name = ""
-        self._configurator = ""
-        self._rebuild_modules = False
-        self._time_build = False
         self._quiet = False
-        self._kernel_options = ""
-        self._editor = ""
 
-        usage = "usage: %prog [options] kernel"
-        parser = optparse.OptionParser(usage=usage)
-        variables, arguments = self._parseOptions(argv, parser)
+        parser = self._get_arg_parser()
+        arguments = parser.
 
         self._quiet = variables.quiet
         self._debug = variables.debug
@@ -52,7 +42,7 @@ class Upkern:
         # If we have verbose we shouldn't be quiet.
         if self._verbose: self._quiet = False
 
-        if len(arguments) > 0: self._kernel_name = arguments[0]
+        helpers.COLORIZE = arguments.color
 
         self._configurator = variables.configurator
         self._rebuild_modules = variables.rebuild_modules
@@ -63,64 +53,79 @@ class Upkern:
         self._dry_run = variables.dry_run
         self._remove = variables.remove
 
-    def Run(self):
-        try:
-            # Handle the kernel parts.
-            kernel = Kernel(self._configurator,
-                self._kernel_name, self._rebuild_modules, 
-                self._configuration, self._debug, self._verbose, 
-                self._quiet, self._dry_run)
+    def run(self):
+        verbosity = {
+                "debug": self._debug,
+                "verbose": self._verbose,
+                "quiet": self._quiet,
+                "dry_run": self._dry_run,
+                }
 
-            if self._remove:
-                kernel.remove()
-            else:
-                kernel.configure()
-                if self._time_build: start_time = time.time()
-                kernel.build()
-                if self._time_build: stop_time = time.time()
-                kernel.install()
-        except KernelException, e:
-            raise UpkernException(e.get_message())
+        kernel_params = {}
+        kernel_params['configurator'] = self._configurator
+        kernel_params['name'] = self._kernel
+        kernel_params['rebuild_modules'] = self._rebuild_modules
+        kernel_params['configuration'] = self._configuration
+        kernel_params.update(verbosity)
 
-        try:
-            # Handle the boot loader stuffs.
-            boot_loader = BootLoader(kernel, self._kernel_options, 
-                self._debug, self._verbose, self._quiet, self._dry_run)
-            boot_loader.create_configuration()
-            boot_loader.install_configuration()
-        except BootLoaderException, e:
-            raise UpkernException(e.get_message())
-        except GrubException, e:
-            raise UpkernException(e.get_message())
-        except IOError, e:
-            raise UpkernException("No more space available on /boot!")
+        kernel = Kernel(**kernel_params)
+
+        if self._remove:
+            kernel.remove()
+        else:
+            kernel.configure()
+
+            if self._time_build:
+                start_time = time.time()
+
+            kernel.build()
+
+            if self._time_build:
+                stop_time = time.time()
+
+            kernel.install()
+
+        bootloader_params = {}
+        bootloader_params['kernel'] = kernel
+        bootloader_params['kernel_options'] = self._kernel_options
+        bootloader_params.update(verbosity)
+
+        bootloader = BootLoader(**bootloader_params)
+        
+        if self._print_bootloader_configuration:
+            helpers.colorize("GREEN", bootloader)
+
+        bootloader.install_configuration()
 
         if self._editor:
             command_list = [
-                self._editor, boot_loader.get_config_url()
+                self._editor,
+                boot_loader.configuration_path
                 ]
             os.system(" ".join(command_list))
 
-        final_output_message_list = [
-            "The kernel, ", kernel.get_name(), 
-            ", has been successfully installed.",
-            ]
         if self._time_build:
             hours = int((stop_time - start_time)/3600)
             minutes = int(((stop_time - start_time) % 3600)/60)
             seconds = int((stop_time - start_time) % 60)
-            final_output_message_list.append( \
-                "  The time to build the kernel was: " + str(hours) + \
-                ":" + str(minutes) + ":" + str(seconds) + ".")
-        final_output_message_list[len(final_output_message_list):] = [
-            "  Please, check that all config files are in the ",
-            "appropriate place and that there are no errors in the ",
-            "configuration of the boot process.  It would be ",
-            "unfortunate if you were not able to boot the kernel we ",
-            "just prepared."
-            ]
-        for string in textwrap.wrap(''.join(final_output_message_list)):
-            print string
+
+            time_list = [
+                    "The time to build the kernel was %02d:%02d:%02d.",
+                    ] % (hours, minutes, seconds)
+
+            for line in textwrap.wrap(''.join(time_list)):
+                print line
+
+        conclusion_list = [
+                "The kernel, %s, has been successfully installed.  Please, ",
+                "check that all configuration files are in the appropriate ",
+                "place and that there are no errors in the boot loader ",
+                "configuration.  It would be unfortunate if you were not able ",
+                "to boo the kernel we just prepared.",
+                ] % kernel.name
+
+        for line in textwrap.wrap(''.join(conclusion_list)):
+            print line
 
     def _parseOptions(self, argv, parser):
         configurators = ["config", "menuconfig", "xconfig", "gconfig",
