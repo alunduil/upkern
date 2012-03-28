@@ -154,7 +154,7 @@ class UpkernOptions(object):
                 "background to color for (light or dark).  This defaults to ",
                 "auto.",
                 ]
-        self.parser.add_arguments("--color", 
+        self.parser.add_argument("--color", 
                 choices = ["none", "light", "dark", "auto"], default = "none",
                 help = "".join(help_list))
 
