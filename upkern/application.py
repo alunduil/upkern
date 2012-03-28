@@ -25,7 +25,7 @@ upkern application.
 
 import argparse
 
-import upkern.helpers
+import helpers
 
 class UpkernApplication(object):
     """Main application class for upkern."""
