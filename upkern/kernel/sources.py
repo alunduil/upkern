@@ -129,36 +129,14 @@ class Sources(object):
             if self.arguments["verbose"]:
                 helpers.verbose("Configuration file: %s", configuration)
 
-            shutil.copy('/boot/' + configuration, '/usr/src/linux/.config')
-
-    def _dry_copy_config(self):
-        """Dry run of _copy_config.
-
-        """
-        if self._debug: output.debug(__file__, {"helpers.is_boot_mounted()":helpers.is_boot_mounted()})
-        if not helpers.is_boot_mounted():
-            if self._verbose: output.verbose("Mounting Boot for Configuration File")
-            output.verbose("mount /boot")
-            output.error("--dry-run requires that you manually mount /boot")
-            output.verbose("umount /boot")
-        else:
-            config_list = os.listdir('/boot')
-            config_list = filter(lambda x: re.match('config-.+', x),
-                config_list)
-
-            keys = map(self._create_kernel_key, config_list)
-            config_dict = dict(zip(keys, config_list))
-
-            if self._debug: output.debug(__file__, {"keys": keys, "config_list": config_list, "config_dict": config_dict})
-
-            result_list = map(lambda x: config_dict[x], sorted(config_dict.keys()))
-            if self._debug: output.debug(__file__, {"result_list": result_list})
-
-            config_list = result_list
-
-            if len(config_list) > 0:
-                output.verbose("cp /boot/%s /usr/src/linux/.config", 
-                    config_list[-1])
+            if self.arguments["dry_run"]:
+                dry_list = [
+                        "cp /boot/%s /usr/src/linux/.config",
+                        ]
+                helpers.colorize("GREEN", 
+                        "".join(dry_list).format(configuration))
+            else:
+                shutil.copy('/boot/' + configuration, '/usr/src/linux/.config')
 
     def _set_symlink(self):
         """Sets the symlink to the new kernel directory.
