@@ -25,8 +25,6 @@ upkern application.
 
 import argparse
 
-VERSION = "4.0.0"
-
 class UpkernApplication(object):
     """Main application class for upkern."""
 
@@ -35,97 +33,73 @@ class UpkernApplication(object):
         self._verbose = False
         self._quiet = False
 
-        arguments = UpkernOptions("upkern").parsed_args
-
-        self._quiet = arguments.quiet
-        self._debug = arguments.debug
+        self.arguments = UpkernOptions("upkern").parsed_args
 
         # If we have debugging turned on we should also have verbose.
-        if self._debug: 
-            self._verbose = True
-        else: 
-            self._verbose = arguments.verbose
+        if self.arguments.debug: 
+            self.arguments.verbose = True
 
         # If we have verbose we shouldn't be quiet.
-        if self._verbose: 
-            self._quiet = False
+        if self.arguments.verbose: 
+            self.arguments.quiet = False
 
         # Other option handling ...
-        helpers.COLORIZE = arguments.color
+        helpers.COLORIZE = self.arguments.color
 
     def run(self):
         verbosity = {
-                "debug": self._debug,
-                "verbose": self._verbose,
-                "quiet": self._quiet,
-                "dry_run": self._dry_run,
+                "debug": self.arguments.debug,
+                "verbose": self.arguments.verbose,
+                "quiet": self.arguments.quiet,
+                "dry_run": self.arguments.dry_run,
                 }
 
-        kernel_params = {}
-        kernel_params['configurator'] = self._configurator
-        kernel_params['name'] = self._kernel
-        kernel_params['rebuild_modules'] = self._rebuild_modules
-        kernel_params['configuration'] = self._configuration
+        kernel_params = {
+                "name": self.arguments.name,
+                }
         kernel_params.update(verbosity)
 
-        kernel = Kernel(**kernel_params)
+        sources = kernel.Sources(**kernel_params)
+        sources.prepare(configuration = self.arguments.config)
+        sources.configure(self.arguments.configurator)
 
-        if self._remove:
-            kernel.remove()
-        else:
-            kernel.configure()
+        if self.arguments.time:
+            start = datetime.now()
 
-            if self._time_build:
-                start_time = time.time()
+        binary = sources.build()
 
-            kernel.build()
+        if self.arguments.time:
+            delta = datetime.now() - start
 
-            if self._time_build:
-                stop_time = time.time()
+        if self.arguments.rebuild_modules:
+            sources.rebuild_modules()
 
-            kernel.install()
+        binary.install()
 
         bootloader_params = {}
-        bootloader_params['kernel'] = kernel
-        bootloader_params['kernel_options'] = self._kernel_options
         bootloader_params.update(verbosity)
 
         bootloader = BootLoader(**bootloader_params)
         
-        if self._print_bootloader_configuration:
-            helpers.colorize("GREEN", bootloader)
+        if self.arguments.debug:
+            helpers.colorize("GREEN", bootloader.configuration)
 
-        bootloader.install_configuration()
-
-        if self._editor:
-            command_list = [
-                self._editor,
-                boot_loader.configuration_path
-                ]
-            os.system(" ".join(command_list))
-
-        if self._time_build:
-            hours = int((stop_time - start_time)/3600)
-            minutes = int(((stop_time - start_time) % 3600)/60)
-            seconds = int((stop_time - start_time) % 60)
-
-            time_list = [
-                    "The time to build the kernel was %02d:%02d:%02d.",
-                    ] % (hours, minutes, seconds)
-
-            for line in textwrap.wrap(''.join(time_list)):
-                print line
+        bootloader.configuration.prepare(kernel = binary, kernel_options = self.arguments.options)
+        bootloader.configuration.install()
 
         conclusion_list = [
-                "The kernel, %s, has been successfully installed.  Please, ",
-                "check that all configuration files are in the appropriate ",
-                "place and that there are no errors in the boot loader ",
-                "configuration.  It would be unfortunate if you were not able ",
-                "to boo the kernel we just prepared.",
-                ] % kernel.name
+                "The kernel, %s, has been successfully installed.  ",
+                "Please, check that all configuration files are ",
+                "installed correctly and the bootloader is configured ",
+                "correctly.",
+                ] % binary.name
 
-        for line in textwrap.wrap(''.join(conclusion_list)):
-            print line
+        if self.arguments.time:
+            conclusion_list.extend([
+                "The kernel's build time was %s",
+                ] % delta)
+
+        print "".join(conclusion_list)
 
 class UpkernOptions(object):
     """Options for the upkern application."""
@@ -149,7 +123,7 @@ class UpkernOptions(object):
         """Add the options to the parser."""
 
         self._parser.add_argument("--version", action = "version", 
-                version = "%(prog)s %(VERSION)s")
+                version = "%(prog)s 4.0.0")
 
         # --verbose, -v
         help_list = [
@@ -234,7 +208,8 @@ class UpkernOptions(object):
         help_list = [
                 "Makes upkern use module-rebuild to rebuild the modules for ",
                 "this new kernel (requires the module-rebuild use flag or a ",
-                "separate install of module-rebuild)",
+                "separate install of module-rebuild).  If module-rebuild is ",
+                "not available; this results in a no-op and no harm is done. ",
                 ]
         self._parser.add_argument("--rebuild-modules", "-r", action = "store_true",
                 default = False, dest = "rebuild_modules", 
@@ -248,6 +223,12 @@ class UpkernOptions(object):
                 ]
         self._parser.add_argument("--time", "-t", action = "store_true", 
                 default = False, help = "".join(help_list))
+
+        # [name]
+        help_list = [
+                "The name of the kernel (using ebuild conventions) to build.",
+                ]
+        self._parser.add_argument("name", nargs = "?", help = "".join(help_list))
 
         return self._parser
 
