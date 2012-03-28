@@ -64,7 +64,7 @@ class UpkernApplication(object):
 
         sources = kernel.Sources(**kernel_params)
         sources.prepare(configuration = self.arguments.config)
-        sources.configure(self.arguments.configurator)
+        sources.configure(configurator = self.arguments.configurator)
 
         if self.arguments.time:
             start = datetime.now()

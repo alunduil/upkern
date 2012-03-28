@@ -16,7 +16,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Corky helper functions.
+"""Upkern helper functions.
 
 Simple things like printing common errors, verbose, and debugging output.
 
@@ -101,4 +101,19 @@ def error(message = None, *args, **kwargs):
 
     for line in output:
         colorize("RED", "E: %s" % line, sys.stderr)
+
+def sufficient_privileges(short_circuit = False):
+    """Return the truthness of the process being root."""
+    return short_circuit or os.getuid() == 0
+
+def mountedboot(func):
+    def new_func(*args, **kargs):
+        if not is_boot_mounted():
+            os.system('mount /boot')
+            res = func(*args, **kargs)
+            os.system('umount /boot')
+        else:
+            res = func(*args, **kargs)
+        return res
+    return new_func
 
