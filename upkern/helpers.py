@@ -32,7 +32,7 @@ import sys
 
 from inspect import stack
 
-from colors import TerminalController
+from upkern.colors import TerminalController
 
 TERMINAL = TerminalController()
 

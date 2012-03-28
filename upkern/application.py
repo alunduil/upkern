@@ -217,7 +217,7 @@ class UpkernOptions(object):
                 "Specifies the configuration file to load into the kernel ",
                 "before running the configurator.",
                 ]
-        self._parser.add_argument('--config', '-f', defatul = "",
+        self._parser.add_argument('--config', '-f', default = "",
                 help = "".join(help_list))
 
         # --rebuild-modules, -r

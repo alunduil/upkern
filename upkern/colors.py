@@ -4,6 +4,8 @@
 # http://code.activestate.com/recipes/
 # 475116-using-terminfo-for-portable-color-output-cursor-co/
 
+"""Provides the color interface for upkern."""
+
 __all__ = [
         "TerminalController",
         ]
