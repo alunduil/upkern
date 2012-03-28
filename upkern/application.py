@@ -53,14 +53,6 @@ class UpkernApplication(object):
         # Other option handling ...
         helpers.COLORIZE = arguments.color
 
-        self._configurator = variables.configurator
-        self._rebuild_modules = variables.rebuild_modules
-        self._time_build = variables.time_build
-        self._kernel_options = variables.kernel_options
-        self._configuration = variables.configuration
-        self._dry_run = variables.dry_run
-        self._remove = variables.remove
-
     def run(self):
         verbosity = {
                 "debug": self._debug,
@@ -183,11 +175,26 @@ class UpkernOptions(object):
                 default = False, help = "".join(help_list))
 
         # --configurator, -c
+        configurator_list = [
+                "config",
+                "menuconfig",
+                "nconfig",
+                "xconfig",
+                "gconfig",
+                "oldconfig",
+                "silentoldconfig",
+                "defconfig",
+                "${PLATFORM}_defconfig",
+                "allyesconfig",
+                "allmodconfig",
+                "allnoconfig",
+                "randconfig",
+                ]
         help_list = [
                 "Specifies which configurator should be used to configure ",
                 "the kernel sources.  The configurator can be on of the ",
                 "following: ",
-                ", ".join(kernel.configurators),
+                ", ".join(configurators_list),
                 ".  All the configurators are documented in the kernel ",
                 "source files.",
                 ]
