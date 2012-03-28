@@ -147,6 +147,16 @@ class UpkernOptions(object):
                 ]
         self._parser.add_argument("--quiet", "-q", action = "store_true",
                 default = False, help = "".join(help_list))
+        
+        # --color=[none,light,dark,auto]
+        help_list = [
+                "Specifies whether output should use color and which type of ",
+                "background to color for (light or dark).  This defaults to ",
+                "auto.",
+                ]
+        self.parser.add_arguments("--color", 
+                choices = ["none", "light", "dark", "auto"], default = "none",
+                help = "".join(help_list))
 
         # --dry-run, -d
         help_list = [
