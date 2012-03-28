@@ -99,7 +99,7 @@ class UpkernApplication(object):
                 "The kernel's build time was %s",
                 ] % delta)
 
-        print "".join(conclusion_list)
+        print("".join(conclusion_list))
 
 class UpkernOptions(object):
     """Options for the upkern application."""
