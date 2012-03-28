@@ -175,7 +175,7 @@ class UpkernOptions(object):
                 default = False, help = "".join(help_list))
 
         # --configurator, -c
-        configurator_list = [
+        configurators_list = [
                 "config",
                 "menuconfig",
                 "nconfig",
