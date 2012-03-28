@@ -174,6 +174,16 @@ class UpkernOptions(object):
         self._parser.add_argument("--quiet", "-q", action = "store_true",
                 default = False, help = "".join(help_list))
 
+        # --dry-run, -d
+        help_list = [
+                "Specifies that none of the actions that can modify the ",
+                "filesystem should occur but they should be printed to the ",
+                "screen.  This way it can be seen what upkern will do ",
+                "without actually doing it.",
+                ]
+        self._parser.add_argument("--dry-run", "-d", action = "store_true", 
+                dest = "dry_run", default = False, help = "".join(help_list))
+
         # --configurator, -c
         configurators_list = [
                 "config",
@@ -238,16 +248,6 @@ class UpkernOptions(object):
                 ]
         self._parser.add_argument("--time", "-t", action = "store_true", 
                 default = False, help = "".join(help_list))
-
-        # --dry-run, -d
-        help_list = [
-                "Specifies that none of the actions that can modify the ",
-                "filesystem should occur but they should be printed to the ",
-                "screen.  This way it can be seen what upkern will do ",
-                "without actually doing it.",
-                ]
-        self._parser.add_argument("--dry-run", "-d", action = "store_true", 
-                dest = "dry_run", default = False, help = "".join(help_list))
 
         return self._parser
 
