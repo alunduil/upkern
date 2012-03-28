@@ -247,7 +247,7 @@ class UpkernOptions(object):
                 "without actually doing it.",
                 ]
         self._parser.add_argument("--dry-run", "-d", action = "store_true", 
-                dest = "dry_run", defaults = False, help = "".join(help_list))
+                dest = "dry_run", default = False, help = "".join(help_list))
 
         return self._parser
 
