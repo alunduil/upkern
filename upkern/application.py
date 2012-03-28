@@ -159,6 +159,29 @@ class UpkernOptions(object):
         self._parser.add_argument("--version", action = "version", 
                 version = "%(prog)s %(VERSION)s")
 
+        # --verbose, -v
+        help_list = [
+                "Specifies verbose output from upkern.",
+                ]
+        self._parser.add_argument("--verbose", "-v", action = "store_true",
+                default = "", help = "".join(help_list))
+
+        # --debug, -D
+        help_list = [
+                "Specifies debugging output from upkern.  Implies verbose ",
+                "output from upkern.",
+                ]
+        self._parser.add_argument("--debug", "-D", action = "store_true",
+                default = False, help = "".join(help_list))
+
+        # --quiet, -q
+        help_list = [
+                "Specifies quiet output from upkern.  This is superceded by ",
+                "verbose output.",
+                ]
+        self._parser.add_argument("--quiet", "-q", action = "store_true",
+                default = False, help = "".join(help_list))
+
         # --configurator, -c
         help_list = [
                 "Specifies which configurator should be used to configure ",
@@ -172,97 +195,52 @@ class UpkernOptions(object):
                 choices = kernel.configurators, default = "menuconfig",
                 help = "".join(help_list))
 
-        options_help_list = [
-            "This string is literally tacked onto the kernel options ",
-            "in your boot loader's configuration file.  This is the ",
-            "place you would want to stick a framebuffer line, or any ",
-            "other options you want your kernel to have."
-            ]
-        self._parser.add_argument('--options', '-o', dest='kernel_options',
-            default='', help=''.join(options_help_list))
+        # --options, -o
+        help_list = [
+                "This string is literally tacked onto the kernel options ",
+                "passed in by the bootloader.  This is where one would place ",
+                "a framebuffer line or any other options to pass to the new ",
+                "kernel."
+                ]
+        self._parser.add_argument("--options", "-o", dest = "kernel_options",
+                default = "", help = "".join(help_list))
 
-        config_file_help_list = [
-            "This specifies the configuration file to load into the ",
-            "kernel before configuration."
-            ]
-        self._parser.add_argument('--configuration', '-C', default='',
-            help=''.join(config_file_help_list))
+        # --config, -f
+        help_list = [
+                "Specifies the configuration file to load into the kernel ",
+                "before running the configurator.",
+                ]
+        self._parser.add_argument('--config', '-f', defatul = "",
+                help = "".join(help_list))
 
-        """
-        @todo Make this work correctly.
+        # --rebuild-modules, -r
+        help_list = [
+                "Makes upkern use module-rebuild to rebuild the modules for ",
+                "this new kernel (requires the module-rebuild use flag or a ",
+                "separate install of module-rebuild)",
+                ]
+        self._parser.add_argument("--rebuild-modules", "-r", action = "store_true",
+                default = False, dest = "rebuild_modules", 
+                help = "".join(help_list))
 
-        editor_help_list = [
-            "Specify the editor to use for editing the boot loader ",
-            "configuration file after " + argv[0] + " has already ",
-            "modified it.  The default editor is the one defined by ",
-            "your ${EDITOR} environment variable."
-            ]
-        self._parser.add_argument('--editor', '-e', 
-            default=os.getenv("EDITOR", ""), 
-            help=''.join(editor_help_list))
-        """
+        # --time, -t
+        help_list = [
+                "Times the actual build of the kernel.  Allows one to ",
+                "determine if kernels are building faster based on different ",
+                "configurations, etc."
+                ]
+        self._parser.add_argument("--time", "-t", action = "store_true", 
+                default = False, help = "".join(help_list))
 
-        verbose_help_list = [
-            "Sets verbose output."
-            ]
-        self._parser.add_argument('--verbose', '-v', action='store_true',
-            default=False, help=''.join(verbose_help_list))
-
-        debug_help_list = [
-            "Sets debugging output (implies verbose output)."
-            ]
-        self._parser.add_argument('--debug', '-d', action='store_true',
-            default=False, help=''.join(debug_help_list))
-
-        quiet_help_list = [
-            "Sets output to be a bit quieter.  If either debug or ",
-            "verbose are set this option has no effect."
-            ]
-        self._parser.add_argument('--quiet', '-q', action='store_true',
-            default=False, help=''.join(quiet_help_list))
-
-        rebuild_modules_help_list = [
-            "Makes " + sys.argv[0] + " use module-rebuild to rebuild ",
-            "the modules you have pulled in via portage for the new ",
-            "kernel."
-            ]
-        self._parser.add_argument('--rebuild-modules', '-r', action='store_true',
-            default=False, dest='rebuild_modules',
-            help=''.join(rebuild_modules_help_list))
-
-        time_help_list = [
-            "Times the actual build of the kernel allowing one to ",
-            "determine if kernels are building faster based on ",
-            "different aspects of the machine."
-            ]
-        self._parser.add_argument('--time', '-t', action='store_true',
-            dest='time_build', default=False,
-            help=''.join(time_help_list))
-
-        dry_run_help_list = [
-            "Specifies that none of the actions that can modify the ",
-            "filesystem should occur, but they should be printed to ",
-            "the screen instead.  This way it can be seen what will ",
-            "happen without actually doing it."
-            ]
-        self._parser.add_argument('--dry-run', '-D', action='store_true', 
-            dest='dry_run', default=False, 
-            help=''.join(dry_run_help_list))
-
-        remove_help_list = [
-            "Will completely remove the specified kernel from the ",
-            "system.  This will not remove the sources from the ",
-            "world file."
-            ]
-        self._parser.add_argument('--remove', '-R', action='store_true',
-            dest='remove', default=False, 
-            help=''.join(remove_help_list))
-
-        version_help_list = [
-            "Print version information about upkern."
-            ]
-        self._parser.add_argument('--version', '-V', action='callback',
-            callback=self._version, help=''.join(version_help_list))
+        # --dry-run, -d
+        help_list = [
+                "Specifies that none of the actions that can modify the ",
+                "filesystem should occur but they should be printed to the ",
+                "screen.  This way it can be seen what upkern will do ",
+                "without actually doing it.",
+                ]
+        self._parser.add_argument("--dry-run", "-d", action = "store_true", 
+                dest = "dry_run", defaults = False, help = "".join(help_list))
 
         return self._parser
 
