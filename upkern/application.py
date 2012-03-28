@@ -199,7 +199,7 @@ class UpkernOptions(object):
                 "source files.",
                 ]
         self._parser.add_argument("--configurator", "-c", 
-                choices = kernel.configurators, default = "menuconfig",
+                choices = configurators_list, default = "menuconfig",
                 help = "".join(help_list))
 
         # --options, -o
