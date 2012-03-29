@@ -238,7 +238,7 @@ class Sources(object):
             original = os.readlink("/usr/src/linux")
 
             if self.arguments["dry_run"]:
-                helpers.colorize("GREEN", "rm /usr/src/linux"))
+                helpers.colorize("GREEN", "rm /usr/src/linux")
             else:
                 try:
                     os.remove('/usr/src/linux')
