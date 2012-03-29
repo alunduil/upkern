@@ -79,22 +79,8 @@ class Sources(object):
         pass # "-" + self._directory_name.partition('-')[2]
 
     def prepare(self, configuration = ""):
-        if self.arguments["dry_run"]:
-            pass # self._dry_set_symlink() # Update the /usr/src symlink.
-            pass # self._dry_copy_config() # Copy the configuration to /usr/src/linux/.config
-        else:
-            try:
-                pass # self._set_symlink() # Update the /usr/src/symlink
-            except:
-                # TODO Undo the symlink
-                # TODO raise a failure exception
-            
-            try:
-                # Copy the configuration to /usr/src/linux/.config
-                self._copy_config(configuration)
-            except:
-                # TODO Undo the configuration copy
-                # TODO raise a failure exception
+        self._set_symlink()
+        self._copy_config(configuration)
 
     def configure(self, configurator = ""):
         pass
@@ -111,50 +97,99 @@ class Sources(object):
 
     @mountedboot
     def _copy_config(self, configuration = ""):
-        """Copy the configuration file into /usr/src/linux/.config."""
-            if not len(configuration):
-                config_list = [ f for f in os.listdir('/boot') if re.match('config-.+', f) ]
+        """Copy the configuration file into /usr/src/linux/.config.
+        
+        This operation can be assumed to be atomic.  If a failure occurs all
+        actions taken up to that point shall be reverted and an appropriate 
+        exception raised.
+        
+        """
 
-                keys = map(self._create_kernel_key, config_list)
-                config_dict = dict(zip(keys, config_list))
+        # If no configuration file is passed; find the highest versioned one
+        # in /boot.
+        if not len(configuration):
+            config_list = [ 
+                    f for f in os.listdir('/boot') \
+                            if re.match('config-.+', f) 
+                    ]
 
-                config_list = map(lambda x: config_dict[x], sorted(config_dict.keys()))
+            keys = map(self._create_kernel_key, config_list)
+            config_dict = dict(zip(keys, config_list))
 
-                if len(config_list):
-                    configuration = config_list[-1]
+            config_list = map(lambda x: config_dict[x], 
+                    sorted(config_dict.keys()))
 
-            if not len(configuration):
-                return
+            if len(config_list):
+                configuration = config_list[-1]
 
-            if self.arguments["verbose"]:
-                helpers.verbose("Configuration file: %s", configuration)
+        # If we didn't find a configuration file there is nothing further to
+        # do and we can return.
+        if not len(configuration):
+            return
 
-            if self.arguments["dry_run"]:
-                dry_list = [
-                        "cp /boot/%s /usr/src/linux/.config",
-                        ]
-                helpers.colorize("GREEN", 
-                        "".join(dry_list).format(configuration))
-            else:
-                shutil.copy('/boot/' + configuration, '/usr/src/linux/.config')
+        if self.arguments["verbose"]:
+            helpers.verbose("Using Configuration File: %s", configuration)
+
+        # Perform the necessary actions (outlined in dry_run performed 
+        # otherwise).  Keeping in mind that any action on the system itself
+        # must be undone if an error occurs.
+        if self.arguments["dry_run"]:
+            dry_list = [
+                    "cp /usr/src/linux/.config{,.bak}",
+                    "cp /boot/%s /usr/src/linux/.config",
+                    ]
+            helpers.colorize("GREEN", 
+                    "\n".join(dry_list).format(configuration))
+        else:
+            try:
+                shutil.copy('/usr/src/linux/.config', 
+                        '/usr/src/linux/.config.bak')
+                shutil.copy('/boot/%s'.format(configuration), 
+                        '/usr/src/linux/.config')
+            except Exception e:
+                if os.access("/usr/src/linux/.config.bak", os.W_OK):
+                    os.remove("/usr/src/linux/.config")
+                    os.rename("/usr/src/linux/.config.bak", 
+                            "/usr/src/linux/.config")
+                raise e
 
     def _set_symlink(self):
         """Sets the symlink to the new kernel directory.
-
+        
+        This operation can be assumed to be atomic.  If a failure occurs all
+        actions taken up to that point shall be reverted and an appropriate
+        exception raised.
+        
         """
+
+        original = None
+
         if os.path.islink('/usr/src/linux'):
-            os.remove('/usr/src/linux')
-        os.symlink('/usr/src/' + self._directory_name, 
-            '/usr/src/linux')
+            original = os.readlink("/usr/src/linux")
 
-    def _dry_set_symlink(self):
-        """Dry run of _set_symlink.
+            if self.arguments["dry_run"]:
+                helpers.colorize("GREEN", "rm /usr/src/linux"))
+            else:
+                try:
+                    os.remove('/usr/src/linux')
+                except Exception e:
+                    os.symlink(original, "/usr/src/linux")
+                    raise e
 
-        """
-        if os.path.islink('/usr/src/linux'): 
-            output.verbose("rm /usr/src/linux")
-        output.verbose("ln -s /usr/src/%s /usr/src/linux", 
-            self._directory_name)
+        if self.arguments["dry_run"]:
+            dry_list = [
+                    "ln -s /usr/src/%s /usr/src/linux",
+                    ]
+            helpers.colorize("GREEN", 
+                    "\n".join(dry_list).format(self.directory_name))
+        else:
+            try:
+                os.symlink('/usr/src/%s'.format(self.directory_name),
+                        '/usr/src/linux')
+            except Exception e:
+                os.remove("/usr/src/linux")
+                os.symlink(original, "/usr/src/linux")
+                raise e
 
     def _have_module_rebuild(self):
         """Determine if module-rebuild is installed or not.
