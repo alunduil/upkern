@@ -72,7 +72,30 @@ class Sources(object):
 
     @property
     def install_image(self):
-        pass # self._get_install_image()
+        """Returns the name of the install image for this architecture.
+        
+        Return bzImage, vmlinux, etc depending on the arch of the machine.
+
+        From the kernel README:
+          
+        Although originally developed first for 32-bit x86-based PCs (386 or
+        higher), today Linux also runs on (at least) the Compaq Alpha AXP, Sun
+        SPARC and UltraSPARC, Motorola 68000, PowerPC, PowerPC64, ARM, Hitachi
+        SuperH, Cell, IBM S/390, MIPS, HP PA-RISC, Intel IA-64, DEC VAX, AMD
+        x86-64, AXIS CRIS, Xtensa, AVR32 and Renesas M32R architectures.
+
+        We will support more of these as we get accurate reports of what image
+        is produced by the default make command.
+
+        """
+
+        if not hasattr(self, "_install_image"):
+            self._install_image = {
+                    "x86_64": "bzImage",
+                    "i686": "bzImage",
+                    }[platform.machine()]
+
+        return self._install_image
 
     @property
     def suffix(self):
@@ -89,11 +112,15 @@ class Sources(object):
         portage_config = portage.config()
 
     def rebuild_modules(self):
-        if not self._have_module_rebuild():
+        if not hasattr(self.rebuild_modules, "has_rebuild_modules"):
+            self.rebuild_modules.has_rebuild_modules = \
+                    not len(GentoolkitQuery("sys-kernel/module-rebuild").find_installed())
+
+        if not self.rebuild_modules.has_rebuild_modules:
             return
 
         if self.arguments["verbose"]:
-            helpers.verbose("Rebuild Modules: True")
+            helpers.verbose("Rebuilding Modules: True")
 
     @mountedboot
     def _copy_config(self, configuration = ""):
@@ -190,52 +217,6 @@ class Sources(object):
                 os.remove("/usr/src/linux")
                 os.symlink(original, "/usr/src/linux")
                 raise e
-
-    def _have_module_rebuild(self):
-        """Determine if module-rebuild is installed or not.
-
-        Using the new stuffs we've learned we can quickly determine
-        if module-rebuild is installed on this system or not.
-
-        """
-        from gentoolkit.query import Query
-        installed = \
-            Query("sys-kernel/module-rebuild").find_installed()
-        if len(installed) < 1: return False
-        return True
-
-    def _get_install_image(self):
-        """Get the image that will be created for this architecture.
-
-        Return bzImage, vmlinux, etc depending on the arch of the 
-        machine.
-
-        From the kernel README:
-          
-        Although originally developed first for 32-bit x86-based PCs 
-        (386 or higher), today Linux also runs on (at least) the Compaq
-        Alpha AXP, Sun SPARC and UltraSPARC, Motorola 68000, PowerPC, 
-        PowerPC64, ARM, Hitachi SuperH, Cell, IBM S/390, MIPS, 
-        HP PA-RISC, Intel IA-64, DEC VAX, AMD x86-64, AXIS CRIS, 
-        Xtensa, AVR32 and Renesas M32R architectures.
-
-        We will support more of these as we get accurate reports of
-        what the image produced by the default make command is.
-
-        """
-        arch = platform.machine()
-        if self._debug: output.debug(__file__, {'arch':arch})
-
-        if arch == "x86_64": return "bzImage"
-        elif arch == "i686": return "bzImage"
-
-        error_list = [
-            "We do not know the output for your architecture. ",
-            "Please, submit a bug report to",
-            "http://bugzilla.alunduil.com with your architecture and",
-            "the image that is created by default."
-            ]
-        raise KernelException(" ".join(error_list))
 
     def _get_kernel_names(self, kernel_name):
         """Gets the names for this kernel.
