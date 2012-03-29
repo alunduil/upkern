@@ -242,9 +242,9 @@ class Sources(object):
             else:
                 try:
                     os.remove('/usr/src/linux')
-                except Exception e:
+                except Exception as error:
                     os.symlink(original, "/usr/src/linux")
-                    raise e
+                    raise error
 
         if self.arguments["dry_run"]:
             dry_list = [
