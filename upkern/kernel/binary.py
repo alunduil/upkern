@@ -30,7 +30,7 @@ class Binary(object):
 
     """
 
-    def __init__(self, debug = False, verbose = False, quiet = False,
+    def __init__(self, directory, debug = False, verbose = False, quiet = False,
             dry_run = False): 
         """Returns a kernel binary object.
 
@@ -42,6 +42,7 @@ class Binary(object):
         """
 
         self.arguments = {
+                "directory": directory,
                 "debug": debug,
                 "verbose": verbose,
                 "quiet": quiet,
@@ -74,4 +75,42 @@ class Binary(object):
                     }[platform.machine()]
 
         return self._install_image
+
+    @property
+    def image_directory(self):
+        if not hasattr(self, "_image_directory"):
+            self._image_directory = "arch/%s/boot/".format(
+                    re.sub(r"i\d86", "x86", platform.machine()))
+        return self._image_directory
+
+    @property
+    def suffix(self):
+        if not hasattr(self, "_suffix"):
+            self._suffix = self.arguments["directory"].partition("-")[2]
+        return self._suffix
+    
+    @mountedboot
+    def install(self):
+        """Install the kernel into /boot."""
+
+        original_directory = os.getcwd()
+
+        if self.arguments["dry_run"]:
+            dry_list = [
+                    "pushd /usr/src/linux",
+                    "cp %s%s /boot/%s%s".format(self.image_directory, self.install_image, self.install_image, self.suffix),
+                    "cp .config /boot/config%s".format(self.suffix),
+                    "cp System.map /boot/System.map%s".format(self.suffix),
+                    "cp System.map /System.map",
+                    "popd",
+                    ]
+            helpers.colorize("GREEN", "\n".join(dry_list))
+        else:
+            # TODO add atomicity to this method.
+            os.chdir("/usr/src/linux")
+            shutil.copy("%s%s".format(self.image_directory, self.install_image), "/boot/%s%s".format(self.install_image, self.suffix))
+            shutil.copy(".config", "/boot/config%s".format(self.suffix))
+            shutil.copy("System.map", "/boot/System.map%s".format(self.suffix))
+            shutil.copy("System.map", "/System.map")
+            os.chdir(original_directory)
 

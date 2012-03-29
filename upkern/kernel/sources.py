@@ -119,8 +119,10 @@ class Sources(object):
         return self._directories
 
     @property
-    def suffix(self):
-        pass # "-" + self._directory_name.partition('-')[2]
+    def portage_config(self):
+        if not hasattr(self, "_portage_config"):
+            self._portage_config = portage.config()
+        return self._portage_config
 
     def prepare(self, configuration = ""):
         self._install_sources()
@@ -128,10 +130,49 @@ class Sources(object):
         self._copy_config(configuration)
 
     def configure(self, configurator = ""):
-        pass
+        """Configure the kernel sources."""
 
+        original_directory = os.getcwd()
+
+        command = "make %s %s".format(self.portage_config["MAKEOPTS"],
+                configurator)
+
+        if self.arguments["dry_run"]:
+            dry_list = [
+                    "pushd /usr/src/linux",
+                    command,
+                    "popd",
+                    ]
+            helpers.colorize("GREEN", "\n".join(dry_list))
+        else:
+            os.chdir('/usr/src/linux')
+            status = subprocess.call(command, shell = True)
+            os.chdir(original_directory)
+        
     def build(self):
-        portage_config = portage.config()
+        """Build the kernel."""
+
+        original_directory = os.getcwd()
+
+        make_options = self.portage_config["MAKEOPTS"]
+        if self.arguments["quiet"]:
+            make_options += " -s"
+
+        command = "make %s && make %s modules_install".format(make_options, make_options)
+
+        if self.arguments["dry_run"]:
+            dry_list = [
+                    "pushd /usr/src/linux",
+                    command,
+                    "popd",
+                    ]
+            helpers.colorize("GREEN", "\n".join(dry_list))
+        else:
+            os.chdir("/usr/src/linux")
+            status = subprocess.call(command, shell = True)
+            os.chdir(original_directory)
+
+        return Binary(self.directory_name)
 
     def rebuild_modules(self):
         if not hasattr(self.rebuild_modules, "has_rebuild_modules"):
@@ -143,6 +184,11 @@ class Sources(object):
 
         if self.arguments["verbose"]:
             helpers.verbose("Rebuilding Modules: True")
+
+        if self.arguments["dry_run"]:
+            helpers.colorize("GREEN", "module-rebuild -X rebuild")
+        else:
+            status = subprocess.call("module-rebuild -X rebuild")
 
     def _install_sources(self):
         """Installs the requested kernel sources using portage.
@@ -290,248 +336,9 @@ class Sources(object):
         
         return key
             
-    def configure(self):
-        """Configure the kernel sources.
-
-        Using the parameters we have collected so far, let us configure
-        the kernel sources we have prepared with the configurator that
-        the user has selected from the strange choices we are given.
-
-        """
-        if not os.access('/usr/src/linux', os.X_OK):
-            raise KernelException("Can't access the kernel source!")
-
-        if self._dry_run:
-            output.verbose("pushd /usr/src/linux")
-        else:
-            opwd = os.getcwd()
-            os.chdir('/usr/src/linux')
-
-        command_list = [
-            "make", self._emerge_config["MAKEOPTS"], 
-            self._configurator
-            ]
-        if self._dry_run:
-            output.verbose(" ".join(command_list))
-            output.verbose("popd")
-        else:
-            os.system(" ".join(command_list))
-            os.chdir(opwd)
-
-    def build(self):
-        """Build the kernel.
-
-        Build the kernel sources in /usr/src/linux, and if necessary 
-        build the modules that portage has previously built for the 
-        kernel.
-
-        """
-        if not os.access('/usr/src/linux', os.X_OK):
-            raise KernelException("Can't access the kernel source!")
-
-        if self._dry_run:
-            output.verbose("pushd /usr/src/linux")
-        else:
-            opwd = os.getcwd()
-            os.chdir('/usr/src/linux')
-
-        makeopts = self._emerge_config["MAKEOPTS"]
-        if self._quiet: makeopts += " -s"
-
-        command_list = [
-            "make", makeopts, "&& make", makeopts, "modules_install"
-            ]
-
-        if self._dry_run:
-            output.verbose(" ".join(command_list))
-        else:
-            os.system(" ".join(command_list))
-
-        if self._rebuild_modules:
-            if self._dry_run:
-                output.verbose("module-rebuild -X rebuild")
-            else:
-                os.system('module-rebuild -X rebuild')
-        if self._dry_run:
-            output.verbose("popd")
-        else:
-            os.chdir(opwd)
-
     def _get_modules_directory(self):
         """Get the modules directory of the kernel.
 
         """
         return "/lib/modules/" + self._directory_name.split("/")[-1]
-
-    def remove(self):
-        """Remove the kernel from the system.
-
-        Remove the kernel by removing the following things:
-         * /usr/src/<sources>
-         * /lib/modules/<sources>
-         * /boot/<stuff>
-         * GRUB entry
-
-        """
-        
-        # Determine if we are running the kernel we just removed:
-        running = Kernel(self._configurator, 
-            self._get_running_kernel_cpv(), self._rebuild_modules,
-            self._configuration, False, False, True, True)
-
-        if self.get_name() == running.get_name():
-            output.status("Will not remove the running kernel.  Please install a different kernel and boot into it before proceeding.")
-            raise KernelException("Cowardly refusing to remove the currently working kernel!")
-
-        # @todo Make this more efficient.
-        # Install the package requested.
-        #from portage import merge
-        #from gentoolkit import split_cpv
-        #category, pkg_name, version, revision = \
-        #    split_cpv(emerge_name)
-        #merge(category, pkg_name+version+revision
-        # @note The following is ugly!
-        opts = ["-C"]
-        if self._verbose: opts.append("-v")
-        command_list = ["emerge", " ".join(opts), "="+self._emerge_name]
-
-        # @todo Any better way to do this?
-        if not self._dry_run and os.getuid() != 0:
-            raise KernelException("Insufficient priveleges to continue!")
-
-        if self._dry_run:
-            output.verbose(" ".join(command_list))
-            output.verbose("rm -rf /usr/src/%s" % self._directory_name)
-            output.verbose("rm -rf %s" % self._get_modules_directory())
-        else:
-            os.system(" ".join(command_list))
-            helpers.recursive_remove("/usr/src/" + self._directory_name)
-            helpers.recursive_remove(self._get_modules_directory())
-        
-        boot_mounted = False
-        if not helpers.is_boot_mounted():
-            if self._dry_run:
-                output.verbose("mount /boot")
-                output.error("--dry-run requires that you manually mount /boot")
-            else:
-                os.system('mount /boot')
-            boot_mounted = True
-
-        if self._dry_run:
-            output.verbose("rm /boot/%s%s", self._install_image, 
-                self._suffix)
-            output.verbose("rm /boot/config%s", self._suffix)
-            output.verbose("rm /boot/System.map%s", self._suffix)
-        else:
-            os.remove('/boot/' + self._install_image + self._suffix)
-            os.remove('/boot/config' + self._suffix)
-            os.remove('/boot/System.map' + self._suffix)
-
-        if boot_mounted: 
-            if self._dry_run:
-                output.verbose("umount /boot")
-            else:
-                os.system('umount /boot')
-
-        # re-symlink the kernel so we leave the system consistent ...
-        if self._dry_run:
-            if os.path.islink('/usr/src/linux'): 
-                output.verbose("rm /usr/src/linux")
-            output.verbose("ln -s /usr/src/%s /usr/src/linux", 
-                running.get_name())
-        else:
-            if os.path.islink('/usr/src/linux'):
-                os.remove('/usr/src/linux')
-            os.symlink('/usr/src/' + running.get_name(), 
-                '/usr/src/linux')
-
-        # Remove from bootloader handled in bootloader?
-        # For now let's say yes.
-
-    def _get_running_kernel_cpv(self):
-        """Get the current running kernel's CPV for portage searches.
-
-        """
-        import platform
-        system, node, release, version, machine, processor = platform.uname()
-        if self._debug: output.debug(__file__, {'release':release})
-        tmp = release.split('-')
-        kernel_cpv = [tmp[0]]
-        if re.search("^rc", tmp[1]):
-            kernel_cpv[0] = "vanilla-sources-" + kernel_cpv[0]
-            kernel_cpv.append(tmp[1])
-            join_char = "_"
-        else:
-            kernel_cpv.extend([tmp[1], tmp[2]])
-            join_char = "-"
-
-        return join_char.join(kernel_cpv)
-        
-    def install(self):
-        """Install the kernel into /boot
-
-        Get all appropriate kernel pieces into the boot area.
-
-        """
-        if not os.access('/usr/src/linux', os.X_OK):
-            raise KernelException("Can't access the kernel source!")
-
-        if self._dry_run:
-            output.verbose("pushd /usr/src/linux")
-        else:
-            opwd = os.getcwd()
-            os.chdir('/usr/src/linux')
-
-        arch_dir = platform.machine()
-        # The following should be necessary on x86 machines.
-        # This needs to be double checked.
-        if re.match('i\d86', arch_dir): arch_dir = "x86"
-
-        if self._verbose: output.verbose("Architecture: %s", arch_dir)
-
-        boot_mounted = False
-        if not helpers.is_boot_mounted():
-            if self._dry_run:
-                output.verbose("mount /boot")
-                output.error("--dry-run requires that you manually mount /boot")
-            else:
-                os.system('mount /boot')
-            boot_mounted = True
-
-        source_dir_list = [
-            "arch/", arch_dir, "/boot/"
-            ]
-        if self._dry_run:
-            output.verbose("cp %s%s /boot/%s%s", 
-                "".join(source_dir_list), self._install_image, 
-                self._install_image, self._suffix)
-            output.verbose("cp .config /boot/config%s", self._suffix)
-            output.verbose("cp System.map /boot/System.map%s", 
-                self._suffix)
-            output.verbose("cp System.map /System.map")
-        else:
-            shutil.copy("".join(source_dir_list) + self._install_image,
-                '/boot/' + self._install_image + self._suffix)
-            shutil.copy('.config', '/boot/config' + self._suffix)
-            shutil.copy('System.map', '/boot/System.map' + \
-                self._suffix)
-            shutil.copy('System.map', '/System.map')
-
-        if boot_mounted: 
-            if self._dry_run:
-                output.verbose("umount /boot")
-            else:
-                os.system('umount /boot')
-        if self._dry_run:
-            output.verbose("popd")
-        else:
-            os.chdir(opwd)
-
-class KernelException(Exception):
-    def __init__(self, message, *args):
-        super(KernelException, self).__init__(args)
-        self._message = message
-
-    def get_message(self):
-        return self._message
 
