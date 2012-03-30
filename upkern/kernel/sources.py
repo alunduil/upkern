@@ -20,7 +20,7 @@ import re
 import os
 import upkern.helpers as helpers
 
-from gentoolkit import query as GentoolkitQuery
+from gentoolkit.query import Query as GentoolkitQuery
 from gentoolkit.helpers import FileOwner
 from upkern.helpers import mountedboot
 
