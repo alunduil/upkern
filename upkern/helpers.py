@@ -78,7 +78,7 @@ def verbose(message = None, *args, **kwargs):
     output = []
 
     if message and len(args):
-        output.append(message.format(args))
+        output.append(message.format(*args))
     elif message:
         output.append(message)
 
