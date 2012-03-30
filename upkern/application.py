@@ -241,7 +241,8 @@ class UpkernOptions(object):
         help_list = [
                 "The name of the kernel (using ebuild conventions) to build.",
                 ]
-        self._parser.add_argument("name", nargs = "?", help = "".join(help_list))
+        self._parser.add_argument("name", nargs = "?", default = "",
+                help = "".join(help_list))
 
         return self._parser
 
