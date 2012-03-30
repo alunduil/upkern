@@ -20,6 +20,7 @@ import os
 import shutil
 import re
 import platform
+import upkern.helpers as helpers
 
 from upkern.helpers import mountedboot
 
