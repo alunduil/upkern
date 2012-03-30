@@ -381,7 +381,7 @@ class Sources(object):
         # must be undone if an error occurs.
         if self.arguments["dry_run"]:
             dry_list = [
-                    "cp /usr/src/linux/.config{,.bak}",
+                    "cp /usr/src/linux/.config{{,.bak}}",
                     "cp /boot/{configuration} /usr/src/linux/.config",
                     ]
             helpers.colorize("GREEN", 
