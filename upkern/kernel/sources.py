@@ -103,8 +103,8 @@ class Sources(object):
         if not hasattr(self, "_package_name"):
             package_expression_list = [
                     r"(?:sys-kernel/)?", # For piping from portage ...
-                    r"(?:(?P<sources>(?:+|\w)(?:[+-]|\w)*)-sources-)?",
-                    r"(?P<version>(?:+|\w)(?:[+-.]|\w)*)",
+                    r"(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+_-]*)-sources-)?",
+                    r"(?P<version>(A-Za-z0-9+_][A-Za-z0-9+_.-]*)",
                     ]
 
             if self.arguments["debug"]:
