@@ -367,12 +367,17 @@ class Sources(object):
 
             if self.arguments["debug"]:
                 helpers.debug(__file__, {
-                    "sorted(dict_.keys())": sorted(dict_.keys()),
+                    "sorted(dict_.keys(), reverse = True)": sorted(dict_.keys(), reverse = True),
                     "config_files": config_files,
                     })
 
             if len(config_list):
-                configuration = config_list[-1]
+                configuration = config_list[0]
+
+            if self.arguments["debug"]:
+                helpers.debug(__file__, {
+                    "configuration": configuration,
+                    })
 
         # If we didn't find a configuration file there is nothing further to
         # do and we can return.
