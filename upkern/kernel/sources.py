@@ -113,6 +113,12 @@ class Sources(object):
                     })
 
             package_expression = re.compile("".join(package_expression_list))
+
+            if self.arguments["debug"]:
+                helpers.debug(__file__, {
+                    "self.arguments[\"name\"]": self.arguments["name"],
+                    })
+
             package_match = package_expression.match(self.arguments["name"])
 
             sources = "gentoo"
