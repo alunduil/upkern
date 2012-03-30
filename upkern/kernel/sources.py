@@ -402,8 +402,9 @@ class Sources(object):
                     "\n".join(dry_list).format(configuration = configuration))
         else:
             try:
-                shutil.copy('/usr/src/linux/.config', 
-                        '/usr/src/linux/.config.bak')
+                if os.access("/usr/src/linux/.config", os.R_OK):
+                    shutil.copy('/usr/src/linux/.config',
+                            '/usr/src/linux/.config.bak')
                 shutil.copy('/boot/{configuration}'.format(
                     configuration = configuration), 
                     '/usr/src/linux/.config')
