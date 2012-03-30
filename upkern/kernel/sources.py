@@ -250,7 +250,10 @@ class Sources(object):
                 pass # TODO raise an appropriate exception.
             os.chdir(original_directory)
 
-        return Binary(self.directory_name)
+        binary_args = self.arguments
+        del binary_args["name"]
+
+        return Binary(self.directory_name, **binary_args)
 
     def rebuild_modules(self):
         """Rebuild any kernel modules installed via portage.
