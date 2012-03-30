@@ -363,7 +363,7 @@ class Sources(object):
             keys = [ self._keyify(c) for c in config_list ]
             dict_ = dict(zip(keys, config_list))
 
-            config_files = [ dict_[k] for k in sorted(dict_.keys()) ] 
+            config_files = [ dict_[k] for k in sorted(dict_.keys(), reverse = True) ] 
 
             if self.arguments["debug"]:
                 helpers.debug(__file__, {
