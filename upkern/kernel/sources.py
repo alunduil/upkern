@@ -304,7 +304,7 @@ class Sources(object):
         if self.arguments["dry_run"]:
             helpers.colorize("GREEN", "module-rebuild -X rebuild")
         else:
-            status = subprocess.call("module-rebuild -X rebuild")
+            status = subprocess.call("module-rebuild -X rebuild", shell = True)
             if status != 0:
                 pass # TODO raise an appropriate exception.
 
