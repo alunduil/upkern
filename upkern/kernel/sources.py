@@ -197,9 +197,15 @@ class Sources(object):
 
         """
 
+        if not self.arguments["quiet"]:
+            print("Preparing the kernel sources ...")
+
         self._install_sources()
         self._set_symlink()
         self._copy_config(configuration)
+
+        if not self.arguments["quiet"]:
+            print("Kernel sources prepared.")
 
     def configure(self, configurator = ""):
         """Configure the kernel sources.
@@ -209,6 +215,9 @@ class Sources(object):
         3. Leave the source directory.
         
         """
+
+        if not self.arguments["quiet"]:
+            print("Configuratin kernel sources ...")
 
         original_directory = os.getcwd()
 
@@ -229,6 +238,9 @@ class Sources(object):
             if status != 0:
                 pass # TODO raise an appropriate exception.
             os.chdir(original_directory)
+
+        if not self.arguments["quiet"]:
+            print("Kernel sources configured.")
         
     def build(self):
         """Build the kernel and return a binary object.
@@ -238,6 +250,9 @@ class Sources(object):
         3. Leave the source directory.
         
         """
+
+        if not self.arguments["quiet"]:
+            print("Building the kernel sources ...")
 
         original_directory = os.getcwd()
 
@@ -265,6 +280,9 @@ class Sources(object):
         binary_args = self.arguments
         del binary_args["name"]
 
+        if not self.arguments["quiet"]:
+            print("Kernel sources built.")
+
         return Binary(self.directory_name, **binary_args)
 
     def rebuild_modules(self):
@@ -273,6 +291,9 @@ class Sources(object):
         Check that module-rebuild is installed and then run it.
 
         """
+
+        if not self.arguments["quiet"]:
+            print("Rebuilding the kernel modules ...")
 
         if not len(GentoolkitQuery("sys-kernel/module-rebuild").find_installed()):
             return
@@ -286,6 +307,9 @@ class Sources(object):
             status = subprocess.call("module-rebuild -X rebuild")
             if status != 0:
                 pass # TODO raise an appropriate exception.
+
+        if not self.arguments["quiet"]:
+            print("Kernel modules rebuilt.")
 
     def _install_sources(self):
         """Installs the requested kernel sources using portage.
