@@ -105,7 +105,7 @@ class Sources(object):
                     r"(?:(?P<sources>[+\w][+-\w]*)-sources-)?",
                     r"(?P<version>[+\w][+-.\w]*)",
                     ]
-            package_expression = re.compile("".join(emerge_expression_list))
+            package_expression = re.compile("".join(package_expression_list))
             package_match = package_expression.match(self.arguments["name"])
 
             sources = "gentoo"
