@@ -136,6 +136,10 @@ class Sources(object):
                 self._package_name += package_match.group("version")
             else:
                 finder = FileOwner()
+
+                if not self.arguments["quiet"]:
+                    print "Determing kernel source package.  This could take some time; please wait ..."
+
                 self._package_name = unicode(finder((self.source_directories[0], ))[0][0])
 
         return self._package_name
