@@ -50,7 +50,8 @@ def colorize(color, message, out = sys.stdout):
     if COLORIZE == "none":
         print >> out, message
     else:
-        print >> out, TERMINAL.render('${%s}%s${NORMAL}' % (color, message))
+        print >> out, TERMINAL.render('${{{color}}}{message}${{NORMAL}}'.format(
+            color = color, message = message))
 
 def debug(file_, message = None, *args, **kwargs):
     """Print a debugging message to the standard error."""
@@ -58,17 +59,18 @@ def debug(file_, message = None, *args, **kwargs):
     output = []
 
     if message and len(args):
-        output.append(message % args)
+        output.append(message.format(args))
     elif message:
         output.append(message)
 
     if len(kwargs.values()):
         output.extend([ 
-            "%s -> %s" % (key, val) for key, val in kwargs.items() ])
+            "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
+            ])
 
     for line in output:
-        colorize("YELLOW", "D: %s:%s %s" % (file_, unicode(stack()[1][2]),
-            line), sys.stderr)
+        colorize("YELLOW", "D: {file_}:{function} {line}".format(file_ = file_,
+            function = unicode(stack()[1][2]), line = line), sys.stderr)
 
 def verbose(message = None, *args, **kwargs):
     """Print a verbose message to the standard error."""
@@ -76,16 +78,17 @@ def verbose(message = None, *args, **kwargs):
     output = []
 
     if message and len(args):
-        output.append(message % args)
+        output.append(message.format(args))
     elif message:
         output.append(message)
 
     if len(kwargs.values()):
         output.extend([
-            "%s -> %s" % (key, val) for key, val in kwargs.items() ])
+            "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
+            ])
 
     for line in output:
-        colorize("BLUE", "V: %s" % line, sys.stderr)
+        colorize("BLUE", "V: {line}".format(line = line), sys.stderr)
 
 def error(message = None, *args, **kwargs):
     """Print an error message to the standard error."""
@@ -93,16 +96,17 @@ def error(message = None, *args, **kwargs):
     output = []
 
     if message and len(args):
-        output.append(message % args)
+        output.append(message.format(args))
     elif message:
         output.append(message)
 
     if len(kwargs.values()):
         output.extend([
-            "%s -> %s" % (key, val) for key, val in kwargs.items() ])
+            "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
+            ])
 
     for line in output:
-        colorize("RED", "E: %s" % line, sys.stderr)
+        colorize("RED", "E: {line}".format(line = line), sys.stderr)
 
 def sufficient_privileges(short_circuit = False):
     """Return the truthness of the process being root."""

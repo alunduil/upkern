@@ -94,8 +94,8 @@ class Binary(object):
         """
 
         if not hasattr(self, "_image_directory"):
-            self._image_directory = "arch/%s/boot/".format(
-                    re.sub(r"i\d86", "x86", platform.machine()))
+            self._image_directory = "arch/{arch}/boot/".format(
+                    arch = re.sub(r"i\d86", "x86", platform.machine()))
         return self._image_directory
 
     @property

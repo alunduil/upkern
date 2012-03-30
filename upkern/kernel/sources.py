@@ -202,8 +202,9 @@ class Sources(object):
 
         original_directory = os.getcwd()
 
-        command = "make %s %s".format(self.portage_config["MAKEOPTS"],
-                configurator)
+        command = "make {options} {configurator}".format(
+                options = self.portage_config["MAKEOPTS"],
+                configurator = configurator)
 
         if self.arguments["dry_run"]:
             dry_list = [
@@ -234,7 +235,8 @@ class Sources(object):
         if self.arguments["quiet"]:
             make_options += " -s"
 
-        command = "make %s && make %s modules_install".format(make_options, make_options)
+        command = "make {options} && make {options} modules_install".format(
+                options = make_options)
 
         if self.arguments["dry_run"]:
             dry_list = [
@@ -295,8 +297,9 @@ class Sources(object):
             if self.arguments["quiet"]:
                 opts.append("-q")
 
-            command = "emerge %s %s".format(" ".join(opts),
-                    self.package_name)
+            command = "emerge {options} {package}".format(
+                    options = " ".join(opts),
+                    package = self.package_name)
             
             if self.arguments["dry_run"]:
                 helpers.colorize("GREEN", command)
@@ -332,13 +335,14 @@ class Sources(object):
 
         if self.arguments["dry_run"]:
             dry_list = [
-                    "ln -s /usr/src/%s /usr/src/linux",
+                    "ln -s /usr/src/{source_directory} /usr/src/linux".format(
+                        source_directory = self.directory_name),
                     ]
-            helpers.colorize("GREEN", 
-                    "\n".join(dry_list).format(self.directory_name))
+            helpers.colorize("GREEN", "\n".join(dry_list))
         else:
             try:
-                os.symlink('/usr/src/%s'.format(self.directory_name),
+                os.symlink('/usr/src/{source_directory}'.format(
+                    source_directory = self.directory_name),
                         '/usr/src/linux')
             except Exception as error:
                 os.remove("/usr/src/linux")
@@ -374,7 +378,7 @@ class Sources(object):
             return
 
         if self.arguments["verbose"]:
-            helpers.verbose("Using Configuration File: %s", configuration)
+            helpers.verbose("Using Configuration File: {configuration}", configuration)
 
         # Perform the necessary actions (outlined in dry_run performed 
         # otherwise).  Keeping in mind that any action on the system itself
@@ -390,8 +394,9 @@ class Sources(object):
             try:
                 shutil.copy('/usr/src/linux/.config', 
                         '/usr/src/linux/.config.bak')
-                shutil.copy('/boot/%s'.format(configuration), 
-                        '/usr/src/linux/.config')
+                shutil.copy('/boot/{configuration}'.format(
+                    configuration = configuration), 
+                    '/usr/src/linux/.config')
             except Exception as error:
                 if os.access("/usr/src/linux/.config.bak", os.W_OK):
                     os.remove("/usr/src/linux/.config")

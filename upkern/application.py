@@ -92,16 +92,17 @@ class UpkernApplication(object):
         bootloader.configuration.install()
 
         conclusion_list = [
-                "The kernel, %s, has been successfully installed.  ",
+                "The kernel, {name}, has been successfully installed.  ".format(
+                    name = binary.name),
                 "Please, check that all configuration files are ",
                 "installed correctly and the bootloader is configured ",
                 "correctly.",
-                ] % binary.name
+                ]
 
         if self.arguments.time:
             conclusion_list.extend([
-                "The kernel's build time was %s",
-                ] % delta)
+                "The kernel's build time was {delta!s}".format(delta = delta),
+                ])
 
         print("".join(conclusion_list))
 
