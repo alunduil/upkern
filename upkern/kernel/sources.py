@@ -365,6 +365,12 @@ class Sources(object):
 
             config_files = [ dict_[k] for k in sorted(dict_.keys()) ] 
 
+            if self.arguments["debug"]:
+                helpers.debug(__file__, {
+                    "sorted(dict_.keys())": sorted(dict_.keys()),
+                    "config_files": config_files,
+                    }
+
             if len(config_list):
                 configuration = config_list[-1]
 
