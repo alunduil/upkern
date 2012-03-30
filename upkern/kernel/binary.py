@@ -78,6 +78,13 @@ class Binary(object):
 
     @property
     def image_directory(self):
+        """The location inside the kernel sources of the resulting image.
+        
+        Caches the result after the first invocation so subsequent calls are
+        quicker.
+        
+        """
+
         if not hasattr(self, "_image_directory"):
             self._image_directory = "arch/%s/boot/".format(
                     re.sub(r"i\d86", "x86", platform.machine()))
@@ -85,13 +92,32 @@ class Binary(object):
 
     @property
     def suffix(self):
+        """The suffix of this kernel's name.
+
+        e.g. -3.3.0-gentoo-r2
+
+        Caches the result after the first invocation so subsequent calls are
+        quicker.
+
+        TODO Check that this is actually quicker with the caching.
+
+        """
+
         if not hasattr(self, "_suffix"):
             self._suffix = self.arguments["directory"].partition("-")[2]
         return self._suffix
     
     @mountedboot
     def install(self):
-        """Install the kernel into /boot."""
+        """Install the kernel into /boot.
+        
+        1. Go into the source directory.
+        2. Copy the image file to /boot.
+        3. Copy the config file to /boot
+        4. Copy System.map to /boot.
+        5. Copy System.map to /
+        
+        """
 
         original_directory = os.getcwd()
 

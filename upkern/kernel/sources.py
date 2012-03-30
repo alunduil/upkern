@@ -56,16 +56,18 @@ class Sources(object):
                 "dry_run": dry_run,
                 }
 
-        if not self.arguments["quiet"]:
-            wait_notice_list = [
-                    "Getting information about the kernel sources ... this ",
-                    "could take a while ... please wait ...",
-                    ]
-            print("".join(warn_notice_list))
-
     @property
     def directory_name(self):
-        """Get the sources directory."""
+        """Get the name of the sources directory.
+        
+        This caches the result after the first invocation so that subsequent
+        calls are much quicker.
+
+        This method grabs the first directory that is a member of
+        self.package_name (a portage package object).
+        
+        """
+
         if not hasattr(self, "_directory_name"):
             finder = FileOwner()
 
@@ -78,7 +80,20 @@ class Sources(object):
 
     @property
     def package_name(self):
-        """Get the package name of the kernel we're dealing with."""
+        """Get the package name of the kernel.
+        
+        This caches the result after the first invocation so that subsequent
+        calls are much quicker.
+        
+        This method gets the portage name of the package of the kernel we want
+        to build.  If the name parameter for this object was specified and 
+        matches the package regular expression, we use what was passed to
+        create the package name.  If the string does not match, we grab the
+        most up to date source directory and use portage to tell us the package
+        name for those sources.
+        
+        """
+
         if not hasattr(self, "_package_name"):
             package_expression_list = [
                     r"(?:sys-kernel/)?", # For piping from portage ...
@@ -106,10 +121,22 @@ class Sources(object):
 
     @property
     def source_directories(self):
-        """Get the list of sorted source directories on the system."""
+        """Get the list of sorted source directories on the system.
+
+        This caches the result after the first invocation so that subsequent
+        calls are much quicker.
+
+        This method uses the self._keyify(kernel_string) to determine a better
+        sort key for kernel names.  See self._keyify's documentation for a
+        description of how this key is created.
+
+        The result of this method is a list of kernel source directories sorted
+        by the recency of the kernel version (most recent to least recent).
+        
+        """
 
         if not hasattr(self, "_source_directories"):
-            self._directories = [ d for d in os.listdir('/usr/src') if re.match(r"linux-.+$", d) ]
+            directories = [ d for d in os.listdir('/usr/src') if re.match(r"linux-.+$", d) ]
 
             keys = [ self._keyify(d) for d in directories ]
             dict_ = dict(zip(keys, directories))
@@ -120,17 +147,41 @@ class Sources(object):
 
     @property
     def portage_config(self):
+        """Get the system's portage configuration.
+
+        This caches the results after the first invocation so that subsequent
+        calls are much quicker.
+
+        Returns a dictionary of basically `emerge --info` output.
+
+        """
+
         if not hasattr(self, "_portage_config"):
             self._portage_config = portage.config()
         return self._portage_config
 
     def prepare(self, configuration = ""):
+        """Prepare the sources to be built.
+
+        1. Check that the kernel sources are installed (if a particular kernel
+           was requested).
+        2. Setup the symlink from the source directory to /usr/src/linux
+        3. Copy the configuration file from /boot to the kernel sources.
+
+        """
+
         self._install_sources()
         self._set_symlink()
         self._copy_config(configuration)
 
     def configure(self, configurator = ""):
-        """Configure the kernel sources."""
+        """Configure the kernel sources.
+
+        1. Enter the source directory.
+        2. Run make <configurator>
+        3. Leave the source directory.
+        
+        """
 
         original_directory = os.getcwd()
 
@@ -147,10 +198,18 @@ class Sources(object):
         else:
             os.chdir('/usr/src/linux')
             status = subprocess.call(command, shell = True)
+            if status != 0:
+                pass # TODO raise an appropriate exception.
             os.chdir(original_directory)
         
     def build(self):
-        """Build the kernel."""
+        """Build the kernel and return a binary object.
+
+        1. Enter the source directory.
+        2. Run make && make modules_install
+        3. Leave the source directory.
+        
+        """
 
         original_directory = os.getcwd()
 
@@ -170,16 +229,20 @@ class Sources(object):
         else:
             os.chdir("/usr/src/linux")
             status = subprocess.call(command, shell = True)
+            if status != 0:
+                pass # TODO raise an appropriate exception.
             os.chdir(original_directory)
 
         return Binary(self.directory_name)
 
     def rebuild_modules(self):
-        if not hasattr(self.rebuild_modules, "has_rebuild_modules"):
-            self.rebuild_modules.has_rebuild_modules = \
-                    not len(GentoolkitQuery("sys-kernel/module-rebuild").find_installed())
+        """Rebuild any kernel modules installed via portage.
 
-        if not self.rebuild_modules.has_rebuild_modules:
+        Check that module-rebuild is installed and then run it.
+
+        """
+
+        if not len(GentoolkitQuery("sys-kernel/module-rebuild").find_installed()):
             return
 
         if self.arguments["verbose"]:
@@ -189,13 +252,14 @@ class Sources(object):
             helpers.colorize("GREEN", "module-rebuild -X rebuild")
         else:
             status = subprocess.call("module-rebuild -X rebuild")
+            if status != 0:
+                pass # TODO raise an appropriate exception.
 
     def _install_sources(self):
         """Installs the requested kernel sources using portage.
 
-        This operation can be assumed to be atomic.  If a failure occurs all
-        actions taken up to that point shall be reverted and an appropriate
-        exception raised.
+        Utilizes portage to install the sources if they are not already
+        installed.
 
         """
 
@@ -232,10 +296,10 @@ class Sources(object):
         
         """
 
-        original = None
+        originali_target = None
 
         if os.path.islink('/usr/src/linux'):
-            original = os.readlink("/usr/src/linux")
+            original_target = os.readlink("/usr/src/linux")
 
             if self.arguments["dry_run"]:
                 helpers.colorize("GREEN", "rm /usr/src/linux")
@@ -256,10 +320,10 @@ class Sources(object):
             try:
                 os.symlink('/usr/src/%s'.format(self.directory_name),
                         '/usr/src/linux')
-            except Exception e:
+            except Exception as error:
                 os.remove("/usr/src/linux")
                 os.symlink(original, "/usr/src/linux")
-                raise e
+                raise error
 
     @mountedboot
     def _copy_config(self, configuration = ""):
@@ -316,7 +380,15 @@ class Sources(object):
                 raise e
 
     def _keyify(self, kernel_string):
-        """Convert a kernel string into majorminorpatch.revision notation."""
+        """Convert a kernel string into a sortable key.
+        
+        The key generated is a floating point number that always increments
+        with the kernel version but is comparable as a float.  The number is
+        generated by concatenating and typecasting the following strings in 
+        the following manner: <major><minor><patch>.<revision>.  Using this
+        number the kernels can be guaranteed to be sorted by version.
+        
+        """
         
         regex = '.*?(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))?-[^-]*(?:-r(?P<revision>\d+))?'
         m = re.match(regex, kernel_string)
@@ -334,11 +406,5 @@ class Sources(object):
 
         key = "%03d%03d%03d.%03d".format(major, minor, patch, revision)
         
-        return key
-            
-    def _get_modules_directory(self):
-        """Get the modules directory of the kernel.
-
-        """
-        return "/lib/modules/" + self._directory_name.split("/")[-1]
+        return float(key)
 
