@@ -382,10 +382,10 @@ class Sources(object):
         if self.arguments["dry_run"]:
             dry_list = [
                     "cp /usr/src/linux/.config{,.bak}",
-                    "cp /boot/%s /usr/src/linux/.config",
+                    "cp /boot/{configuration} /usr/src/linux/.config",
                     ]
             helpers.colorize("GREEN", 
-                    "\n".join(dry_list).format(configuration))
+                    "\n".join(dry_list).format(configuration = configuration))
         else:
             try:
                 shutil.copy('/usr/src/linux/.config', 
