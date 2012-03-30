@@ -74,7 +74,7 @@ def debug(message = None, *args, **kwargs):
 
     for line in output:
         colorize("YELLOW", "D: {called} called from {caller}: {line}".format(
-            called = stack_item(1), caller = stack_item(2), line = line),
+            called = stack_item(2), caller = stack_item(3), line = line),
             sys.stderr)
 
 def verbose(message = None, *args, **kwargs):
