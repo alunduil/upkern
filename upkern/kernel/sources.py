@@ -87,7 +87,7 @@ class Sources(object):
                     break
 
             if self.arguments["verbose"]:
-                helpers.verbose("Using source directory: {0}",
+                helpers.verbose("Using source directory: {0!s}",
                         self._directory_name)
 
         return self._directory_name
