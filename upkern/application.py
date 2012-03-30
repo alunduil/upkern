@@ -68,12 +68,12 @@ class UpkernApplication(object):
         sources.configure(configurator = self.arguments.configurator)
 
         if self.arguments.time:
-            start = datetime.now()
+            start = datetime.datetime.now()
 
         binary = sources.build()
 
         if self.arguments.time:
-            delta = datetime.now() - start
+            delta = datetime.datetime.now() - start
 
         if self.arguments.rebuild_modules:
             sources.rebuild_modules()
