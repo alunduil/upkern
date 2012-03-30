@@ -17,11 +17,12 @@
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
 import re
+import os
 import upkern.helpers as helpers
 
-from upkern.helpers import mountedboot
 from gentoolkit import query as GentoolkitQuery
 from gentoolkit.helpers import FileOwner
+from upkern.helpers import mountedboot
 
 class Sources(object):
     """A kernel source model.
