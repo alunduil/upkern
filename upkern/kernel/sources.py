@@ -138,7 +138,7 @@ class Sources(object):
                 finder = FileOwner()
 
                 if not self.arguments["quiet"]:
-                    print "Determing kernel source package.  This could take some time; please wait ..."
+                    print("Determing kernel source package.  This could take some time; please wait ...")
 
                 self._package_name = unicode(finder((self.source_directories[0], ))[0][0])
 
