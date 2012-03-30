@@ -104,7 +104,7 @@ class Sources(object):
             package_expression_list = [
                     r"(?:sys-kernel/)?", # For piping from portage ...
                     r"(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+_-]*)-sources-)?",
-                    r"(?P<version>(A-Za-z0-9+_][A-Za-z0-9+_.-]*)",
+                    r"(?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)",
                     ]
 
             if self.arguments["debug"]:
