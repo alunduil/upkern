@@ -114,7 +114,7 @@ class Sources(object):
             package_expression = re.compile("".join(package_expression_list))
 
             if self.arguments["debug"]:
-                helpers.debug(__file__, {
+                helpers.debug({
                     "self.arguments[\"name\"]": self.arguments["name"],
                     })
 
@@ -432,7 +432,7 @@ class Sources(object):
         key = "{:03d}{:03d}{:03d}.{:03d}".format(major, minor, patch, revision)
 
         if self.arguments["debug"]:
-            helpers.debug(__file__, {
+            helpers.debug({
                 "key": key,
                 })
         
