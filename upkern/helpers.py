@@ -108,12 +108,22 @@ def sufficient_privileges(short_circuit = False):
 
 def mountedboot(func):
     def new_func(*args, **kargs):
-        if not is_boot_mounted():
+        if os.path.ismount("/boot") or \
+                len([
+                    f for f in list(
+                        itertools.chain(*[
+                            [
+                                os.path.join(x[0], fs) for fs in x[2]
+                                ]
+                            for x in os.walk("/boot")
+                            ])
+                        ) if not re.search("^/boot/(?:boot|.keep)", f)
+                    ]):
+            res = func(*args, **kargs)
+        else:
             os.system('mount /boot')
             res = func(*args, **kargs)
             os.system('umount /boot')
-        else:
-            res = func(*args, **kargs)
         return res
     return new_func
 
