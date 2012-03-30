@@ -105,6 +105,12 @@ class Sources(object):
                     r"(?:(?P<sources>(?:+|\w)(?:[+-]|\w)*)-sources-)?",
                     r"(?P<version>(?:+|\w)(?:[+-.]|\w)*)",
                     ]
+
+            if self.arguments["debug"]:
+                helpers.debug(__file__, {
+                    "package_expression": "".join(package_expression_list)
+                    })
+
             package_expression = re.compile("".join(package_expression_list))
             package_match = package_expression.match(self.arguments["name"])
 
