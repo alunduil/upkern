@@ -158,7 +158,7 @@ class UpkernOptions(object):
                 "auto.",
                 ]
         self.parser.add_argument("--color", 
-                choices = ["none", "light", "dark", "auto"], default = "none",
+                choices = ["none", "light", "dark", "auto"], default = "auto",
                 help = "".join(help_list))
 
         # --dry-run, -d
