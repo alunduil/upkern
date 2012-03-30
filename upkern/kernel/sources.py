@@ -424,7 +424,7 @@ class Sources(object):
             if m.group("patch"):
                 patch = int(m.group("patch"))
 
-        key = "%03d%03d%03d.%03d".format(major, minor, patch, revision)
+        key = "{:03d}"*3 + ".{:03d}".format(major, minor, patch, revision)
 
         if self.arguments["debug"]:
             helpers.debug(__file__, {
