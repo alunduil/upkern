@@ -131,9 +131,13 @@ class Binary(object):
         if self.arguments["dry_run"]:
             dry_list = [
                     "pushd /usr/src/linux",
-                    "cp %s%s /boot/%s%s".format(self.image_directory, self.install_image, self.install_image, self.suffix),
-                    "cp .config /boot/config%s".format(self.suffix),
-                    "cp System.map /boot/System.map%s".format(self.suffix),
+                    "cp {directory}{image} /boot/{image}{suffix}".format(
+                        directory = self.image_directory,
+                        image = self.install_image, suffix = self.suffix),
+                    "cp .config /boot/config{suffix}".format(
+                        suffix = self.suffix),
+                    "cp System.map /boot/System.map{suffix}".format(
+                        suffix = self.suffix),
                     "cp System.map /System.map",
                     "popd",
                     ]
@@ -141,9 +145,12 @@ class Binary(object):
         else:
             # TODO add atomicity to this method.
             os.chdir("/usr/src/linux")
-            shutil.copy("%s%s".format(self.image_directory, self.install_image), "/boot/%s%s".format(self.install_image, self.suffix))
-            shutil.copy(".config", "/boot/config%s".format(self.suffix))
-            shutil.copy("System.map", "/boot/System.map%s".format(self.suffix))
+            shutil.copy("{directory}{image}".format(
+                directory = self.image_directory, image = self.install_image),
+                "/boot/{image}{suffix}".format(image = self.install_image,
+                    suffix = self.suffix))
+            shutil.copy(".config", "/boot/config{suffix}".format(suffix = self.suffix))
+            shutil.copy("System.map", "/boot/System.map{suffix}".format(suffix = self.suffix))
             shutil.copy("System.map", "/System.map")
             os.chdir(original_directory)
 
