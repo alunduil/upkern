@@ -21,6 +21,7 @@ import upkern.helpers as helpers
 
 from upkern.helpers import mountedboot
 from gentoolkit import query as GentoolkitQuery
+from gentoolkit.helpers import FileOwner
 
 class Sources(object):
     """A kernel source model.
