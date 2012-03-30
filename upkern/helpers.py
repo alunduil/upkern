@@ -53,7 +53,7 @@ def colorize(color, message, out = sys.stdout):
         print >> out, TERMINAL.render('${{{color}}}{message}${{NORMAL}}'.format(
             color = color, message = message))
 
-def debug(file_, message = None, *args, **kwargs):
+def debug(message = None, *args, **kwargs):
     """Print a debugging message to the standard error."""
 
     output = []
@@ -68,9 +68,11 @@ def debug(file_, message = None, *args, **kwargs):
             "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
             ])
 
+    stack = stack()
+
     for line in output:
-        colorize("YELLOW", "D: {file_}:{function} {line}".format(file_ = file_,
-            function = unicode(stack()[1][2]), line = line), sys.stderr)
+        colorize("YELLOW", "D: {file_}:{file_line} in {function}: {line}".format(file_ = unicode(stack[1][1]),
+            file_line = unicode(stack[1][2]), function = unicode(stack[1][3]), line = line), sys.stderr)
 
 def verbose(message = None, *args, **kwargs):
     """Print a verbose message to the standard error."""
