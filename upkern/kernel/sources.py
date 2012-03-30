@@ -109,11 +109,6 @@ class Sources(object):
                     r"(?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)",
                     ]
 
-            if self.arguments["debug"]:
-                helpers.debug(__file__, {
-                    "package_expression": "".join(package_expression_list)
-                    })
-
             package_expression = re.compile("".join(package_expression_list))
 
             if self.arguments["debug"]:
