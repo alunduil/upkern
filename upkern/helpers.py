@@ -30,6 +30,7 @@ __all__ = [
 
 import sys
 import os
+import itertools
 
 from inspect import stack
 
