@@ -112,7 +112,7 @@ class Binary(object):
         """
 
         if not hasattr(self, "_suffix"):
-            self._suffix = self.arguments["directory"].partition("-")[2]
+            self._suffix = "-" + self.arguments["directory"].partition("-")[2]
         return self._suffix
     
     @mountedboot
