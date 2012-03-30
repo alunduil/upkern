@@ -378,7 +378,7 @@ class Sources(object):
             return
 
         if self.arguments["verbose"]:
-            helpers.verbose("Using Configuration File: {configuration}", configuration)
+            helpers.verbose("Using Configuration File: {0}", configuration)
 
         # Perform the necessary actions (outlined in dry_run performed 
         # otherwise).  Keeping in mind that any action on the system itself
