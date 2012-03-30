@@ -156,7 +156,7 @@ class Sources(object):
         
         """
 
-        if not hasattr(self, "_source_directories"):
+        if not hasattr(self, "_directories"):
             directories = [ d for d in os.listdir('/usr/src') if re.match(r"linux-.+$", d) ]
 
             keys = [ self._keyify(d) for d in directories ]
