@@ -31,6 +31,7 @@ __all__ = [
 import sys
 import os
 import itertools
+import re
 
 from inspect import stack
 
