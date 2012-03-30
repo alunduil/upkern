@@ -365,7 +365,7 @@ class Sources(object):
 
             config_files = [ dict_[k] for k in sorted(dict_.keys(), reverse = True) ] 
 
-            if len(config_list):
+            if len(config_files):
                 configuration = config_files[0]
 
         # If we didn't find a configuration file there is nothing further to
