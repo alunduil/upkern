@@ -17,6 +17,7 @@
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
 from upkern.helpers import mountedboot
+from gentoolkit import query as GentoolkitQuery
 
 class Sources(object):
     """A kernel source model.
