@@ -102,8 +102,8 @@ class Sources(object):
         if not hasattr(self, "_package_name"):
             package_expression_list = [
                     r"(?:sys-kernel/)?", # For piping from portage ...
-                    r"(?:(?P<sources>[+\w][+-\w]*)-sources-)?",
-                    r"(?P<version>[+\w][+-.\w]*)",
+                    r"(?:(?P<sources>(?:+|\w)(?:[+-]|\w)*)-sources-)?",
+                    r"(?P<version>(?:+|\w)(?:[+-.]|\w)*)",
                     ]
             package_expression = re.compile("".join(package_expression_list))
             package_match = package_expression.match(self.arguments["name"])
