@@ -372,12 +372,12 @@ class Sources(object):
                         '/usr/src/linux/.config.bak')
                 shutil.copy('/boot/%s'.format(configuration), 
                         '/usr/src/linux/.config')
-            except Exception e:
+            except Exception as error:
                 if os.access("/usr/src/linux/.config.bak", os.W_OK):
                     os.remove("/usr/src/linux/.config")
                     os.rename("/usr/src/linux/.config.bak", 
                             "/usr/src/linux/.config")
-                raise e
+                raise error
 
     def _keyify(self, kernel_string):
         """Convert a kernel string into a sortable key.
