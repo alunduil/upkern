@@ -68,9 +68,14 @@ def debug(message = None, *args, **kwargs):
             "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
             ])
 
+    stack_item = lambda x: return "{file_}:{line} in {function}".format(
+            file_ = stack()[x][1], line = stack()[x][2],
+            function = stack()[x][3])
+
     for line in output:
-        colorize("YELLOW", "D: {file_}:{file_line} in {function}: {line}".format(file_ = unicode(stack()[1][1]),
-            file_line = unicode(stack()[1][2]), function = unicode(stack()[1][3]), line = line), sys.stderr)
+        colorize("YELLOW", "D: {called} called from {caller}: {line}".format(
+            called = stack_item(1), caller = stack_item(2), line = line),
+            sys.stderr)
 
 def verbose(message = None, *args, **kwargs):
     """Print a verbose message to the standard error."""
