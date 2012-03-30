@@ -20,6 +20,7 @@ import re
 import os
 import portage
 import shutil
+import subprocess
 import upkern.helpers as helpers
 
 from gentoolkit.query import Query as GentoolkitQuery
