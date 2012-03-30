@@ -358,26 +358,15 @@ class Sources(object):
         # If no configuration file is passed; find the highest versioned one
         # in /boot.
         if not len(configuration):
-            config_list = [ f for f in os.listdir('/boot') if re.match('config-.+', f) ]
+            config_files = [ f for f in os.listdir('/boot') if re.match('config-.+', f) ]
 
-            keys = [ self._keyify(c) for c in config_list ]
-            dict_ = dict(zip(keys, config_list))
+            keys = [ self._keyify(c) for c in config_files ]
+            dict_ = dict(zip(keys, config_files))
 
             config_files = [ dict_[k] for k in sorted(dict_.keys(), reverse = True) ] 
 
-            if self.arguments["debug"]:
-                helpers.debug(__file__, {
-                    "sorted(dict_.keys(), reverse = True)": sorted(dict_.keys(), reverse = True),
-                    "config_files": config_files,
-                    })
-
             if len(config_list):
-                configuration = config_list[0]
-
-            if self.arguments["debug"]:
-                helpers.debug(__file__, {
-                    "configuration": configuration,
-                    })
+                configuration = config_files[0]
 
         # If we didn't find a configuration file there is nothing further to
         # do and we can return.
