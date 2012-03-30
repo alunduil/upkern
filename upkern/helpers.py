@@ -68,9 +68,9 @@ def debug(message = None, *args, **kwargs):
             "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
             ])
 
-    stack_item = lambda x: return "{file_}:{line} in {function}".format(
-            file_ = stack()[x][1], line = stack()[x][2],
-            function = stack()[x][3])
+    def stack_item(x):
+        return "{file_}:{line} in {function}".format(file_ = stack()[x][1],
+                line = stack()[x][2], function = stack()[x][3])
 
     for line in output:
         colorize("YELLOW", "D: {called} called from {caller}: {line}".format(
