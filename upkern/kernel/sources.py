@@ -391,6 +391,7 @@ class Sources(object):
             dry_list = [
                     "cp /usr/src/linux/.config{{,.bak}}",
                     "cp /boot/{configuration} /usr/src/linux/.config",
+                    "rm /usr/src/linux/.config.bak",
                     ]
             helpers.colorize("GREEN", 
                     "\n".join(dry_list).format(configuration = configuration))
@@ -407,6 +408,9 @@ class Sources(object):
                     os.rename("/usr/src/linux/.config.bak", 
                             "/usr/src/linux/.config")
                 raise error
+            finally:
+                if os.access("/usr/src/linux/.config.bak", os.W_OK):
+                    os.remove("/usr/src/linux/.config.bak")
 
     def _keyify(self, kernel_string):
         """Convert a kernel string into a sortable key.
