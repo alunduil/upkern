@@ -425,6 +425,11 @@ class Sources(object):
                 patch = int(m.group("patch"))
 
         key = "%03d%03d%03d.%03d".format(major, minor, patch, revision)
+
+        if self.arguments["debug"]:
+            helpers.debug(__file__, {
+                "key": key,
+                })
         
         return float(key)
 
