@@ -128,8 +128,12 @@ def mountedboot(func):
             res = func(*args, **kargs)
         else:
             os.system('mount /boot')
-            res = func(*args, **kargs)
-            os.system('umount /boot')
+            try:
+                res = func(*args, **kargs)
+            except Exception as error:
+                raise error
+            finally:
+                os.system('umount /boot')
         return res
     return new_func
 
