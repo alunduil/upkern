@@ -87,12 +87,12 @@ class UpkernApplication(object):
         bootloader = BootLoader(**bootloader_params)
         
         if self.arguments.debug:
-            helpers.colorize("BLUE", bootloader.configuration)
+            helpers.colorize("BLUE", "\n".join(bootloader.configuration))
 
         bootloader.prepare(kernel = binary, kernel_options = self.arguments.kernel_options)
 
         if self.arguments.debug:
-            helpers.colorize("BLUE", bootloader.configuration)
+            helpers.colorize("BLUE", "\n".join(bootloader.configuration))
 
         bootloader.install()
 
@@ -101,7 +101,7 @@ class UpkernApplication(object):
                     name = binary.name),
                 "Please, check that all configuration files are ",
                 "installed correctly and the bootloader is configured ",
-                "correctly.",
+                "correctly.  ",
                 ]
 
         if self.arguments.time:
