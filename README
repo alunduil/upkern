@@ -73,4 +73,5 @@ Output ::
    * verbose
    * debug
    * dry-run
+   * quiet
 

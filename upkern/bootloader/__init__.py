@@ -18,6 +18,7 @@
 
 from gentoolkit.helpers import get_installed_cpvs
 from gentoolkit.cpv import split_cpv
+from gentoolkit.package import Package
 
 from bootloaders import Grub
 
@@ -29,9 +30,14 @@ def BootLoader(*args, **kargs):
     """
 
     bootloaders = get_installed_cpvs(lambda x: x.startswith('sys-boot'))
-    bootloaders = [ split_cpv(bootloader)[1] for bootloader in bootloaders ]
+    bootloaders = [ split_cpv(bootloader)[1] + Package(bootloader).environment["SLOT"] for bootloader in bootloaders ]
 
-    bootloaders = set(["grub", "grub2", "lilo"]) & set(bootloaders)
+    if kargs["debug"]:
+        helpers.debug({
+            "bootloaders", bootloaders,
+            })
+
+    bootloaders = set(["grub0", "grub2"]) & set(bootloaders)
 
     if "grub" in bootloaders:
         return Grub(*args, **kargs)
