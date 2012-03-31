@@ -30,7 +30,7 @@ def BootLoader(*args, **kargs):
     """
 
     bootloaders = get_installed_cpvs(lambda x: x.startswith('sys-boot'))
-    bootloaders = [ split_cpv(bootloader)[1] + Package(bootloader).environment["SLOT"] for bootloader in bootloaders ]
+    bootloaders = [ split_cpv(bootloader)[1] + Package(bootloader).environment("SLOT") for bootloader in bootloaders ]
 
     if kargs["debug"]:
         helpers.debug({
