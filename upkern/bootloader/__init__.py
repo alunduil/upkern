@@ -16,10 +16,11 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
+import upkern.helpers as helpers
+
 from gentoolkit.helpers import get_installed_cpvs
 from gentoolkit.cpv import split_cpv
 from gentoolkit.package import Package
-
 from bootloaders import Grub
 
 def BootLoader(*args, **kargs):
