@@ -40,149 +40,89 @@ class Grub(BaseBootLoader):
         return "/boot/grub/grub.conf"
 
     @property
-    def configuration_entry(self):
-        """The grub configuration entry."""
-        return "\n".join([
-            "# Kernel added on {time!s}:".format(time = datetime.datetime.now()),
-            "title={kernel_name}".format(kernel_name = self.arguments["kernel_binary"].name)
-    
-        self._config_url = '/boot/grub/grub.conf'
-        self._configuration = []
+    def grub_root(self):
+        """The grub root parameter."""
+        if not hasattr(self, "_grub_root"):
+            match = re.match(r"/dev/[\w\d]+(?P<letter>\w)(?P<number\d+)",
+                    self.boot_partition)
+            self._grub_root = "(hd{letter!s},{number!s})".format(
+                    letter = ascii_lowercase.find(match.group("letter")),
+                    number = 1 + match.group("number"))
+        return self._grub_root
 
-        # @todo Some good way to do this?
-        kernel_list = [
-            "",
-            "# Kernel added on " + str(datetime.datetime.now()) + ":",
-            "title=" + self._kernel.get_name(),
-            "  root " + self._get_grub_root(),
-            "  kernel /boot/" + self._kernel.get_image() + \
-            self._kernel.get_suffix() + " root=" + \
-            self._root_partition
-            ]
-        self._kernel_string = kernel_list # @todo Fix this up.
-        if len(kernel_options) > 0: 
-            self._kernel_string[-1] += " " + kernel_options
+    @property
+    def configuration(self):
+        """The grub configuration file (mutable)."""
+        if not hasattr(self, "_configuration"):
+            configuration = open(self.configuration_uri, 'r')
+            self._configuration = configuration.readlines()
+            configuration.close()
+        return self._configuration
 
-    def _get_grub_root(self):
-        """Using the root partition found we create a GRUB root string.
+    @configuration.setter(self, value):
+        """The grub configuration file (mutable)."""
+        self.configuration = value
 
-        """
-        match = re.match('/dev/.d(?P<letter>\w)(?P<number>\d+)', 
-            self._boot_partition)
+    @mountedboot
+    def prepare(self, kernel = None, kernel_options = ""):
+        """Prepare the configuration file."""
 
-        if not match: 
-            raise GrubException("Device %s not supported" % self._boot_partition)
+        if not self._has_kernel(kernel.name):
+            new_configuration = []
 
-        from string import ascii_lowercase
-        return "(hd" + \
-            str(ascii_lowercase.find(match.group("letter"))) + "," + \
-            str(int(match.group("number")) - 1) + ")"
-
-    def create_configuration(self):
-        """Create a new configuration file for the boot loader.
-
-        Create a new configuration file in a temporary location for the
-        boot loader. We'll use <normal location>.tmp as it should be
-        pretty obvious that it is not meant to stick around.
-
-        """
-
-        if not helpers.is_boot_mounted():
-            if self._dry_run:
-                output.verbose('mount /boot')
-                output.error('--dry-run requires that you manually mount /boot')
-                output.verbose('umount /boot')
-            else:
-                os.system('mount /boot')
-                self.create_configuration()
-                os.system('umount /boot')
-        else:
-            if not os.access(self._config_url, os.R_OK):
-                raise GrubException("Could not read %s" % self._config_url)
-
-            c = open(self._config_url)
-            self._configuration = c.readlines()
-            c.close()
-
-            if self._already_have_kernel(): 
-                if self._verbose or self._dry_run:
-                    output.verbose("Kernel entry already in %s" % self._config_url)
-                return
-           
-            tmp_configuration = []
-            kernel_options = ""
-            default_expr = re.compile("(default\s+)(?P<number>\d+)\s*")
-            kernel_expr = re.compile("\s*kernel.*?root=[\w\d/]+\s+(.+)")
-            for line in self._configuration:
-                default = default_expr.match(line)
-                kernel = kernel_expr.match(line)
-                if default:
-                    new_line_list = [
-                        default.group(1), 
-                        str(int(default.group("number")) + 1)
-                        ]
-                    if self._debug:
-                        output.debug(__file__, 
-                            {"default_line":"".join(new_line_list)})
-                    tmp_configuration.append("".join(new_line_list))
-                elif kernel:
-                    tmp_configuration.append(line.rstrip())
-                    kernel_options = kernel.group(1).rstrip()
-                    if self._debug:
-                        output.debug(__file__, 
-                            {"kernel_options":kernel_options})
+            for line in self.configuration:
+                if re.search("default", line, re.I):
+                    new_configuration.append("".join([
+                        "default {defaulti!s}".format(default = 1 + line.partition(" ")[2]),
+                        ]))
+                elif not len(kernel_options) and re.search("kernel", line, re.I):
+                    new_configuration.append(line)
+                    kernel_options = " ".join([ option for option in line.split(" ") if not re.search("(?:kernel|/boot/|root=)", option, re.I) ])
+                    # TODO Merge the kernel options passed with those found?
                 else:
-                    tmp_configuration.append(line.rstrip())
+                    new_configuration.append(line)
 
-            self._kernel_string[-1] += " " + kernel_options
+            kernel_entry = [
+                    "# Kernel added {time!s}:".format(
+                        time = datetime.datetime.now()),
+                    "title={kernel_name}".format(kernel_name = kernel.name),
+                    "  root {grub_root}".format(grub_root = self.grub_root),
+                    "  kernel /boot/{image} root={root} {options}".format(
+                        image = kernel.image, root = self.root_partition,
+                        options = kernel_options),
+                    ]
 
-            if self._debug:
-                for line in tmp_configuration:
-                    output.debug(__file__, {"line":line})
+            new_configuration.extend(kernel_entry)
 
-            if self._debug:
-                for line in self._kernel_string:
-                    output.debug(__file__, {"line":line})
+            self.configuration = new_configuration
 
-            self._configuration = tmp_configuration
-
-    def _already_have_kernel(self):
-        """Determine if our new kernel is already listed.
-
-        """
-        results = filter(lambda x: re.search(self._kernel.get_name(), x), self._configuration)
-        if len(results) > 0: return True
-        return False
-
-    def install_configuration(self):
-        """Install the newly created configuration file.
-
-
-        Install the tmp config file into the actual location.
-
-        """
-
-        if self._already_have_kernel(): return
-
-        if not helpers.is_boot_mounted():
-            if self._dry_run:
-                output.verbose('mount /boot')
-                output.error('--dry-run requires that you manually mount /boot')
-                output.verbose('umount /boot')
-            else:
-                os.system('mount /boot')
-                self.install_configuration()
-                os.system('umount /boot')
+    @mountedboot
+    def install(self):
+        """Install the configuration and make the system bootable."""
+        if self.arguments["dry_run"]:
+           dry_list = [
+                   "cp {config}{{,.bak}}".format(config = self.configuration_uri),
+                   "cat > {config}".format(config = self.configuration_uri),
+                   "\n".join(self.configuration),
+                   "^d",
+                   "rm {config}.bak".format(config = self.configuration_uri),
+                   ]
+           helpers.colorize("GREEN", "\n".join(dry_list))
         else:
-            self._configuration.extend(self._kernel_string)
+            if os.access(self.configuration_uri, os.W_OK):
+                try:
+                    shutil.copy(self.configuration_uri, "{config}.bak".format(config = self.configuration_uri))
+                    configuration = open(self.configuration_uri, "w")
+                    configuration.write("\n".join(self.configuration))
+                    configuration.flush()
+                    configuration.close()
+                except Exception as error:
+                    os.rename("{config}.bak".format(config = self.configuration_uri), self.configuration_uri)
+                finally:
+                    if os.access("{config}.bak".format(config = self.configuration_uri), os.W_OK):
+                        os.remove("{config}.bak".format(config = self.configuration_uri))
 
-            if self._dry_run:
-                output.verbose("echo -en \n%s\n > /boot/grub/grub.conf" % "\n".join(self._configuration))
-            else:
-                if not os.access(self._config_url, os.W_OK):
-                    raise GrubException("Cannot write to /boot/grub/grub.conf")
-                c = open(self._config_url, 'w')
-                c.write("\n".join(self._configuration))
-                c.flush()
-                c.close()
+    def _has_kernel(self, kernel_name):
+        """Return the truthness of the kernel's presence in the config."""
+        return len([ line for line in self.configuration if re.search(kernel_name, line) ])
 

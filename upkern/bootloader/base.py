@@ -62,13 +62,12 @@ class BaseBootLoader(object):
         return FSTab["/"]
 
     @property
-    def has_kernel(self):
-        """Get whether this bootloader's configuration contains the kernel."""
-        raise AttributeError("has_kernel")
-
-    @property
     def configuration(self):
         """Get the configuration file for the bootloader (if applicable)."""
+        raise AttributeError("configuration")
+
+    @configuration.setter
+    def configuration(self, value):
         raise AttributeError("configuration")
 
     def prepare(self, kernel = None, kernel_options = ""):
