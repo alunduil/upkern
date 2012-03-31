@@ -274,7 +274,7 @@ class Sources(object):
             os.chdir("/usr/src/linux")
             status = subprocess.call(command, shell = True)
             if status != 0:
-                pass # TODO raise an appropriate exception.
+                raise KernelBuildFailure()
             os.chdir(original_directory)
 
         binary_args = self.arguments
@@ -476,4 +476,8 @@ class Sources(object):
                 })
         
         return float(key)
+
+class KernelBuildError(Exception):
+    """Indicates a build error in the kernel."""
+    pass
 
