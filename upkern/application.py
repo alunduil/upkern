@@ -28,7 +28,7 @@ import datetime
 
 import helpers
 import kernel
-import bootloader
+from bootloader import BootLoader
 
 class UpkernApplication(object):
     """Main application class for upkern."""
@@ -84,7 +84,7 @@ class UpkernApplication(object):
         bootloader_params = {}
         bootloader_params.update(verbosity)
 
-        bootloader = bootloader.BootLoader(**bootloader_params)
+        bootloader = BootLoader(**bootloader_params)
         
         if self.arguments.debug:
             helpers.colorize("GREEN", bootloader.configuration)
