@@ -57,6 +57,7 @@ class Grub(BaseBootLoader):
         return self._grub_root
 
     @property
+    @mountedboot
     def configuration(self):
         """The grub configuration file (mutable)."""
         if not hasattr(self, "_configuration"):
