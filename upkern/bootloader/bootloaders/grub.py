@@ -59,7 +59,8 @@ class Grub(BaseBootLoader):
             configuration.close()
         return self._configuration
 
-    @configuration.setter(self, value):
+    @configuration.setter
+    def configuration(self, value):
         """The grub configuration file (mutable)."""
         self.configuration = value
 
