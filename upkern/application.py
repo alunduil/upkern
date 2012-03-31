@@ -87,9 +87,13 @@ class UpkernApplication(object):
         bootloader = BootLoader(**bootloader_params)
         
         if self.arguments.debug:
-            helpers.colorize("GREEN", bootloader.configuration)
+            helpers.colorize("BLUE", bootloader.configuration)
 
         bootloader.prepare(kernel = binary, kernel_options = self.arguments.kernel_options)
+
+        if self.arguments.debug:
+            helpers.colorize("BLUE", bootloader.configuration)
+
         bootloader.install()
 
         conclusion_list = [

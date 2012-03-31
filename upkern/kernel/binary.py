@@ -58,6 +58,10 @@ class Binary(object):
                 }
 
     @property
+    def name(self):
+        return self.arguments["name"]
+
+    @property
     def install_image(self):
         """Returns the name of the install image for this architecture.
         
