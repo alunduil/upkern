@@ -34,7 +34,8 @@ setup_params['packages'] = [
         "upkern",
         "upkern.kernel",
         "upkern.bootloader",
-        "upkern.bootloader.bootloaders"
+        "upkern.bootloader.bootloaders",
+        "upkern.system",
         ]
 setup_params['data_files'] = [
         ("share/doc/%s-%s" % (setup_params['name'], setup_params['version']), [
