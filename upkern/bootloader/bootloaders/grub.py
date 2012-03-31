@@ -35,7 +35,7 @@ class Grub(BaseBootLoader):
 
         """
 
-        super(Grub, self).__init__(self, debug, verbose, quiet, dry_run)
+        super(Grub, self).__init__(debug, verbose, quiet, dry_run)
 
     @property
     def configuration_uri(self):
