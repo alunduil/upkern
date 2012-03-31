@@ -26,7 +26,7 @@ from upkern.application import UpkernApplication
 
 def main():
     """Main method for calling upkern as an application."""
-    app = UpkernApplication(sys.argv)
+    app = UpkernApplication()
     app.run()
 
 if __name__ == "__main__":
