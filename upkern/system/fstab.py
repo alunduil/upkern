@@ -16,18 +16,17 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
-def BootLoader(*args):
-    """Factory method for getting the appropriate BootLoader object.
+class FSTab(object):
+    def __init__(self):
+        fstab = open("/etc/fstab", "r")
+        self._partitions = dict([
+            line.expandtabs(1).partition(" ")[:1] in fstab.readlines() \
+                    if not re.search(r"^(?:\s*#|$)")
+            ])
+        fstab.close()
 
-    Returns the correct BootLoader object for the system currently running.
-
-    """
-
-    bootloaders = get_installed_cpvs(lambda x: x.startswith('sys-boot'))
-    bootloaders = [ split_cpv(bootloader)[1] for bootloader in bootloaders ]
-
-    bootloaders = set(["grub", "grub2", "lilo"]) & set(bootloaders)
-
-    if "grub" in bootloaders:
-        return Grub(*args)
+    def __getattr__(self, name):
+        if name in self._partitions:
+            return self._partitions[name]
+        raise AttributeError
 

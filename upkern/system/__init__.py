@@ -16,18 +16,3 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
-def BootLoader(*args):
-    """Factory method for getting the appropriate BootLoader object.
-
-    Returns the correct BootLoader object for the system currently running.
-
-    """
-
-    bootloaders = get_installed_cpvs(lambda x: x.startswith('sys-boot'))
-    bootloaders = [ split_cpv(bootloader)[1] for bootloader in bootloaders ]
-
-    bootloaders = set(["grub", "grub2", "lilo"]) & set(bootloaders)
-
-    if "grub" in bootloaders:
-        return Grub(*args)
-

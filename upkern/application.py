@@ -28,6 +28,7 @@ import datetime
 
 import helpers
 import kernel
+import bootloader
 
 class UpkernApplication(object):
     """Main application class for upkern."""
@@ -83,13 +84,13 @@ class UpkernApplication(object):
         bootloader_params = {}
         bootloader_params.update(verbosity)
 
-        bootloader = BootLoader(**bootloader_params)
+        bootloader = bootloader.BootLoader(**bootloader_params)
         
         if self.arguments.debug:
             helpers.colorize("GREEN", bootloader.configuration)
 
-        bootloader.configuration.prepare(kernel = binary, kernel_options = self.arguments.options)
-        bootloader.configuration.install()
+        bootloader.prepare(kernel = binary, kernel_options = self.arguments.options)
+        bootloader.install()
 
         conclusion_list = [
                 "The kernel, {name}, has been successfully installed.  ".format(

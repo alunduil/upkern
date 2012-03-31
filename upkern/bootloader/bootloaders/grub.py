@@ -1,29 +1,20 @@
 # -*- coding: utf-8 -*-
-#########################################################################
-# Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             #
-#                                                                       #
-# This program is free software; you can redistribute it and#or modify  #
-# it under the terms of the GNU General Public License as published by  #
-# the Free Software Foundation; either version 2 of the License, or     #
-# (at your option) any later version.                                   #
-#                                                                       #
-# This program is distributed in the hope that it will be useful,       #
-# but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-# GNU General Public License for more details.                          #
-#                                                                       #
-# You should have received a copy of the GNU General Public License     #
-# along with this program; if not, write to the                         #
-# Free Software Foundation, Inc.,                                       #
-# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
-#########################################################################
 
-from basebootloader import BaseBootLoader
-from upkern import output, helpers
-
-import datetime
-import re
-import os
+# Copyright (C) 2008 by Alex Brandt <alunduil@alunduil.com>             
+#                                                                       
+# This program is free software; you can redistribute it andor modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.                                   
+#                                                                       
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.                  
+#                                                                       
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+# Place - Suite 330, Boston, MA  02111-1307, USA.             
 
 class Grub(BaseBootLoader):
     """A specific boot loader, GRUB, handler.
@@ -31,17 +22,30 @@ class Grub(BaseBootLoader):
     Specifies the generic boot loader interface for the GRUB boot loader.
 
     """
-    def __init__(self, kernel, kernel_options = "", debug = False, 
-        verbose = False, quiet = False, dry_run = False):
+
+    def __init__(self, kernel_name, kernel_options = "", debug = False,
+            verbose = False, quiet = False, dry_run = False):
         """Set up GRUB specific information.
 
         Finalize the boot loader initialization with grub specific 
         information.
 
         """
-        BaseBootLoader.__init__(self, kernel, kernel_options, debug, 
-            verbose, quiet, dry_run)
 
+        super(Grub, self).__init__(self, debug, verbose, quiet, dry_run)
+
+    @property
+    def configuration_uri(self):
+        """The grub configuration URI."""
+        return "/boot/grub/grub.conf"
+
+    @property
+    def configuration_entry(self):
+        """The grub configuration entry."""
+        return "\n".join([
+            "# Kernel added on {time!s}:".format(time = datetime.datetime.now()),
+            "title={kernel_name}".format(kernel_name = self.arguments["kernel_binary"].name)
+    
         self._config_url = '/boot/grub/grub.conf'
         self._configuration = []
 
@@ -181,12 +185,4 @@ class Grub(BaseBootLoader):
                 c.write("\n".join(self._configuration))
                 c.flush()
                 c.close()
-
-class GrubException(Exception):
-    def __init__(self, message, *args):
-        Exception.__init__(self, *args)
-        self.message = message
-
-    def get_message(self):
-        return self.message
 
