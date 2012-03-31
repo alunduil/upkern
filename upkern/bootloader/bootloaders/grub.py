@@ -83,11 +83,11 @@ class Grub(BaseBootLoader):
                         "default {defaulti!s}".format(default = 1 + line.partition(" ")[2]),
                         ]))
                 elif not len(kernel_options) and re.search("kernel", line, re.I):
-                    new_configuration.append(line)
+                    new_configuration.append(line.rstrip())
                     kernel_options = " ".join([ option for option in line.split(" ") if not re.search("(?:kernel|/boot/|root=)", option, re.I) ])
                     # TODO Merge the kernel options passed with those found?
                 else:
-                    new_configuration.append(line)
+                    new_configuration.append(line.rstrip())
 
             kernel_entry = [
                     "# Kernel added {time!s}:".format(
