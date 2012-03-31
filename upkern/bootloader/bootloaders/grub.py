@@ -61,7 +61,7 @@ class Grub(BaseBootLoader):
         """The grub configuration file (mutable)."""
         if not hasattr(self, "_configuration"):
             configuration = open(self.configuration_uri, 'r')
-            self._configuration = configuration.readlines()
+            self._configuration = [ line.rstrip("\n") for line in configuration.readlines() ]
             configuration.close()
         return self._configuration
 
@@ -83,11 +83,11 @@ class Grub(BaseBootLoader):
                         "default {defaulti!s}".format(default = 1 + line.partition(" ")[2]),
                         ]))
                 elif not len(kernel_options) and re.search("kernel", line, re.I):
-                    new_configuration.append(line.rstrip())
+                    new_configuration.append(line)
                     kernel_options = " ".join([ option for option in line.split(" ") if not re.search("(?:kernel|/boot/|root=)", option, re.I) ])
                     # TODO Merge the kernel options passed with those found?
                 else:
-                    new_configuration.append(line.rstrip())
+                    new_configuration.append(line)
 
             kernel_entry = [
                     "# Kernel added {time!s}:".format(
