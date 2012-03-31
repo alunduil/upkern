@@ -22,11 +22,7 @@
 import sys
 import os
 
-try:
-    from upkern import UpkernApplication
-except ImportError:
-    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-    from upkern import UpkernApplication
+from upkern.application import UpkernApplication
 
 def main():
     """Main method for calling upkern as an application."""
