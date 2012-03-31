@@ -36,7 +36,7 @@ def BootLoader(*args, **kargs):
 
     if kargs["debug"]:
         helpers.debug({
-            "bootloaders", bootloaders,
+            "bootloaders": bootloaders,
             })
 
     bootloaders = set(["grub0", "grub2"]) & set(bootloaders)
