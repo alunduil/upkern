@@ -17,6 +17,7 @@
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
 from gentoolkit.helpers import get_installed_cpvs
+from gentoolkit.cpv import split_cpv
 
 def BootLoader(*args, **kargs):
     """Factory method for getting the appropriate BootLoader object.
