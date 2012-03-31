@@ -64,18 +64,18 @@ class BaseBootLoader(object):
     @property
     def has_kernel(self):
         """Get whether this bootloader's configuration contains the kernel."""
-        raise UnboundLocalError("has_kernel")
+        raise AttributeError("has_kernel")
 
     @property
     def configuration(self):
         """Get the configuration file for the bootloader (if applicable)."""
-        raise UnboundLocalError("configuration")
+        raise AttributeError("configuration")
 
     def prepare(self, kernel = None, kernel_options = ""):
         """Prepare the configuration of the bootloader."""
-        raise UnboundLocalError("prepare")
+        raise NotImplementedError("prepare")
 
     def install(self):
         """Install the configuration and make the system bootable."""
-        raise UnboundLocalError("install")
+        raise NotImplementedError("install")
 
