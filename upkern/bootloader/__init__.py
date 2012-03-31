@@ -41,7 +41,7 @@ def BootLoader(*args, **kargs):
 
     bootloaders = set(["grub0", "grub2"]) & set(bootloaders)
 
-    if "grub" in bootloaders:
+    if "grub0" in bootloaders:
         return Grub(*args, **kargs)
     return None
 
