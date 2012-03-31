@@ -45,8 +45,6 @@ class BaseBootLoader(object):
                 "verbose": verbose,
                 "quiet": quiet,
                 "dry_run": dry_run,
-                "kernel_name": kernel_name,
-                "kernel_options": kernel_options,
                 }
 
     @property
