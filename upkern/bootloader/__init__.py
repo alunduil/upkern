@@ -19,6 +19,8 @@
 from gentoolkit.helpers import get_installed_cpvs
 from gentoolkit.cpv import split_cpv
 
+from bootloaders import Grub
+
 def BootLoader(*args, **kargs):
     """Factory method for getting the appropriate BootLoader object.
 
