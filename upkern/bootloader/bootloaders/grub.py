@@ -17,6 +17,7 @@
 # Place - Suite 330, Boston, MA  02111-1307, USA.             
 
 import re
+import upkern.helpers as helpers
 
 from upkern.bootloader.base import BaseBootLoader
 from upkern.helpers import mountedboot
