@@ -18,3 +18,5 @@
 
 """The module that includes all the supported bootloaders."""
 
+from grub import Grub
+
