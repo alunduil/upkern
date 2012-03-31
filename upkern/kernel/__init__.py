@@ -18,3 +18,5 @@
 
 """The module definition for the kernel models."""
 
+from sources import Sources
+
