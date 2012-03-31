@@ -16,7 +16,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
-def BootLoader(*args):
+def BootLoader(*args, **kargs):
     """Factory method for getting the appropriate BootLoader object.
 
     Returns the correct BootLoader object for the system currently running.
@@ -29,5 +29,5 @@ def BootLoader(*args):
     bootloaders = set(["grub", "grub2", "lilo"]) & set(bootloaders)
 
     if "grub" in bootloaders:
-        return Grub(*args)
+        return Grub(*args, **kargs)
 
