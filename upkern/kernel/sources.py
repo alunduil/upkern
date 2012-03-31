@@ -84,7 +84,8 @@ class Sources(object):
             finder = FileOwner()
 
             for directory in self.source_directories:
-                if unicode(finder((directory, ))[0][0]) == self.package_name.lstrip("="):
+                self.package_name = unicode(finder((directory, ))[0][0])
+                if self.package_name == self.package_name.lstrip("="):
                     self._directory_name = directory
                     break
 
@@ -145,6 +146,11 @@ class Sources(object):
                 self._package_name = unicode(finder((self.source_directories[0], ))[0][0])
 
         return self._package_name
+
+    @package_name.setter
+    def package_name(self, value):
+        """Set the package name of the kernel."""
+        self._package_name = value
 
     @property
     def source_directories(self):
