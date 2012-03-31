@@ -71,7 +71,7 @@ class BaseBootLoader(object):
         """Get the configuration file for the bootloader (if applicable)."""
         raise UnboundLocalError("configuration")
 
-    def prepare(self, kernel = None, kernel_options = "")
+    def prepare(self, kernel = None, kernel_options = ""):
         """Prepare the configuration of the bootloader."""
         raise UnboundLocalError("prepare")
 
