@@ -27,6 +27,7 @@ def BootLoader(*args, **kargs):
     """Factory method for getting the appropriate BootLoader object.
 
     Returns the correct BootLoader object for the system currently running.
+    Returns None if no supported bootloader is found.
 
     """
 
@@ -42,4 +43,5 @@ def BootLoader(*args, **kargs):
 
     if "grub" in bootloaders:
         return Grub(*args, **kargs)
+    return None
 
