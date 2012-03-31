@@ -26,8 +26,8 @@ class Grub(BaseBootLoader):
 
     """
 
-    def __init__(self, kernel_name, kernel_options = "", debug = False,
-            verbose = False, quiet = False, dry_run = False):
+    def __init__(self, debug = False, verbose = False, quiet = False,
+            dry_run = False):
         """Set up GRUB specific information.
 
         Finalize the boot loader initialization with grub specific 
