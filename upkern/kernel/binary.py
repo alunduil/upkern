@@ -59,7 +59,7 @@ class Binary(object):
 
     @property
     def name(self):
-        return self.arguments["name"]
+        return self.arguments["directory"]
 
     @property
     def install_image(self):
