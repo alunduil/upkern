@@ -16,6 +16,8 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
+"""Specifies the binary model for dealing with kernel objects."""
+
 import os
 import shutil
 import re
@@ -59,6 +61,7 @@ class Binary(object):
 
     @property
     def name(self):
+        """The name of the kernel for labelling purposes."""
         return self.arguments["directory"]
 
     @property
@@ -154,8 +157,10 @@ class Binary(object):
                 directory = self.image_directory, image = self.install_image),
                 "/boot/{image}{suffix}".format(image = self.install_image,
                     suffix = self.suffix))
-            shutil.copy(".config", "/boot/config{suffix}".format(suffix = self.suffix))
-            shutil.copy("System.map", "/boot/System.map{suffix}".format(suffix = self.suffix))
+            shutil.copy(".config", "/boot/config{suffix}".format(
+                suffix = self.suffix))
+            shutil.copy("System.map", "/boot/System.map{suffix}".format(
+                suffix = self.suffix))
             shutil.copy("System.map", "/System.map")
             os.chdir(original_directory)
 

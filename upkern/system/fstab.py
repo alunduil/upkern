@@ -16,11 +16,17 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
-class FSTab(object):
+"""Declares a very simple dictionary style model of /etc/fstab."""
+
+import re
+
+class FSTab(object): #pylint: disable-msg=R0903
+    """Simply model of /etc/fstab."""
     def __init__(self):
         fstab = open("/etc/fstab", "r")
         self._partitions = dict([
-            line.expandtabs(1).partition(" ")[:1] for line in fstab.readlines() \
+            line.expandtabs(1).partition(" ")[:1] \
+                    for line in fstab.readlines() \
                     if not re.search(r"^(?:\s*#|$)")
             ])
         fstab.close()

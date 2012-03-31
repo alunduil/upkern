@@ -16,6 +16,8 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
+"""Provides the kernel source models."""
+
 import re
 import os
 import portage
@@ -26,7 +28,7 @@ import upkern.helpers as helpers
 from gentoolkit.query import Query as GentoolkitQuery
 from gentoolkit.helpers import FileOwner
 from upkern.helpers import mountedboot
-from binary import Binary
+from upkern.kernel.binary import Binary
 
 class Sources(object):
     """A kernel source model.
@@ -84,7 +86,8 @@ class Sources(object):
             finder = FileOwner()
 
             for directory in self.source_directories:
-                if unicode(finder((directory, ))[0][0]) == self.package_name.lstrip("="):
+                if unicode(finder((
+                    directory, ))[0][0]) == self.package_name.lstrip("="):
                     self._directory_name = directory
                     break
 
@@ -140,9 +143,14 @@ class Sources(object):
                 finder = FileOwner()
 
                 if not self.arguments["quiet"]:
-                    print("Determing kernel source package.  This could take some time; please wait ...")
+                    wait_list = [
+                            "Determining kernel source package.  This could ",
+                            "take some time.  Please wait ...",
+                            ]
+                    print("".join(wait_list))
 
-                self._package_name = unicode(finder((self.source_directories[0], ))[0][0])
+                self._package_name = unicode(finder(
+                    (self.source_directories[0], ))[0][0])
 
         return self._package_name
 
@@ -163,12 +171,17 @@ class Sources(object):
         """
 
         if not hasattr(self, "_directories"):
-            directories = [ d for d in os.listdir('/usr/src') if re.match(r"linux-.+$", d) ]
+            directories = [ 
+                    d for d in os.listdir('/usr/src') \
+                            if re.match(r"linux-.+$", d)
+                    ]
 
             keys = [ self._keyify(d) for d in directories ]
             dict_ = dict(zip(keys, directories))
 
-            self._directories = [ dict_[d] for d in sorted(dict_.keys(), reverse = True) ]
+            self._directories = [ 
+                    dict_[d] for d in sorted(dict_.keys(), reverse = True)
+                    ]
 
         return self._directories
 
@@ -295,7 +308,8 @@ class Sources(object):
         if not self.arguments["quiet"]:
             print("Rebuilding the kernel modules ...")
 
-        if not len(GentoolkitQuery("sys-kernel/module-rebuild").find_installed()):
+        if not len(GentoolkitQuery(
+            "sys-kernel/module-rebuild").find_installed()):
             return
 
         if self.arguments["verbose"]:
@@ -353,7 +367,7 @@ class Sources(object):
         
         """
 
-        originali_target = None
+        original_target = None
 
         if os.path.islink('/usr/src/linux'):
             original_target = os.readlink("/usr/src/linux")
@@ -364,7 +378,7 @@ class Sources(object):
                 try:
                     os.remove('/usr/src/linux')
                 except Exception as error:
-                    os.symlink(original, "/usr/src/linux")
+                    os.symlink(original_target, "/usr/src/linux")
                     raise error
 
         if self.arguments["dry_run"]:
@@ -380,7 +394,7 @@ class Sources(object):
                         '/usr/src/linux')
             except Exception as error:
                 os.remove("/usr/src/linux")
-                os.symlink(original, "/usr/src/linux")
+                os.symlink(original_target, "/usr/src/linux")
                 raise error
 
     @mountedboot
@@ -396,12 +410,16 @@ class Sources(object):
         # If no configuration file is passed; find the highest versioned one
         # in /boot.
         if not len(configuration):
-            config_files = [ f for f in os.listdir('/boot') if re.match('config-.+', f) ]
+            config_files = [
+                    f for f in os.listdir('/boot') if re.match('config-.+', f)
+                    ]
 
             keys = [ self._keyify(c) for c in config_files ]
             dict_ = dict(zip(keys, config_files))
 
-            config_files = [ dict_[k] for k in sorted(dict_.keys(), reverse = True) ] 
+            config_files = [
+                    dict_[k] for k in sorted(dict_.keys(), reverse = True)
+                    ] 
 
             if len(config_files):
                 configuration = config_files[0]
@@ -454,19 +472,24 @@ class Sources(object):
         
         """
         
-        regex = '.*?(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))?-[^-]*(?:-r(?P<revision>\d+))?'
-        m = re.match(regex, kernel_string)
+        regex = "".join([
+            r".*?(?P<major>\d+)\.",
+            r"(?P<minor>\d+)",
+            r"(?:\.(?P<patch>\d+))?",
+            r"-[^-]*(?:-r(?P<revision>\d+))?",
+            ])
+        match = re.match(regex, kernel_string)
         
         revision = major = minor = patch = 0
-        if m:
-            if m.group("revision"): 
-                revision = int(m.group("revision"))
-            if m.group("major"):
-                major = int(m.group("major"))
-            if m.group("minor"):
-                minor = int(m.group("minor"))
-            if m.group("patch"):
-                patch = int(m.group("patch"))
+        if match:
+            if match.group("revision"): 
+                revision = int(match.group("revision"))
+            if match.group("major"):
+                major = int(match.group("major"))
+            if match.group("minor"):
+                minor = int(match.group("minor"))
+            if match.group("patch"):
+                patch = int(match.group("patch"))
 
         key = "{:03d}{:03d}{:03d}.{:03d}".format(major, minor, patch, revision)
 

@@ -66,12 +66,16 @@ def debug(message = None, *args, **kwargs):
 
     if len(kwargs.values()):
         output.extend([ 
-            "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
+            "{key} -> {value}".format(
+                key = key,
+                value = val
+                ) for key, val in kwargs.items()
             ])
 
-    def stack_item(x):
-        return "{file_}:{line} in {function}".format(file_ = stack()[x][1],
-                line = stack()[x][2], function = stack()[x][3])
+    def stack_item(level):
+        """Return details about the level of the current stack."""
+        return "{file_}:{line} in {function}".format(file_ = stack()[level][1],
+                line = stack()[level][2], function = stack()[level][3])
 
     for line in output:
         colorize("YELLOW", "D: {called} called from {caller}: {line}".format(
@@ -90,7 +94,10 @@ def verbose(message = None, *args, **kwargs):
 
     if len(kwargs.values()):
         output.extend([
-            "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
+            "{key} -> {value}".format(
+                key = key,
+                value = val
+                ) for key, val in kwargs.items()
             ])
 
     for line in output:
@@ -108,7 +115,10 @@ def error(message = None, *args, **kwargs):
 
     if len(kwargs.values()):
         output.extend([
-            "{key} -> {value}".format(key = key, value = val) for key, val in kwargs.items()
+            "{key} -> {value}".format(
+                key = key,
+                value = val
+                ) for key, val in kwargs.items()
             ])
 
     for line in output:
@@ -119,7 +129,14 @@ def sufficient_privileges(short_circuit = False):
     return short_circuit or os.getuid() == 0
 
 def mountedboot(func):
+    """A decorator that checks if boot is mounted before running the function.
+
+    If boot is not mounted; it gets mounted and unmounted properly.
+
+    """
+
     def new_func(*args, **kargs):
+        """Closure definition."""
         if os.path.ismount("/boot") or \
                 len([
                     f for f in list(

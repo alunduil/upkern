@@ -18,5 +18,3 @@
 
 """The program module for upkern. """
 
-from upkern.application import UpkernApplication
-

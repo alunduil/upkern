@@ -16,6 +16,12 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.            
 
+"""Provides the base bootloader object which all plugins should inherit from.
+
+"""
+
+from upkern.system.fstab import FSTab
+
 class BaseBootLoader(object):
     """A boot loader handling object.
 
@@ -66,6 +72,7 @@ class BaseBootLoader(object):
 
     @configuration.setter
     def configuration(self, value):
+        """The configuration file for the bootlaoder."""
         raise AttributeError("configuration")
 
     def prepare(self, kernel = None, kernel_options = ""):

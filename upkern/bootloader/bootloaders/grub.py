@@ -16,7 +16,12 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.             
 
+"""Defines the model for the grub bootloader."""
+
 import re
+import datetime
+import os
+import shutil
 import upkern.helpers as helpers
 
 from upkern.bootloader.base import BaseBootLoader
@@ -52,7 +57,8 @@ class Grub(BaseBootLoader):
             match = re.match(r"/dev/[\w\d]+(?P<letter>\w)(?P<number\d+)",
                     self.boot_partition)
             self._grub_root = "(hd{letter!s},{number!s})".format(
-                    letter = ascii_lowercase.find(match.group("letter")),
+                    letter = "abcdefghijklmnopqrstuvwxyz".find(
+                        match.group("letter")),
                     number = 1 + match.group("number"))
         return self._grub_root
 
@@ -62,14 +68,16 @@ class Grub(BaseBootLoader):
         """The grub configuration file (mutable)."""
         if not hasattr(self, "_configuration"):
             configuration = open(self.configuration_uri, 'r')
-            self._configuration = [ line.rstrip("\n") for line in configuration.readlines() ]
+            self._configuration = [
+                    line.rstrip("\n") for line in configuration.readlines()
+                    ]
             configuration.close()
         return self._configuration
 
     @configuration.setter
     def configuration(self, value):
         """The grub configuration file (mutable)."""
-        self.configuration = value
+        self._configuration = value
 
     @mountedboot
     def prepare(self, kernel = None, kernel_options = ""):
@@ -81,11 +89,16 @@ class Grub(BaseBootLoader):
             for line in self.configuration:
                 if re.search("default", line, re.I):
                     new_configuration.append("".join([
-                        "default {defaulti!s}".format(default = 1 + line.partition(" ")[2]),
+                        "default {defaulti!s}".format(
+                            default = 1 + line.partition(" ")[2]),
                         ]))
-                elif not len(kernel_options) and re.search("kernel", line, re.I):
+                elif not len(kernel_options) and re.search("kernel", line,
+                        re.I):
                     new_configuration.append(line)
-                    kernel_options = " ".join([ option for option in line.split(" ") if not re.search("(?:kernel|/boot/|root=)", option, re.I) ])
+                    kernel_options = " ".join([
+                        option for option in line.split(" ") if not re.search(
+                            "(?:kernel|/boot/|root=)", option, re.I)
+                        ])
                     # TODO Merge the kernel options passed with those found?
                 else:
                     new_configuration.append(line)
@@ -108,29 +121,38 @@ class Grub(BaseBootLoader):
     def install(self):
         """Install the configuration and make the system bootable."""
         if self.arguments["dry_run"]:
-           dry_list = [
-                   "cp {config}{{,.bak}}".format(config = self.configuration_uri),
-                   "cat > {config}".format(config = self.configuration_uri),
-                   "\n".join(self.configuration),
-                   "^d",
-                   "rm {config}.bak".format(config = self.configuration_uri),
-                   ]
-           helpers.colorize("GREEN", "\n".join(dry_list))
+            dry_list = [
+                    "cp {config}{{,.bak}}".format(
+                        config = self.configuration_uri),
+                    "cat > {config}".format(config = self.configuration_uri),
+                    "\n".join(self.configuration),
+                    "^d",
+                    "rm {config}.bak".format(config = self.configuration_uri),
+                    ]
+            helpers.colorize("GREEN", "\n".join(dry_list))
         else:
             if os.access(self.configuration_uri, os.W_OK):
                 try:
-                    shutil.copy(self.configuration_uri, "{config}.bak".format(config = self.configuration_uri))
+                    shutil.copy(self.configuration_uri, "{config}.bak".format(
+                        config = self.configuration_uri))
                     configuration = open(self.configuration_uri, "w")
                     configuration.write("\n".join(self.configuration))
                     configuration.flush()
                     configuration.close()
                 except Exception as error:
-                    os.rename("{config}.bak".format(config = self.configuration_uri), self.configuration_uri)
+                    os.rename("{config}.bak".format(
+                        config = self.configuration_uri),
+                        self.configuration_uri)
+                    raise error
                 finally:
-                    if os.access("{config}.bak".format(config = self.configuration_uri), os.W_OK):
-                        os.remove("{config}.bak".format(config = self.configuration_uri))
+                    if os.access("{config}.bak".format(
+                        config = self.configuration_uri), os.W_OK):
+                        os.remove("{config}.bak".format(
+                            config = self.configuration_uri))
 
     def _has_kernel(self, kernel_name):
         """Return the truthness of the kernel's presence in the config."""
-        return len([ line for line in self.configuration if re.search(kernel_name, line) ])
+        return len([
+            line for line in self.configuration if re.search(kernel_name, line)
+            ])
 

@@ -26,14 +26,14 @@ upkern application.
 import argparse
 import datetime
 
-import helpers
-import kernel
-from bootloader import BootLoader
+import upkern.helpers as helpers
+import upkern.kernel as kernel
+from upkern.bootloader import BootLoader
 
-class UpkernApplication(object):
+class UpkernApplication(object): #pylint: disable-msg=R0903
     """Main application class for upkern."""
 
-    def __init__(self, argv):
+    def __init__(self):
         self._debug = False
         self._verbose = False
         self._quiet = False
@@ -52,6 +52,7 @@ class UpkernApplication(object):
         helpers.COLORIZE = self.arguments.color
 
     def run(self):
+        """Does all the legwork of getting the specified kernel installed."""
         verbosity = {
                 "debug": self.arguments.debug,
                 "verbose": self.arguments.verbose,
@@ -89,7 +90,8 @@ class UpkernApplication(object):
         if self.arguments.debug:
             helpers.colorize("BLUE", "\n".join(bootloader.configuration))
 
-        bootloader.prepare(kernel = binary, kernel_options = self.arguments.kernel_options)
+        bootloader.prepare(kernel = binary,
+                kernel_options = self.arguments.kernel_options)
 
         if self.arguments.debug:
             helpers.colorize("BLUE", "\n".join(bootloader.configuration))
@@ -231,9 +233,9 @@ class UpkernOptions(object):
                 "separate install of module-rebuild).  If module-rebuild is ",
                 "not available; this results in a no-op and no harm is done. ",
                 ]
-        self._parser.add_argument("--rebuild-modules", "-r", action = "store_true",
-                default = False, dest = "rebuild_modules", 
-                help = "".join(help_list))
+        self._parser.add_argument("--rebuild-modules", "-r",
+                action = "store_true", default = False,
+                dest = "rebuild_modules", help = "".join(help_list))
 
         # --time, -t
         help_list = [
