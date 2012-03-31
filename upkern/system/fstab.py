@@ -20,7 +20,7 @@ class FSTab(object):
     def __init__(self):
         fstab = open("/etc/fstab", "r")
         self._partitions = dict([
-            line.expandtabs(1).partition(" ")[:1] in fstab.readlines() \
+            line.expandtabs(1).partition(" ")[:1] for line in fstab.readlines() \
                     if not re.search(r"^(?:\s*#|$)")
             ])
         fstab.close()
