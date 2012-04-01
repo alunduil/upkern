@@ -94,8 +94,7 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
 
         if not self.arguments.quiet:
             conclusion_list = [
-                    "The kernel, {name}, has been successfully installed.  ".format(
-                        name = binary.name),
+                    "The kernel, {name}, has been successfully installed.  ",
                     "Please, check that all configuration files are ",
                     "installed correctly and the bootloader is configured ",
                     "correctly.  ",
@@ -103,10 +102,11 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
 
             if self.arguments.time:
                 conclusion_list.extend([
-                    "The kernel's build time was {delta!s}".format(delta = delta),
+                    "The kernel's build time was {delta!s}".format(
+                        delta = delta),
                     ])
 
-            print("".join(conclusion_list))
+            print("".join(conclusion_list).format(name = binary.name))
 
 class UpkernOptions(object):
     """Options for the upkern application."""

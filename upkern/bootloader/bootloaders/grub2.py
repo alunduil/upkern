@@ -16,6 +16,8 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.             
 
+"""Module that provides models and functions for handling grub2."""
+
 import re
 import os
 import shutil
@@ -83,14 +85,16 @@ class Grub2(BaseBootLoader):
         """The grub configuration file (mutable)."""
         if not hasattr(self, "_configuration"):
             configuration = open(self.configuration_uri, 'r')
-            self._configuration = [ line.rstrip("\n") for line in configuration.readlines() ]
+            self._configuration = [
+                    line.rstrip("\n") for line in configuration.readlines()
+                    ]
             configuration.close()
         return self._configuration
 
     @configuration.setter
     def configuration(self, value):
         """The grub configuration file (mutable)."""
-        self.configuration = value
+        self._configuration = value
 
     @mountedboot
     def prepare(self, kernel = None, kernel_options = ""):
@@ -101,10 +105,15 @@ class Grub2(BaseBootLoader):
         if self.arguments["dry_run"]:
             dry_list = [
                     "pushd /boot",
-                    "ln -s {kernel_image} {grub_image}".format(grub_image = grub_image, kernel_image = kernel.image),
+                    "ln -s {kernel_image} {grub_image}".format(
+                        grub_image = grub_image, kernel_image = kernel.image),
                     "popd",
                     # TODO find a better way to depict this ...
-                    "sed -i -e 's/(GRUB_CMDLINE_LINUX_DEFAULT=\")(.*)(\")/\\0\\1 {kernel_options}\\3/' {defaults}".format(kernel_options = kernel_options, defaults = self.grub_defaults_uri),
+                    "".join([
+                        "sed -i -e 's/(GRUB_CMDLINE_LINUX_DEFAULT=\")(.*)(\")",
+                        "/\\0\\1 {kernel_options}\\3/' {defaults}",
+                        ]).format(kernel_options = kernel_options,
+                            defaults = self.grub_defaults_uri),
                     ]
             helpers.colorize("GREEN", "\n".join(dry_list))
         else:
@@ -140,20 +149,25 @@ class Grub2(BaseBootLoader):
                 })
 
         if self.arguments["dry_run"]:
-           dry_list = [
-                   "pushd /boot/grub2",
-                   "cp {grub_config}{{.,bak}}".format(grub_config = self.configuration_uri),
-                   "grub2-mkconfig -o {grub_config}".format(grub_config = self.configuration_uri),
-                   "rm {grub_config}.bak".format(grub_config = self.configuration_uri),
-                   "popd",
-                   ]
-           helpers.colorize("GREEN", "\n".join(dry_list))
+            dry_list = [
+                    "pushd /boot/grub2",
+                    "cp {grub_config}{{.,bak}}",
+                    "grub2-mkconfig -o {grub_config}",
+                    "rm {grub_config}.bak",
+                    "popd",
+                    ]
+            helpers.colorize("GREEN", "\n".join(dry_list).format(
+                grub_config = self.configuration_uri))
         else:
             original_directory = os.getcwd()
             try:
                 os.chdir("/boot/grub2")
-                shutil.copy(self.configuration_uri, "{grub_config}.bak".format(grub_config = self.configuration_uri))
-                status = subprocess.call("grub2-mkconfig -o {grub_config}".format(grub_config = self.configuration_uri), shell = True)
+                shutil.copy(self.configuration_uri, "{grub_config}.bak".format(
+                    grub_config = self.configuration_uri))
+                status = subprocess.call(
+                        "grub2-mkconfig -o {grub_config}".format(
+                            grub_config = self.configuration_uri),
+                        shell = True)
                 if status != 0:
                     pass # TODO raise an appropriate error
 
@@ -163,10 +177,14 @@ class Grub2(BaseBootLoader):
                         "error": error,
                         })
 
-                os.rename("{grub_config}.bak".format(grub_config = self.configuration_uri), self.configuration_uri)
+                os.rename("{grub_config}.bak".format(
+                    grub_config = self.configuration_uri),
+                    self.configuration_uri)
                 raise error
             finally:
-                if os.access("{grub_config}.bak".format(grub_config = self.configuration_uri), os.W_OK):
-                    os.remove("{grub_config}.bak".format(grub_config = self.configuration_uri))
+                if os.access("{grub_config}.bak".format(
+                    grub_config = self.configuration_uri), os.W_OK):
+                    os.remove("{grub_config}.bak".format(
+                        grub_config = self.configuration_uri))
                 os.chdir(original_directory)
 

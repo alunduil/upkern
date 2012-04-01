@@ -24,9 +24,9 @@ class FSTab(object): #pylint: disable-msg=R0903
     """Simply model of /etc/fstab."""
     def __init__(self):
         fstab = open("/etc/fstab", "r")
-        self._partitions = dict([
-            [ item for item in line.expandtabs(1).split(" ") if len(item) ][1::-1] \
-                    for line in fstab.readlines() \
+        self._partitions = dict([[
+            item for item in line.expandtabs(1).split(" ") if len(item)
+            ][1::-1] for line in fstab.readlines() \
                     if not re.search(r"^(?:\s*#|$)", line)
             ])
         fstab.close()
