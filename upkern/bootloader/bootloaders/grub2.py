@@ -33,7 +33,7 @@ def mountedgrub(func):
 
     def new_func(*args, **kargs):
         """Closure definition."""
-        if FSTab["/boot/grub2"] and os.path.ismount("/boot/grub2"):
+        if FSTab()["/boot/grub2"] and os.path.ismount("/boot/grub2"):
             res = func(*args, **kargs)
         else:
             os.system('mount /boot/grub2')
