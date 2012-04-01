@@ -22,6 +22,7 @@ import upkern.helpers as helpers
 
 from upkern.bootloader.base import BaseBootLoader
 from upkern.helpers import mountedboot
+from upkern.system import FSTab
 
 def mountedgrub(func):
     """A decorator that checks if boot is mounted before running the function.
