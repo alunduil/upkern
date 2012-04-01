@@ -52,11 +52,6 @@ class Grub2(BaseBootLoader):
         return "/etc/default/grub"
 
     @property
-    def grub_partition(self):
-        """The grub root parameter."""
-        return FSTab["/boot/grub2"]
-
-    @property
     def configuration(self):
         """The grub configuration file (mutable)."""
         if not hasattr(self, "_configuration"):
@@ -101,6 +96,7 @@ class Grub2(BaseBootLoader):
             grub_defaults.flush()
             grub_defaults.close()
 
+    @mountedgrub
     @mountedboot
     def install(self):
         """Install the configuration and make the system bootable."""
@@ -124,4 +120,26 @@ class Grub2(BaseBootLoader):
             finally:
                 if os.access("{grub_config}.bak".format(grub_config = self.configuration_uri), os.W_OK):
                     os.remove("{grub_config}.bak".format(grub_config = self.configuration_uri))
+
+def mountedgrub(func):
+    """A decorator that checks if boot is mounted before running the function.
+
+    If boot is not mounted; it gets mounted and unmounted properly.
+
+    """
+
+    def new_func(*args, **kargs):
+        """Closure definition."""
+        if FSTab["/boot/grub2"] and os.path.ismount("/boot/grub2"):
+            res = func(*args, **kargs)
+        else:
+            os.system('mount /boot/grub2')
+            try:
+                res = func(*args, **kargs)
+            except Exception as error:
+                raise error
+            finally:
+                os.system('umount /boot/grub2')
+        return res
+    return new_func
 
