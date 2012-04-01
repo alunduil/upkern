@@ -65,6 +65,11 @@ class Binary(object):
         return self.arguments["directory"]
 
     @property
+    def image(self):
+        """The complete image name."""
+        return self.install_image + self.suffix
+
+    @property
     def install_image(self):
         """Returns the name of the install image for this architecture.
         

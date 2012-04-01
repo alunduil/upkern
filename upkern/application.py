@@ -98,7 +98,7 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
 
         bootloader.install()
 
-        if not self.arguments["quiet"]:
+        if not self.arguments.quiet:
             conclusion_list = [
                     "The kernel, {name}, has been successfully installed.  ".format(
                         name = binary.name),
