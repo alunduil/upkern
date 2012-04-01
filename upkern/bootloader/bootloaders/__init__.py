@@ -19,4 +19,5 @@
 """The module that includes all the supported bootloaders."""
 
 from grub import Grub
+from grub2 import Grub2
 
