@@ -220,7 +220,7 @@ class Sources(object):
         if not self.arguments["quiet"]:
             print("Kernel sources prepared.")
 
-    def configure(self, configurator = ""):
+    def configure(self, configurator = "", accept_defaults = False):
         """Configure the kernel sources.
 
         1. Enter the source directory.
@@ -237,6 +237,9 @@ class Sources(object):
         command = "make {options} {configurator}".format(
                 options = self.portage_config["MAKEOPTS"],
                 configurator = configurator)
+
+        if accept_defaults:
+            command = "yes \"\" | " + command
 
         if self.arguments["dry_run"]:
             dry_list = [

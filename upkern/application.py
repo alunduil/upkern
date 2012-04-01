@@ -67,7 +67,8 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
 
         sources = kernel.Sources(**kernel_params)
         sources.prepare(configuration = self.arguments.config)
-        sources.configure(configurator = self.arguments.configurator)
+        sources.configure(configurator = self.arguments.configurator,
+                accept_defaults = self.arguments.yes)
 
         if self.arguments.time:
             start = datetime.datetime.now()
@@ -239,6 +240,15 @@ class UpkernOptions(object):
                 "configurations, etc."
                 ]
         self._parser.add_argument("--time", "-t", action = "store_true", 
+                default = False, help = "".join(help_list))
+
+        # --yes, -y
+        help_list = [
+                "Passes returns to the make CONFIGURATOR command to accept ",
+                "all defaults if any prompts are given.  Allows for a ",
+                "completely automated kernel build in an update.",
+                ]
+        self._parser.add_argument("--yes", "-y", action = "store_true",
                 default = False, help = "".join(help_list))
 
         # [name]
