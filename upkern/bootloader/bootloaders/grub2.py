@@ -79,7 +79,7 @@ class Grub2(BaseBootLoader):
             dry_list = [
                     "ln -s {grub_image} {kernel_image}".format(grub_image = grub_image, kernel_image = kernel.image),
                     # TODO find a better way to depict this ...
-                    "sed -i -e 's/(GRUB_CMDLINE_LINUX_DEFAULT=\")(.*)(\")/\0\1 {kernel_options}\3/' {defaults}".format(kernel_options = kernel_options, defaults = self.grub_defaults_uri),
+                    "sed -i -e 's/(GRUB_CMDLINE_LINUX_DEFAULT=\")(.*)(\")/\\0\\1 {kernel_options}\\3/' {defaults}".format(kernel_options = kernel_options, defaults = self.grub_defaults_uri),
                     ]
             helpers.colorize("GREEN", "\n".join(dry_list))
         else:
