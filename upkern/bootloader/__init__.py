@@ -48,5 +48,7 @@ def BootLoader(*args, **kargs):
 
     if "grub0" in bootloaders:
         return Grub(*args, **kargs)
+    elif "grub2" in bootloaders:
+        return Grub2(*args, **kargs)
     return None
 
