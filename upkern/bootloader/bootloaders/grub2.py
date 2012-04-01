@@ -146,7 +146,7 @@ class Grub2(BaseBootLoader):
                         })
 
                 os.chdir("/boot/grub2")
-                shutil.copy("{grub_config}".format(grub_config = self.configuration_uri, "{grub_config}.bak".format(grub_config = self.configuration_uri))
+                shutil.copy(self.configuration_uri, "{grub_config}.bak".format(grub_config = self.configuration_uri))
                 status = subprocess.call("grub2-mkconfig -o {grub_config}".format(grub_config = self.configuration_uri), shell = True)
                 if status != 0:
                     pass # TODO raise an appropriate error
