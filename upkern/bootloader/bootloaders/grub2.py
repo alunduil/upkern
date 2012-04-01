@@ -75,6 +75,8 @@ class Grub2(BaseBootLoader):
         return "/etc/default/grub"
 
     @property
+    @mountedgrub
+    @mountedboot
     def configuration(self):
         """The grub configuration file (mutable)."""
         if not hasattr(self, "_configuration"):
