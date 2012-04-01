@@ -18,3 +18,5 @@
 
 """Any generic system items that are needed."""
 
+from fstab import FSTab
+
