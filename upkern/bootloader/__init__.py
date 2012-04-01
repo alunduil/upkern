@@ -23,7 +23,7 @@ import upkern.helpers as helpers
 from gentoolkit.helpers import get_installed_cpvs
 from gentoolkit.cpv import split_cpv
 from gentoolkit.package import Package
-from bootloaders import Grub
+from bootloaders import Grub, Grub2
 
 def BootLoader(*args, **kargs):
     """Factory method for getting the appropriate BootLoader object.
