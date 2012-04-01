@@ -122,6 +122,6 @@ class Grub2(BaseBootLoader):
                 os.rename("{grub_config}.bak".format(grub_config = self.configuration_uri), self.configuration_uri)
                 raise error
             finally:
-                if os.access("{grub_config}.bak".format(grub_config = self.configuratino_uri), os.W_OK):
+                if os.access("{grub_config}.bak".format(grub_config = self.configuration_uri), os.W_OK):
                     os.remove("{grub_config}.bak".format(grub_config = self.configuration_uri))
 
