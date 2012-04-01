@@ -67,7 +67,7 @@ class Grub2(BaseBootLoader):
     @property
     def configuration_uri(self):
         """The grub configuration URI."""
-        return "/boot/grub2/grub.conf"
+        return "/boot/grub2/grub.cfg"
 
     @property
     def grub_defaults_uri(self):
