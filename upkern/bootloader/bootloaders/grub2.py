@@ -128,7 +128,7 @@ class Grub2(BaseBootLoader):
     @mountedboot
     def install(self):
         """Install the configuration and make the system bootable."""
-        if self.argument["debug"]:
+        if self.arguments["debug"]:
             helpers.debug({
                 "self.configuration_uri": self.configuration_uri,
                 "os.listdir(\"/boot\")": os.listdir("/boot"),
