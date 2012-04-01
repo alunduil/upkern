@@ -25,7 +25,7 @@ class FSTab(object): #pylint: disable-msg=R0903
     def __init__(self):
         fstab = open("/etc/fstab", "r")
         self._partitions = dict([
-            line.expandtabs(1).partition(" ")[:1] \
+            line.expandtabs(1).split(" ")[:1].reverse() \
                     for line in fstab.readlines() \
                     if not re.search(r"^(?:\s*#|$)", line)
             ])
