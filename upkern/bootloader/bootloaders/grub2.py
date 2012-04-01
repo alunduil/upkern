@@ -73,7 +73,7 @@ class Grub2(BaseBootLoader):
     def prepare(self, kernel = None, kernel_options = ""):
         """Prepare the configuration file."""
 
-        grub_image = "kernel" + kernel.image.partition("-")[1:]
+        grub_image = "kernel" + "".join(kernel.image.partition("-")[1:])
 
         if self.arguments["dry_run"]:
             dry_list = [
