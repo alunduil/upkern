@@ -130,22 +130,37 @@ class Grub2(BaseBootLoader):
         """Install the configuration and make the system bootable."""
         if self.arguments["dry_run"]:
            dry_list = [
+                   "pushd /boot/grub2",
                    "cp {grub_config}{{.,bak}}".format(grub_config = self.configuration_uri),
                    "grub2-mkconfig -o {grub_config}".format(grub_config = self.configuration_uri),
                    "rm {grub_config}.bak".format(grub_config = self.configuration_uri),
+                   "popd",
                    ]
            helpers.colorize("GREEN", "\n".join(dry_list))
         else:
+            original_directory = os.getcwd()
             try:
-                shutil.copy(self.configuration_uri, "{grub_config}.bak".format(grub_config = self.configuration_uri))
+                if self.argument["debug"]:
+                    helpers.debug({
+                        "self.configuration_uri": self.configuration_uri,
+                        })
+
+                os.chdir("/boot/grub2")
+                shutil.copy("{grub_config}".format(grub_config = self.configuration_uri, "{grub_config}.bak".format(grub_config = self.configuration_uri))
                 status = subprocess.call("grub2-mkconfig -o {grub_config}".format(grub_config = self.configuration_uri), shell = True)
                 if status != 0:
                     pass # TODO raise an appropriate error
 
             except Exception as error:
+                if self.arguments["debug"]:
+                    helpers.debug({
+                        "error": error,
+                        })
+
                 os.rename("{grub_config}.bak".format(grub_config = self.configuration_uri), self.configuration_uri)
                 raise error
             finally:
                 if os.access("{grub_config}.bak".format(grub_config = self.configuration_uri), os.W_OK):
                     os.remove("{grub_config}.bak".format(grub_config = self.configuration_uri))
+                os.chdir(original_directory)
 
