@@ -128,6 +128,13 @@ class Grub2(BaseBootLoader):
     @mountedboot
     def install(self):
         """Install the configuration and make the system bootable."""
+        if self.argument["debug"]:
+            helpers.debug({
+                "self.configuration_uri": self.configuration_uri,
+                "os.listdir(\"/boot\")": os.listdir("/boot"),
+                "os.listdir(\"/boot/grub2\")": os.listdir("/boot/grub2"),
+                })
+
         if self.arguments["dry_run"]:
            dry_list = [
                    "pushd /boot/grub2",
@@ -140,11 +147,6 @@ class Grub2(BaseBootLoader):
         else:
             original_directory = os.getcwd()
             try:
-                if self.argument["debug"]:
-                    helpers.debug({
-                        "self.configuration_uri": self.configuration_uri,
-                        })
-
                 os.chdir("/boot/grub2")
                 shutil.copy(self.configuration_uri, "{grub_config}.bak".format(grub_config = self.configuration_uri))
                 status = subprocess.call("grub2-mkconfig -o {grub_config}".format(grub_config = self.configuration_uri), shell = True)
