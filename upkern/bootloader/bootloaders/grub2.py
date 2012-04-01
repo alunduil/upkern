@@ -23,6 +23,28 @@ import upkern.helpers as helpers
 from upkern.bootloader.base import BaseBootLoader
 from upkern.helpers import mountedboot
 
+def mountedgrub(func):
+    """A decorator that checks if boot is mounted before running the function.
+
+    If boot is not mounted; it gets mounted and unmounted properly.
+
+    """
+
+    def new_func(*args, **kargs):
+        """Closure definition."""
+        if FSTab["/boot/grub2"] and os.path.ismount("/boot/grub2"):
+            res = func(*args, **kargs)
+        else:
+            os.system('mount /boot/grub2')
+            try:
+                res = func(*args, **kargs)
+            except Exception as error:
+                raise error
+            finally:
+                os.system('umount /boot/grub2')
+        return res
+    return new_func
+
 class Grub2(BaseBootLoader):
     """A specific boot loader, GRUB, handler.
 
@@ -120,26 +142,4 @@ class Grub2(BaseBootLoader):
             finally:
                 if os.access("{grub_config}.bak".format(grub_config = self.configuration_uri), os.W_OK):
                     os.remove("{grub_config}.bak".format(grub_config = self.configuration_uri))
-
-def mountedgrub(func):
-    """A decorator that checks if boot is mounted before running the function.
-
-    If boot is not mounted; it gets mounted and unmounted properly.
-
-    """
-
-    def new_func(*args, **kargs):
-        """Closure definition."""
-        if FSTab["/boot/grub2"] and os.path.ismount("/boot/grub2"):
-            res = func(*args, **kargs)
-        else:
-            os.system('mount /boot/grub2')
-            try:
-                res = func(*args, **kargs)
-            except Exception as error:
-                raise error
-            finally:
-                os.system('umount /boot/grub2')
-        return res
-    return new_func
 
