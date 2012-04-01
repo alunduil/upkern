@@ -19,6 +19,7 @@
 import re
 import os
 import shutil
+import subprocess
 import upkern.helpers as helpers
 
 from upkern.bootloader.base import BaseBootLoader
