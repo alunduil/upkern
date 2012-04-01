@@ -87,14 +87,8 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
 
         bootloader = BootLoader(**bootloader_params)
         
-        if self.arguments.debug:
-            helpers.colorize("BLUE", "\n".join(bootloader.configuration))
-
         bootloader.prepare(kernel = binary,
                 kernel_options = self.arguments.kernel_options)
-
-        if self.arguments.debug:
-            helpers.colorize("BLUE", "\n".join(bootloader.configuration))
 
         bootloader.install()
 
