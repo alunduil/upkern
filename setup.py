@@ -19,6 +19,8 @@
 
 from distutils.core import setup
 
+from doc.man import build_manpage
+
 setup_params = {}
 setup_params['name'] = "upkern"
 setup_params['version'] = "4.0.0"
@@ -42,15 +44,17 @@ setup_params['data_files'] = [
             "COPYING",
             "README",
             ]),
-        # TODO Uncomment when the dynamic man page is added.
-        #("share/man/man1", [
-        #    "doc/man/man1/upkern.1",
-        #    ]),
+        ("share/man/man1", [
+            "doc/man/man8/upkern.8",
+            ]),
         ]
 setup_params['requires'] = [
         "gentoolkit",
         "portage",
         ]
+setup_params['cmdclass'] = {
+        "build_manpage": build_manpage,
+        }
 
 setup(**setup_params)
 
