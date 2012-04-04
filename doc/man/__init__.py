@@ -26,13 +26,14 @@ and then the statically generated man page will be included in the sdist.
 
 import argparse
 import datetime
+import re
 
 from distutils.command.build import build
 from distutils.core import Command
 
 from upkern.application import UpkernOptions
 
-def _markup(self, txt):
+def _markup(txt):
     """Prepare passed text to be used in man pages."""
 
     return txt.replace('-', '\\-')
@@ -106,7 +107,7 @@ class build_manpage(Command):
 
         self._parser = UpkernOptions("upkern").parser
         self._parser.formatter = ManPageFormatter()
-        self._parser.formatter.set_parser(self._parser)
+        #self._parser.formatter.set_parser(self._parser)
         self.announce("Writing man page {0!s}".format(self.output))
         self._today = datetime.date.today()
     
@@ -134,7 +135,7 @@ class build_manpage(Command):
 
         ret.append(".SH NAME\n{0!s}\n".format(name))
 
-        synopsis = self._parser.get_usage()
+        synopsis = self._parser.format_usage()
 
         if synopsis:
             synopsis = synopsis.replace("{0!s} ".format(appname), "")
@@ -150,9 +151,22 @@ class build_manpage(Command):
     def _write_options(self):
         ret = []
 
-        ret.append(".SH OPTIONS\n{0!s}\n".format(_markup(self._parser.get_options())))
+        found = False
 
-        return ret
+        options = self._parser.format_help().split('\n')
+
+        opts = []
+
+        for line in options:
+            if not found:
+                if line.startswith("optional arguments:"):
+                    found = True
+            else:
+                opts.append(line)
+
+        ret.append(".SH OPTIONS\n{0!s}\n".format(_markup("\n".join(opts))))
+
+        return "".join(ret)
 
     def _write_footer(self):
         ret = []
@@ -161,7 +175,7 @@ class build_manpage(Command):
 
         ret.append(".SH \"SEE ALSO\"\n{0!s}\n".format(_markup(", ".join(sorted([".BR dracut(8)"])))))
 
-        return ret
+        return "".join(ret)
 
 build.sub_commands.append({"build_manpage", None})
 
