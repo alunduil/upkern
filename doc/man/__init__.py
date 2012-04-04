@@ -54,7 +54,7 @@ class ManPageFormatter(argparse.HelpFormatter):
 
         """
 
-        super(ManPageFormatter, self).__init__(self, indent_increment,
+        super(ManPageFormatter, self).__init__(indent_increment,
                 max_help_position, width, short_first)
 
     def format_usage(self, usage):
