@@ -128,9 +128,9 @@ class Grub2(BaseBootLoader):
             for line in open(self.grub_defaults_uri, "r").readlines():
                 if re.search(r"GRUB_CMDLINE_LINUX_DEFAULT", line):
                     line = line[:-1] + " " + kernel_options + "\""
-                    new_grub_defaults.append(line)
+                    new_grub_defaults.append(line.rstrip("\n"))
                 else:
-                    new_grub_defaults.append(line)
+                    new_grub_defaults.append(line.rstrip("\n"))
 
             grub_defaults = open(self.grub_defaults_uri, "w")
             grub_defaults.write("\n".join(new_grub_defaults))
