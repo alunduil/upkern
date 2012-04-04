@@ -25,7 +25,7 @@ setup_params = {}
 setup_params['name'] = "upkern"
 setup_params['version'] = "4.0.0"
 setup_params['description'] = "Automated kernel updater for Gentoo."
-setup_params["long_description"] = [
+setup_params["long_description"] = "".join([
         "Defaults to building the most up to date kernel currently on the ",
         "system but can be used to build an alternative kernel by specifying ",
         "a name.  That name is an ebuild name for a kernel that at the very ",
@@ -34,7 +34,7 @@ setup_params["long_description"] = [
         "'gentoo-sources-2.6.23-r6', '2.6.33-r6', 'vanilla-sources-2.6.33'.  ",
         "The name passed must be the name of a current ebuild in the portage ",
         "tree.",
-        ]
+        ])
 setup_params['author'] = "Alex Brandt"
 setup_params['author_email'] = "alunduil@alunduil.com"
 setup_params['url'] = "http://www.alunduil.com/programs/upkern/"

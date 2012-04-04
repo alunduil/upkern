@@ -1,0 +1,58 @@
+.TH upkern 8 2012\-04\-03 "Linux System Administration"
+.SH NAME
+upkern \- Automated kernel updater for Gentoo.
+.SH SYNOPSIS
+.B upkern
+[-h] [--version] [--verbose] [--debug] [--quiet] [--color {none,light,dark,auto}] [--dry-run] [--configurator {config,menuconfig,nconfig,xconfig,gconfig,oldconfig,silentoldconfig,defconfig,${PLATFORM}_defconfig,allyesconfig,allmodconfig,allnoconfig,randconfig}] [--options KERNEL_OPTIONS] [--config CONFIG] [--rebuild-modules] [--time] [--yes] [name] 
+.SH DESCRIPTION
+Defaults to building the most up to date kernel currently on the system but can be used to build an alternative kernel by specifying a name.  That name is an ebuild name for a kernel that at the very least specifies a version (in which case the gentoo\-sources will be used).  Example names: 'sys\-kernel/gentoo\-sources\-2.6.32\-r6', 'gentoo\-sources\-2.6.23\-r6', '2.6.33\-r6', 'vanilla\-sources\-2.6.33'.  The name passed must be the name of a current ebuild in the portage tree.
+.SH OPTIONS
+  \-h, \-\-help            show this help message and exit
+  \-\-version             show program's version number and exit
+  \-\-verbose, \-v         Specifies verbose output from upkern.
+  \-\-debug, \-D           Specifies debugging output from upkern. Implies
+                        verbose output from upkern.
+  \-\-quiet, \-q           Specifies quiet output from upkern. This is superceded
+                        by verbose output.
+  \-\-color {none,light,dark,auto}
+                        Specifies whether output should use color and which
+                        type of background to color for (light or dark). This
+                        defaults to auto.
+  \-\-dry\-run, \-d         Specifies that none of the actions that can modify the
+                        filesystem should occur but they should be printed to
+                        the screen. This way it can be seen what upkern will
+                        do without actually doing it.
+  \-\-configurator {config,menuconfig,nconfig,xconfig,gconfig,oldconfig,silentoldconfig,defconfig,${PLATFORM}_defconfig,allyesconfig,allmodconfig,allnoconfig,randconfig}, \-c {config,menuconfig,nconfig,xconfig,gconfig,oldconfig,silentoldconfig,defconfig,${PLATFORM}_defconfig,allyesconfig,allmodconfig,allnoconfig,randconfig}
+                        Specifies which configurator should be used to
+                        configure the kernel sources. The configurator can be
+                        on of the following: config, menuconfig, nconfig,
+                        xconfig, gconfig, oldconfig, silentoldconfig,
+                        defconfig, ${PLATFORM}_defconfig, allyesconfig,
+                        allmodconfig, allnoconfig, randconfig. All the
+                        configurators are documented in the kernel source
+                        files.
+  \-\-options KERNEL_OPTIONS, \-o KERNEL_OPTIONS
+                        This string is literally tacked onto the kernel
+                        options passed in by the bootloader. This is where one
+                        would place a framebuffer line or any other options to
+                        pass to the new kernel.
+  \-\-config CONFIG, \-f CONFIG
+                        Specifies the configuration file to load into the
+                        kernel before running the configurator.
+  \-\-rebuild\-modules, \-r
+                        Makes upkern use module\-rebuild to rebuild the modules
+                        for this new kernel (requires the module\-rebuild use
+                        flag or a separate install of module\-rebuild). If
+                        module\-rebuild is not available; this results in a no\-
+                        op and no harm is done.
+  \-\-time, \-t            Times the actual build of the kernel. Allows one to
+                        determine if kernels are building faster based on
+                        different configurations, etc.
+  \-\-yes, \-y             Passes returns to the make CONFIGURATOR command to
+                        accept all defaults if any prompts are given. Allows
+                        for a completely automated kernel build in an update.
+
+.SH AUTHOR
+Alex Brandt <alunduil@alunduil.com>
+.SH "SEE ALSO"
+.BR dracut(8)

@@ -124,7 +124,7 @@ class build_manpage(Command):
         appname = self.distribution.get_name()
 
         ret = []
-        ret.append(".TH {0!s} 8 {1!s}\n".format(_markup(appname), self._today.strftime("%Y\\-%m\\-%d")))
+        ret.append(".TH {0!s} 8 {1!s} \"Linux System Administration\"\n".format(_markup(appname), self._today.strftime("%Y\\-%m\\-%d")))
 
         description = self.distribution.get_description()
 
@@ -135,7 +135,7 @@ class build_manpage(Command):
 
         ret.append(".SH NAME\n{0!s}\n".format(name))
 
-        synopsis = self._parser.format_usage()
+        synopsis = re.sub(r"\s+", " ", " ".join(self._parser.format_usage().split("\n"))).replace("usage: ", "")
 
         if synopsis:
             synopsis = synopsis.replace("{0!s} ".format(appname), "")
