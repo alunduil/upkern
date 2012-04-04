@@ -19,7 +19,7 @@
 
 from distutils.core import setup
 
-from doc.man import build_manpage
+#from doc.man import build_manpage
 
 setup_params = {}
 setup_params['name'] = "upkern"
