@@ -54,7 +54,7 @@ setup_params['data_files'] = [
             "COPYING",
             "README",
             ]),
-        ("share/man/man1", [
+        ("share/man/man8", [
             "doc/man/man8/upkern.8",
             ]),
         ]
