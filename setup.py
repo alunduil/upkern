@@ -19,7 +19,11 @@
 
 from distutils.core import setup
 
-from doc.man import build_manpage
+manpage = True
+try:
+    from doc.man import build_manpage
+except ImportError as error:
+    manpage = False
 
 setup_params = {}
 setup_params['name'] = "upkern"
@@ -62,7 +66,8 @@ setup_params['requires'] = [
         "gentoolkit",
         "portage",
         ]
-setup_params['cmdclass'] = {
+if manpage:
+    setup_params['cmdclass'] = {
         "build_manpage": build_manpage,
         }
 
