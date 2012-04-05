@@ -22,6 +22,7 @@ import os
 import shutil
 import re
 import platform
+import subprocess
 import upkern.helpers as helpers
 
 from gentoolkit.query import Query as GentoolkitQuery
