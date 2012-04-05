@@ -75,7 +75,7 @@ class BaseBootLoader(object):
         """The configuration file for the bootlaoder."""
         raise AttributeError("configuration")
 
-    def prepare(self, kernel = None, kernel_options = ""):
+    def prepare(self, kernel = None, kernel_options = "", initrd = False):
         """Prepare the configuration of the bootloader."""
         raise NotImplementedError("prepare")
 

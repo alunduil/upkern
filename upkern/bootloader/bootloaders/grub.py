@@ -80,7 +80,7 @@ class Grub(BaseBootLoader):
         self._configuration = value
 
     @mountedboot
-    def prepare(self, kernel = None, kernel_options = ""):
+    def prepare(self, kernel = None, kernel_options = "", initrd = False):
         """Prepare the configuration file."""
 
         if not self._has_kernel(kernel.name):
@@ -112,6 +112,11 @@ class Grub(BaseBootLoader):
                         image = kernel.image, root = self.root_partition,
                         options = kernel_options),
                     ]
+
+            if initrd:
+                kernel_entry.append(
+                        "  initrd /boot/{initrd}".format(
+                            initrd = kernel.initrd))
 
             new_configuration.extend(kernel_entry)
 
