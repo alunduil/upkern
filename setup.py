@@ -19,7 +19,7 @@
 
 from distutils.core import setup
 
-from upkern.doc.man import build_manpage
+#from upkern.doc.man import build_manpage
 
 setup_params = {}
 setup_params['name'] = "upkern"
@@ -62,9 +62,9 @@ setup_params['requires'] = [
         "gentoolkit",
         "portage",
         ]
-setup_params['cmdclass'] = {
-        "build_manpage": build_manpage,
-        }
+#setup_params['cmdclass'] = {
+#        "build_manpage": build_manpage,
+#        }
 
 setup(**setup_params)
 
