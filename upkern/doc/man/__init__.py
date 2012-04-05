@@ -124,27 +124,33 @@ class build_manpage(Command):
         appname = self.distribution.get_name()
 
         ret = []
-        ret.append(".TH {0!s} 8 {1!s} \"Linux System Administration\"\n".format(_markup(appname), self._today.strftime("%Y\\-%m\\-%d")))
+        ret.append(
+                ".TH {0!s} 8 {1!s} \"Linux System Administration\"\n".format(
+                    _markup(appname), self._today.strftime("%Y\\-%m\\-%d")))
 
         description = self.distribution.get_description()
 
         if description:
-            name = _markup("{0!s} - {1!s}".format(_markup(appname), description.splitlines()[0]))
+            name = _markup("{0!s} - {1!s}".format(_markup(appname),
+                description.splitlines()[0]))
         else:
             name = _markup(appname)
 
         ret.append(".SH NAME\n{0!s}\n".format(name))
 
-        synopsis = re.sub(r"\s+", " ", " ".join(self._parser.format_usage().split("\n"))).replace("usage: ", "")
+        synopsis = re.sub(r"\s+", " ", " ".join(
+            self._parser.format_usage().split("\n"))).replace("usage: ", "")
 
         if synopsis:
             synopsis = synopsis.replace("{0!s} ".format(appname), "")
-            ret.append(".SH SYNOPSIS\n.B {0!s}\n{1!s}\n".format(_markup(appname), synopsis))
+            ret.append(".SH SYNOPSIS\n.B {0!s}\n{1!s}\n".format(
+                _markup(appname), synopsis))
         
         long_description = self.distribution.get_long_description()
 
         if long_description:
-            ret.append(".SH DESCRIPTION\n{0!s}\n".format(_markup(long_description)))
+            ret.append(".SH DESCRIPTION\n{0!s}\n".format(_markup(
+                long_description)))
 
         return "".join(ret)
 
@@ -171,9 +177,12 @@ class build_manpage(Command):
     def _write_footer(self):
         ret = []
 
-        ret.append(".SH AUTHOR\n{0!s} <{1!s}>\n".format(_markup(self.distribution.get_author()), _markup(self.distribution.get_author_email())))
+        ret.append(".SH AUTHOR\n{0!s} <{1!s}>\n".format(_markup(
+            self.distribution.get_author()), _markup(
+                self.distribution.get_author_email())))
 
-        ret.append(".SH \"SEE ALSO\"\n{0!s}\n".format(_markup(", ".join(sorted([".BR dracut(8)"])))))
+        ret.append(".SH \"SEE ALSO\"\n{0!s}\n".format(_markup(", ".join(
+            sorted([".BR dracut(8)"])))))
 
         return "".join(ret)
 
