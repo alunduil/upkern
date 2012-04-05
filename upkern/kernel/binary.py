@@ -184,12 +184,12 @@ class Binary(object):
 
         if self.arguments["dry_run"]:
             helpers.colorize("GREEN",
-                    "dracut -H {options} /boot/initramfs-{suffix}.img {suffix}".format(
+                    "dracut -H --force {options} /boot/initramfs-{suffix}.img {suffix}".format(
                         options = dracut_options,
                         suffix = self.suffix[1:]))
         else:
             status = subprocess.call(
-                    "dracut -H {options} /boot/initramfs-{suffix}.img {suffix}".format(
+                    "dracut -H --force {options} /boot/initramfs-{suffix}.img {suffix}".format(
                         options = dracut_options,
                         suffix = self.suffix[1:]), shell = True)
             if status != 0:
