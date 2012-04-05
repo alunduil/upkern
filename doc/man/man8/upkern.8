@@ -1,9 +1,9 @@
-.TH upkern 8 2012\-04\-03 "Linux System Administration"
+.TH upkern 8 2012\-04\-04 "Linux System Administration"
 .SH NAME
 upkern \- Automated kernel updater for Gentoo.
 .SH SYNOPSIS
 .B upkern
-[-h] [--version] [--verbose] [--debug] [--quiet] [--color {none,light,dark,auto}] [--dry-run] [--configurator {config,menuconfig,nconfig,xconfig,gconfig,oldconfig,silentoldconfig,defconfig,${PLATFORM}_defconfig,allyesconfig,allmodconfig,allnoconfig,randconfig}] [--options KERNEL_OPTIONS] [--config CONFIG] [--rebuild-modules] [--time] [--yes] [name] 
+[-h] [--version] [--verbose] [--debug] [--quiet] [--color {none,light,dark,auto}] [--dry-run] [--configurator {config,menuconfig,nconfig,xconfig,gconfig,oldconfig,silentoldconfig,defconfig,${PLATFORM}_defconfig,allyesconfig,allmodconfig,allnoconfig,randconfig}] [--options KERNEL_OPTIONS] [--config CONFIG] [--rebuild-modules] [--time] [--yes] [--initrd] [name] 
 .SH DESCRIPTION
 Defaults to building the most up to date kernel currently on the system but can be used to build an alternative kernel by specifying a name.  That name is an ebuild name for a kernel that at the very least specifies a version (in which case the gentoo\-sources will be used).  Example names: 'sys\-kernel/gentoo\-sources\-2.6.32\-r6', 'gentoo\-sources\-2.6.23\-r6', '2.6.33\-r6', 'vanilla\-sources\-2.6.33'.  The name passed must be the name of a current ebuild in the portage tree.
 .SH OPTIONS
@@ -51,6 +51,9 @@ Defaults to building the most up to date kernel currently on the system but can 
   \-\-yes, \-y             Passes returns to the make CONFIGURATOR command to
                         accept all defaults if any prompts are given. Allows
                         for a completely automated kernel build in an update.
+  \-\-initrd, \-i          Specifies that upkern should build an initramfs to
+                        assist the boot process. This option utilizes dracut
+                        to build this initramfs.
 
 .SH AUTHOR
 Alex Brandt <alunduil@alunduil.com>
