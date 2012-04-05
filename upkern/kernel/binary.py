@@ -170,7 +170,7 @@ class Binary(object):
             os.chdir(original_directory)
 
     @mountedboot
-    def install_initramfs(self):
+    def install_initramfs(self, dracut_options = ""):
         """Build and install the initramfs using dracut."""
 
         if not self.arguments["quiet"]:
@@ -184,11 +184,13 @@ class Binary(object):
 
         if self.arguments["dry_run"]:
             helpers.colorize("GREEN",
-                    "dracut -H /boot/initramfs-{suffix}.img {suffix}".format(
+                    "dracut -H {options} /boot/initramfs-{suffix}.img {suffix}".format(
+                        options = dracut_options,
                         suffix = self.suffix[1:]))
         else:
             status = subprocess.call(
-                    "dracut -H /boot/initramfs-{suffix}.img {suffix}".format(
+                    "dracut -H {options} /boot/initramfs-{suffix}.img {suffix}".format(
+                        options = dracut_options,
                         suffix = self.suffix[1:]), shell = True)
             if status != 0:
                 pass # TODO raise an appropriate exception

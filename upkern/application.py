@@ -83,6 +83,9 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
 
         binary.install()
 
+        if self.arguments.initrd:
+            binary.install_initramfs()
+
         bootloader_params = {}
         bootloader_params.update(verbosity)
 
@@ -249,6 +252,15 @@ class UpkernOptions(object):
                 "completely automated kernel build in an update.",
                 ]
         self._parser.add_argument("--yes", "-y", action = "store_true",
+                default = False, help = "".join(help_list))
+
+        # --initrd, -i
+        help_list = [
+                "Specifies that upkern should build an initramfs to assist ",
+                "the boot process.  This option utilizes dracut to build ",
+                "this initramfs.",
+                ]
+        self._parser.add_argument("--initrd", "-i", action = "store_true",
                 default = False, help = "".join(help_list))
 
         # [name]
