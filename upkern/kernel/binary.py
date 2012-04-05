@@ -24,6 +24,7 @@ import re
 import platform
 import upkern.helpers as helpers
 
+from gentoolkit.query import Query as GentoolkitQuery
 from upkern.helpers import mountedboot
 
 class Binary(object):
