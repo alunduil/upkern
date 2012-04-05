@@ -72,6 +72,11 @@ class Binary(object):
         return self.install_image + self.suffix
 
     @property
+    def initrd(self):
+        """The complete initrd name."""
+        return "initramfs" + self.suffix + ".img"
+
+    @property
     def install_image(self):
         """Returns the name of the install image for this architecture.
         
@@ -186,13 +191,15 @@ class Binary(object):
 
         if self.arguments["dry_run"]:
             helpers.colorize("GREEN",
-                    "dracut -H --force {options} /boot/initramfs-{suffix}.img {suffix}".format(
+                    "dracut -H --force {options} /boot/{initrd} {suffix}".format(
                         options = dracut_options,
+                        initrd = self.initrd,
                         suffix = self.suffix[1:]))
         else:
             status = subprocess.call(
-                    "dracut -H --force {options} /boot/initramfs-{suffix}.img {suffix}".format(
+                    "dracut -H --force {options} /boot/{initrd} {suffix}".format(
                         options = dracut_options,
+                        initrd = self.initrd,
                         suffix = self.suffix[1:]), shell = True)
             if status != 0:
                 pass # TODO raise an appropriate exception
