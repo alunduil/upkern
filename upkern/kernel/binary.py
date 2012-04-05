@@ -169,3 +169,30 @@ class Binary(object):
             shutil.copy("System.map", "/System.map")
             os.chdir(original_directory)
 
+    @mountedboot
+    def install_initramfs(self):
+        """Build and install the initramfs using dracut."""
+
+        if not self.arguments["quiet"]:
+            print("Building and installing initramfs ...")
+
+        if not len(GentoolkitQuery("sys-kernel/dracut").find_installed()):
+            return
+
+        if self.arguments["verbose"]:
+            helpers.verbose("Building and Installing initramfs: True")
+
+        if self.arguments["dry_run"]:
+            helpers.colorize("GREEN",
+                    "dracut -H /boot/initramfs-{suffix}.img {suffix}".format(
+                        suffix = self.suffix[1:]))
+        else:
+            status = subprocess.call(
+                    "dracut -H /boot/initramfs-{suffix}.img {suffix}".format(
+                        suffix = self.suffix[1:]), shell = True)
+            if status != 0:
+                pass # TODO raise an appropriate exception
+
+        if not self.arguments["quiet"]:
+            print("initramfs built and installed.")
+
