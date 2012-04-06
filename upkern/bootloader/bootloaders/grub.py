@@ -54,7 +54,7 @@ class Grub(BaseBootLoader):
     def grub_root(self):
         """The grub root parameter."""
         if not hasattr(self, "_grub_root"):
-            match = re.match(r"/dev/[\w\d]+(?P<letter>\w)(?P<number\d+)",
+            match = re.match(r"/dev/[\w\d]+(?P<letter>\w)(?P<number>\d+)",
                     self.boot_partition)
             self._grub_root = "(hd{letter!s},{number!s})".format(
                     letter = "abcdefghijklmnopqrstuvwxyz".find(
