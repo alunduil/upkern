@@ -96,8 +96,9 @@ class Grub(BaseBootLoader):
                         re.I):
                     new_configuration.append(line)
                     kernel_options = " ".join([
-                        option for option in line.split(" ") if not re.search(
-                            "(?:kernel|/boot/|root=)", option, re.I)
+                        option.strip() for option in line.split(" ") \
+                                if not re.search("(?:kernel|/boot/|root=)",
+                                    option, re.I)
                         ])
                     # TODO Merge the kernel options passed with those found?
                 else:
