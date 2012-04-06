@@ -92,7 +92,7 @@ class Grub(BaseBootLoader):
                         "default {default!s}".format(
                             default = 1 + int(line.partition(" ")[2])),
                         ]))
-                elif not len(kernel_options) and re.search("kernel", line,
+                elif not len(kernel_options) and re.search("[^#]*kernel", line,
                         re.I):
                     new_configuration.append(line)
                     kernel_options = " ".join([
@@ -113,6 +113,12 @@ class Grub(BaseBootLoader):
                         image = kernel.image, root = self.root_partition,
                         options = kernel_options),
                     ]
+
+
+            if self.arguments["debug"]:
+                helpers.debug({
+                    "kernel_entry": kernel_entry,
+                    })
 
             if initrd:
                 kernel_entry.append(
