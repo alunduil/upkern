@@ -36,3 +36,6 @@ class FSTab(object): #pylint: disable-msg=R0903
             return self._partitions[name]
         return None
 
+    def __contains__(self, name):
+        return name in self._partitions
+
