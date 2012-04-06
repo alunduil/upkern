@@ -61,7 +61,7 @@ class BaseBootLoader(object):
     @property
     def boot_partition(self):
         """Get the system's boot partition."""
-        if "/boot" in FSTab:
+        if "/boot" in FSTab():
             return FSTab()["/boot"]
         return FSTab()["/"]
 
