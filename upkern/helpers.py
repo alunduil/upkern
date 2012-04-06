@@ -153,8 +153,8 @@ def mountedboot(func):
             os.system('mount /boot')
             try:
                 res = func(*args, **kargs)
-            except Exception as error:
-                raise error
+            except:
+                raise
             finally:
                 os.system('umount /boot')
         return res
