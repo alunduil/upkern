@@ -34,5 +34,5 @@ class FSTab(object): #pylint: disable-msg=R0903
     def __getitem__(self, name):
         if name in self._partitions:
             return self._partitions[name]
-        raise AttributeError
+        return None
 
