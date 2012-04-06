@@ -89,7 +89,7 @@ class Grub(BaseBootLoader):
             for line in self.configuration:
                 if re.search("default", line, re.I):
                     new_configuration.append("".join([
-                        "default {defaulti!s}".format(
+                        "default {default!s}".format(
                             default = 1 + int(line.partition(" ")[2])),
                         ]))
                 elif not len(kernel_options) and re.search("kernel", line,
