@@ -104,6 +104,7 @@ class Grub(BaseBootLoader):
                     new_configuration.append(line)
 
             kernel_entry = [
+                    "",
                     "# Kernel added {time!s}:".format(
                         time = datetime.datetime.now()),
                     "title={kernel_name}".format(kernel_name = kernel.name),
