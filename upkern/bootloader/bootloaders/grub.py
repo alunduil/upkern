@@ -56,10 +56,16 @@ class Grub(BaseBootLoader):
         if not hasattr(self, "_grub_root"):
             match = re.match(r"/dev/[\w\d]+(?P<letter>\w)(?P<number>\d+)",
                     self.boot_partition)
+
+            if self.arguments["debug"]:
+                helpers.debug({
+                    "self.boot_partition": self.boot_partition,
+                    })
+
             self._grub_root = "(hd{letter!s},{number!s})".format(
                     letter = "abcdefghijklmnopqrstuvwxyz".find(
                         match.group("letter")),
-                    number = 1 + int(match.group("number")))
+                    number = -1 + int(match.group("number")))
         return self._grub_root
 
     @property
