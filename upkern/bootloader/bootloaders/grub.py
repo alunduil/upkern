@@ -92,7 +92,7 @@ class Grub(BaseBootLoader):
                         "default {default!s}".format(
                             default = 1 + int(line.partition(" ")[2])),
                         ]))
-                elif not len(kernel_options) and re.search("[^#]*kernel", line,
+                elif not len(kernel_options) and re.search("^[^#]*kernel", line,
                         re.I):
                     new_configuration.append(line)
                     kernel_options = " ".join([
