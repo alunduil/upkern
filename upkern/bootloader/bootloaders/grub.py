@@ -59,7 +59,7 @@ class Grub(BaseBootLoader):
             self._grub_root = "(hd{letter!s},{number!s})".format(
                     letter = "abcdefghijklmnopqrstuvwxyz".find(
                         match.group("letter")),
-                    number = 1 + match.group("number"))
+                    number = 1 + int(match.group("number")))
         return self._grub_root
 
     @property
