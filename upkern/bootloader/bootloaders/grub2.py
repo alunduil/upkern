@@ -128,7 +128,7 @@ class Grub2(BaseBootLoader):
             for line in open(self.grub_defaults_uri, "r").readlines():
                 line = line.rstrip("\n")
 
-                if re.search(r"GRUB_CMDLINE_LINUX_DEFAULT", line):
+                if len(kernel_options) and re.search(r"GRUB_CMDLINE_LINUX_DEFAULT", line):
 
                     if self.arguments["debug"]:
                         helpers.debug({
