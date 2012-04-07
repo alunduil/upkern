@@ -97,26 +97,29 @@ class Sources(object):
 
             for directory in self.source_directories:
 
-                if not self.arguments["quiet"]:
-                    print("Finding the owner of {directory}  ".format(
-                        directory = directory), end = "")
-                    spinner = multiprocessing.Process(target = self._print_spinner)
-                    spinner.start()
+                package = None
 
-                if unicode(finder((
-                    directory, ))[0][0]) == self.package_name.lstrip("="):
-                    self._directory_name = directory
+                if directory in self._packages:
+                    package = self._packages[directory]
+                else:
+                    if not self.arguments["quiet"]:
+                        print("Finding the owner of {directory}  ".format(
+                            directory = directory), end = "")
+                        spinner = multiprocessing.Process(target = self._print_spinner)
+                        spinner.start()
 
-                    if not self.arguemtnts["quiet"]:
+                    package = unicode(finder((directory, ))[0][0])
+                    self._packages[directory] = package
+
+                    if not self.arguments["quiet"]:
                         spinner.terminate()
                         print("\b... done!")
 
+
+                if package == self.package_name.lstrip("="):
+                    self._directory_name = directory
+
                     break
-
-                if not self.arguemtnts["quiet"]:
-                    spinner.terminate()
-                    print("\b... done!")
-
 
             if self.arguments["verbose"]:
                 helpers.verbose("Using source directory: {0}",
@@ -167,20 +170,27 @@ class Sources(object):
                 self._package_name += "-sources-"
                 self._package_name += package_match.group("version")
             else:
-                if not self.arguments["quiet"]:
-                    print("Finding the owner of {directory}  ".format(
-                        directory = self.source_directories[0]), end = "")
-                    spinner = multiprocessing.Process(target = self._print_spinner)
-                    spinner.start()
-
                 finder = FileOwner()
 
-                self._package_name = unicode(finder(
-                    (self.source_directories[0], ))[0][0])
+                package = None
 
-                if not self.arguments["quiet"]:
-                    spinner.terminate()
-                    print("\b ... done!")
+                if self.source_directories[0] in self._packages:
+                    package = self._packages[self.source_directories[0]]
+                else:
+                    if not self.arguments["quiet"]:
+                        print("Finding the owner of {directory}  ".format(
+                            directory = self.source_directories[0]), end = "")
+                        spinner = multiprocessing.Process(target = self._print_spinner)
+                        spinner.start()
+
+                    package = unicode(finder((self.source_directories[0], ))[0][0])
+                    self._packages[self.source_directories[0]] = package
+
+                    if not self.arguments["quiet"]:
+                        spinner.terminate()
+                        print("\b ... done!")
+
+                self._package_name = package
 
         return self._package_name
 
