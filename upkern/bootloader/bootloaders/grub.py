@@ -104,14 +104,26 @@ class Grub(BaseBootLoader):
                 elif not len(kernel_options) and re.search("^[^#]*kernel", line,
                         re.I):
                     new_configuration.append(line)
-                    kernel_options = " ".join([
+                    kernel_options = [
                         option.strip() for option in line.split(" ") \
                                 if not re.search("(?:kernel|/boot/|root=)",
                                     option, re.I)
-                        ])
-                    # TODO Merge the kernel options passed with those found?
+                        ]
+
+                    kernel_options = " ".join(list(set(kernel_options.extend(
+                        kernel_options.split(" ")))))
+
+                    if self.arguments["debug"]:
+                        debug({
+                            "kernel_options": kernel_options,
+                            })
                 else:
                     new_configuration.append(line)
+
+            if self.arguments["debug"]:
+                debug({
+                    "kernel_options": kernel_options,
+                    })
 
             kernel_entry = [
                     "",
