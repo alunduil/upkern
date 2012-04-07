@@ -126,6 +126,8 @@ class Grub2(BaseBootLoader):
             new_grub_defaults = []
 
             for line in open(self.grub_defaults_uri, "r").readlines():
+                line = line.rstrip("\n")
+
                 if re.search(r"GRUB_CMDLINE_LINUX_DEFAULT", line):
 
                     if self.arguments["debug"]:
