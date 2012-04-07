@@ -23,6 +23,7 @@ import os
 import portage
 import shutil
 import subprocess
+import multiprocessing
 import upkern.helpers as helpers
 
 from gentoolkit.query import Query as GentoolkitQuery
@@ -70,6 +71,13 @@ class Sources(object):
                 "dry_run": dry_run,
                 }
 
+    def _print_spinner(self):
+        """Continually spit out a spinner similar to portage."""
+        while True:
+            print("\b/", end = "")
+            print("\b|", end = "")
+            print("\b\\", end = "")
+
     @property
     def directory_name(self):
         """Get the name of the sources directory.
@@ -86,10 +94,27 @@ class Sources(object):
             finder = FileOwner()
 
             for directory in self.source_directories:
+
+                if not self.arguments["quiet"]:
+                    print("Finding the owner of {directory}  ".format(
+                        directory = directory), end = "")
+                    spinner = multiprocessing.Process(target = self._print_spinner)
+                    spinner.start()
+
                 if unicode(finder((
                     directory, ))[0][0]) == self.package_name.lstrip("="):
                     self._directory_name = directory
+
+                    if not self.arguemtnts["quiet"]:
+                        spinner.terminate()
+                        print("\b... done!")
+
                     break
+
+                if not self.arguemtnts["quiet"]:
+                    spinner.terminate()
+                    print("\b... done!")
+
 
             if self.arguments["verbose"]:
                 helpers.verbose("Using source directory: {0}",
@@ -140,17 +165,20 @@ class Sources(object):
                 self._package_name += "-sources-"
                 self._package_name += package_match.group("version")
             else:
-                finder = FileOwner()
-
                 if not self.arguments["quiet"]:
-                    wait_list = [
-                            "Determining kernel source package.  This could ",
-                            "take some time.  Please wait ...",
-                            ]
-                    print("".join(wait_list))
+                    print("Finding the owner of {directory}  ".format(
+                        directory = directory), end = "")
+                    spinner = multiprocessing.Process(target = self._print_spinner)
+                    spinner.start()
+
+                finder = FileOwner()
 
                 self._package_name = unicode(finder(
                     (self.source_directories[0], ))[0][0])
+
+                if not self.arguments["quiet"]:
+                    spinner.terminate()
+                    print("\b ... done!")
 
         return self._package_name
 
