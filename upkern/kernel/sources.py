@@ -26,6 +26,7 @@ import subprocess
 import multiprocessing
 import upkern.helpers as helpers
 
+from __future__ import print_function
 from gentoolkit.query import Query as GentoolkitQuery
 from gentoolkit.helpers import FileOwner
 from upkern.helpers import mountedboot
@@ -167,7 +168,7 @@ class Sources(object):
             else:
                 if not self.arguments["quiet"]:
                     print("Finding the owner of {directory}  ".format(
-                        directory = directory), end = "")
+                        directory = self.source_directories[0]), end = "")
                     spinner = multiprocessing.Process(target = self._print_spinner)
                     spinner.start()
 
