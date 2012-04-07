@@ -18,6 +18,8 @@
 
 """Provides the kernel source models."""
 
+from __future__ import print_function
+
 import re
 import os
 import portage
@@ -26,7 +28,6 @@ import subprocess
 import multiprocessing
 import upkern.helpers as helpers
 
-from __future__ import print_function
 from gentoolkit.query import Query as GentoolkitQuery
 from gentoolkit.helpers import FileOwner
 from upkern.helpers import mountedboot
