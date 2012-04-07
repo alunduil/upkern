@@ -73,6 +73,8 @@ class Sources(object):
                 "dry_run": dry_run,
                 }
 
+        self._packages = {}
+
     def _print_spinner(self):
         """Continually spit out a spinner similar to portage."""
         while True:
