@@ -272,7 +272,7 @@ class Sources(object):
         """
 
         if not self.arguments["quiet"]:
-            print("Configuratin kernel sources ...")
+            print("Configuring kernel sources ...")
 
         original_directory = os.getcwd()
 

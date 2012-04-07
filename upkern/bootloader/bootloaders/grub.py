@@ -89,6 +89,9 @@ class Grub(BaseBootLoader):
     def prepare(self, kernel = None, kernel_options = "", initrd = False):
         """Prepare the configuration file."""
 
+        if not self.arguments["quiet"]:
+            print("Preparing GRUB configuration ...")
+
         if not self._has_kernel(kernel.name):
             new_configuration = []
 
@@ -136,9 +139,16 @@ class Grub(BaseBootLoader):
 
             self.configuration = new_configuration
 
+            if not self.arguments["quiet"]:
+                print("GRUB configuration prepared.")
+
     @mountedboot
     def install(self):
         """Install the configuration and make the system bootable."""
+
+        if not self.arguments["quiet"]:
+            print("Installing GRUB configuration.")
+
         if self.arguments["dry_run"]:
             dry_list = [
                     "cp {config}{{,.bak}}".format(
@@ -168,6 +178,9 @@ class Grub(BaseBootLoader):
                         config = self.configuration_uri), os.W_OK):
                         os.remove("{config}.bak".format(
                             config = self.configuration_uri))
+
+        if not self.arguments["quiet"]:
+            print("GRUB configuration installed.")
 
     def _has_kernel(self, kernel_name):
         """Return the truthness of the kernel's presence in the config."""

@@ -146,6 +146,9 @@ class Binary(object):
         
         """
 
+        if not self.arguments["quiet"]:
+            print("Installing the kernel binaries ...")
+
         original_directory = os.getcwd()
 
         if self.arguments["dry_run"]:
@@ -175,6 +178,9 @@ class Binary(object):
                 suffix = self.suffix))
             shutil.copy("System.map", "/System.map")
             os.chdir(original_directory)
+
+        if not self.arguments["quiet"]:
+            print("Kernel binaries installed.")
 
     @mountedboot
     def install_initramfs(self, dracut_options = ""):
