@@ -107,7 +107,8 @@ class Sources(object):
                     if not self.arguments["quiet"]:
                         print("Finding the owner of {directory}  ".format(
                             directory = directory), end = "")
-                        spinner = multiprocessing.Process(target = self._print_spinner)
+                        spinner = multiprocessing.Process(
+                                target = self._print_spinner)
                         spinner.start()
 
                     package = unicode(finder((directory, ))[0][0])
@@ -182,10 +183,12 @@ class Sources(object):
                     if not self.arguments["quiet"]:
                         print("Finding the owner of {directory}  ".format(
                             directory = self.source_directories[0]), end = "")
-                        spinner = multiprocessing.Process(target = self._print_spinner)
+                        spinner = multiprocessing.Process(
+                                target = self._print_spinner)
                         spinner.start()
 
-                    package = unicode(finder((self.source_directories[0], ))[0][0])
+                    package = unicode(finder(
+                        (self.source_directories[0], ))[0][0])
                     self._packages[self.source_directories[0]] = package
 
                     if not self.arguments["quiet"]:

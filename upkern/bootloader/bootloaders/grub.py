@@ -114,14 +114,14 @@ class Grub(BaseBootLoader):
                         kernel_options.split(" ")))))
 
                     if self.arguments["debug"]:
-                        debug({
+                        helpers.debug({
                             "kernel_options": kernel_options,
                             })
                 else:
                     new_configuration.append(line)
 
             if self.arguments["debug"]:
-                debug({
+                helpers.debug({
                     "kernel_options": kernel_options,
                     })
 

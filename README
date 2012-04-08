@@ -12,21 +12,7 @@ Description
 ----
 
 This utility is a batch kernel updating utility written specifically
-for the Gentoo Linux (TM).  
-
-This program was written on a machine with the following software:
- * Gentoo (default/linux/amd64/10.0/desktop) x86_64
- * Portage 2.1.7.17 
- * dev-lang/python:      2.6.4-r1, 3.1.1-r1                                                                
- * sys-apps/baselayout:  2.0.1                                                                             
- * sys-apps/openrc:      0.6.0-r1                                                                          
- * sys-apps/sandbox:     2.2                                                                               
- * sys-devel/binutils:   2.20                                                                              
- * sys-devel/gcc:        4.4.3                                                                             
- * sys-devel/gcc-config: 1.4.1                                                                            
- * sys-devel/libtool:    2.2.6b                                                                            
- * sys-lib/glibc:        2.11-r1
- * virtual/os-headers:   2.6.32
+for the Gentoo Linux (TM) meta-distribution.  
 
 ----
 Installation
@@ -39,19 +25,8 @@ Dependencies
 ----
 
 Python packages not provided but needed by the script:
- - datetime
  - gentoolkit (>=0.3)
- - inspect
- - optparse
- - os
- - platform
  - portage
- - re
- - shutil
- - string
- - sys
- - textwrap
- - time
 
 ----
 Example input and output
@@ -74,4 +49,73 @@ Output ::
    * debug
    * dry-run
    * quiet
+ - example (dry-run):
+   Preparing the kernel sources ...
+   Finding the owner of linux-3.3.1-gentoo  ... done!
+   rm /usr/src/linux
+   ln -s /usr/src/linux-3.3.1-gentoo /usr/src/linux
+   cp /usr/src/linux/.config{,.bak}
+   cp /boot/config-3.3.1-gentoo /usr/src/linux/.config
+   rm /usr/src/linux/.config.bak
+   Kernel sources prepared.
+   Configuratin kernel sources ...
+   pushd /usr/src/linux
+   make -j5 oldconfig
+   popd
+   Kernel sources configured.
+   Building the kernel sources ...
+   pushd /usr/src/linux
+   make -j5 && make -j5 modules_install
+   popd
+   Kernel sources built.
+   Rebuilding the kernel modules ...
+   module-rebuild -X rebuild
+   Kernel modules rebuilt.
+   pushd /usr/src/linux
+   cp arch/x86_64/boot/bzImage /boot/bzImage-3.3.1-gentoo
+   cp .config /boot/config-3.3.1-gentoo
+   cp System.map /boot/System.map-3.3.1-gentoo
+   cp System.map /System.map
+   popd
+   cp /boot/grub/grub.conf{,.bak}
+   cat > /boot/grub/grub.conf
+   # This is a sample grub.conf for use with Genkernel, per the Gentoo handbook
+   # http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=1&chap=10#doc_chap2
+   # If you are not using Genkernel and you need help creating this file, you
+   # should consult the handbook. Alternatively, consult the grub.conf.sample that
+   # is included with the Grub documentation.
+
+   default 4
+   timeout 3
+   splashimage=(hd0,0)/boot/grub/splash.xpm.gz
+
+   # vim:ft=conf:
+
+   # Kernel added on 2012-02-07 19:21:06.305820:
+   title=linux-3.2.5-gentoo
+     root (hd0,0)
+     kernel /boot/bzImage-3.2.5-gentoo root=/dev/sda3 fastboot rootfstype=ext4
+
+   # Kernel added on 2012-02-13 19:11:19.584541:
+   title=linux-3.2.6-gentoo
+     root (hd0,0)
+     kernel /boot/bzImage-3.2.6-gentoo root=/dev/sda3 fastboot rootfstype=ext4
+
+   # Kernel added on 2012-03-15 09:09:49.147355:
+   title=linux-3.2.11-gentoo
+     root (hd0,0)
+     kernel /boot/bzImage-3.2.11-gentoo root=/dev/sda3 fastboot rootfstype=ext4
+     
+   # Kernel added on 2012-03-22 12:13:50.447946:
+   title=linux-3.3.0-gentoo
+     root (hd0,0)
+     kernel /boot/bzImage-3.3.0-gentoo root=/dev/sda3 fastboot rootfstype=ext4
+
+   # Kernel added 2012-04-05 22:16:25.099744:
+   title=linux-3.3.1-gentoo
+     root (hd0,0)
+     kernel /boot/bzImage-3.3.1-gentoo root=/dev/sda3   fastboot rootfstype=ext4
+   ^d
+   rm /boot/grub/grub.conf.bak
+   The kernel, linux-3.3.1-gentoo, has been successfully installed.  Please, check that all configuration files are installed correctly and the bootloader is configured correctly.  The kernel's build time was 0:00:00.000189
 

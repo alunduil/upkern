@@ -195,18 +195,17 @@ class Binary(object):
         if self.arguments["verbose"]:
             helpers.verbose("Building and Installing initramfs: True")
 
+        command = [
+                "dracut -H --force {options} /boot/{initrd} {suffix}".format(
+                    options = dracut_options,
+                    initrd = self.initrd,
+                    suffix = self.suffix[1:]),
+                ]
+
         if self.arguments["dry_run"]:
-            helpers.colorize("GREEN",
-                    "dracut -H --force {options} /boot/{initrd} {suffix}".format(
-                        options = dracut_options,
-                        initrd = self.initrd,
-                        suffix = self.suffix[1:]))
+            helpers.colorize("GREEN", "".join(command))
         else:
-            status = subprocess.call(
-                    "dracut -H --force {options} /boot/{initrd} {suffix}".format(
-                        options = dracut_options,
-                        initrd = self.initrd,
-                        suffix = self.suffix[1:]), shell = True)
+            status = subprocess.call("".join(command), shell = True)
             if status != 0:
                 pass # TODO raise an appropriate exception
 

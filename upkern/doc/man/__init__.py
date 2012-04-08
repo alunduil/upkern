@@ -93,6 +93,7 @@ class ManPageFormatter(argparse.HelpFormatter):
         return "".join(result)
 
 class build_manpage(Command):
+    """The manpage build subcommand for setuptools."""
     description = "Generate a man page."
     user_options = [
             ("output=", "o", "output file"),
@@ -121,6 +122,7 @@ class build_manpage(Command):
         stream.close()
 
     def _write_header(self):
+        """Write the manpage header."""
         appname = self.distribution.get_name()
 
         ret = []
@@ -155,6 +157,7 @@ class build_manpage(Command):
         return "".join(ret)
 
     def _write_options(self):
+        """Write the OPTIONS section of the manpage."""
         ret = []
 
         found = False
@@ -175,6 +178,7 @@ class build_manpage(Command):
         return "".join(ret)
 
     def _write_footer(self):
+        """Write the manpage's footer."""
         ret = []
 
         ret.append(".SH AUTHOR\n{0!s} <{1!s}>\n".format(_markup(
