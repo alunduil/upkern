@@ -471,7 +471,7 @@ class Sources(object):
                     ] 
 
             if len(config_files):
-                configuration = config_files[0]
+                configuration = "/boot/" + config_files[0]
 
         # If we didn't find a configuration file there is nothing further to
         # do and we can return.
@@ -487,7 +487,7 @@ class Sources(object):
         if self.arguments["dry_run"]:
             dry_list = [
                     "cp /usr/src/linux/.config{{,.bak}}",
-                    "cp /boot/{configuration} /usr/src/linux/.config",
+                    "cp {configuration} /usr/src/linux/.config",
                     "rm /usr/src/linux/.config.bak",
                     ]
             helpers.colorize("GREEN", 
@@ -497,7 +497,7 @@ class Sources(object):
                 if os.access("/usr/src/linux/.config", os.R_OK):
                     shutil.copy('/usr/src/linux/.config',
                             '/usr/src/linux/.config.bak')
-                shutil.copy('/boot/{configuration}'.format(
+                shutil.copy('{configuration}'.format(
                     configuration = configuration), 
                     '/usr/src/linux/.config')
             except Exception as error:
