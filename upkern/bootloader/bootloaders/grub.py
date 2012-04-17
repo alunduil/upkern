@@ -95,30 +95,46 @@ class Grub(BaseBootLoader):
         if not self._has_kernel(kernel.name):
             new_configuration = []
 
+            options = []
+
             for line in self.configuration:
                 if re.search("default", line, re.I):
                     new_configuration.append("".join([
                         "default {default!s}".format(
                             default = 1 + int(line.partition(" ")[2])),
                         ]))
-                elif not len(kernel_options) and re.search("^[^#]*kernel", line,
-                        re.I):
+                elif re.search("^[^#]*kernel", line, re.I):
                     new_configuration.append(line)
+
+                    if self.arguments["debug"]:
+                        helpers.debug({
+                            "kernel_options": kernel_options,
+                            "kernel_options.split(" ")": kernel_options.split(" "),
+                            "type(kernel_options)": type(kernel_options),
+                            })
+
                     options = [
                         option.strip() for option in line.split(" ") \
                                 if not re.search("(?:kernel|/boot/|root=)",
                                     option, re.I)
                         ]
 
-                    kernel_options = " ".join(list(set(
-                        kernel_options.split(" ").extend(options))))
-
                     if self.arguments["debug"]:
                         helpers.debug({
-                            "kernel_options": kernel_options,
+                            "options": options,
+                            "type(options)": type(options),
+                            "len(kernel_options)": len(kernel_options),
                             })
                 else:
                     new_configuration.append(line)
+
+            if len(kernel_options):
+                kernel_options = " ".join(list(set(
+                    kernel_options.split(" ").extend(options))))
+            else:
+                kernel_options = " ".join(list(set(options)))
+
+            kernel_options = kernel_options.lstrip(" ")
 
             if self.arguments["debug"]:
                 helpers.debug({
