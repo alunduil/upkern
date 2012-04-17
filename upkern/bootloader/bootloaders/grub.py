@@ -110,8 +110,8 @@ class Grub(BaseBootLoader):
                                     option, re.I)
                         ]
 
-                    kernel_options = " ".join(list(set(kernel_options.extend(
-                        options))))
+                    kernel_options = " ".join(list(set(
+                        kernel_options.split(" ").extend(options))))
 
                     if self.arguments["debug"]:
                         helpers.debug({
