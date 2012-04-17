@@ -81,7 +81,6 @@ class Sources(object):
             print("\b/", end = "")
             print("\b|", end = "")
             print("\b\\", end = "")
-            print("\b|", end = "")
 
     @property
     def directory_name(self):
