@@ -181,15 +181,15 @@ class Binary(object):
                 os.chdir(original_directory)
             except Exception as error:
                 if os.access("/boot/{image}{suffix}".format(
-                    image = self.install_image, suffix = self.suffix), os.W_OK:
+                    image = self.install_image, suffix = self.suffix), os.W_OK):
                     os.remove("/boot/{image}{suffix}".format(
                         image = self.install_image, suffix = self.suffix))
                 if os.access("/boot/config{suffix}".format(
-                    suffix = self.suffix, os.W_OK)):
+                    suffix = self.suffix), os.W_OK):
                     os.remove("/boot/config{suffix}".format(
                         suffix = self.suffix))
                 if os.access("/bot/System.map{suffix}".format(
-                    suffix = self.suffix, os.W_OK)):
+                    suffix = self.suffix), os.W_OK):
                     os.remove("/boot/System.map{suffix}".format(
                         suffix = self.suffix))
                 if os.access("/System.map", os.W_OK) and os.access(
