@@ -37,7 +37,13 @@ from inspect import stack
 
 from upkern.colors import TerminalController
 
-TERMINAL = TerminalController()
+try:
+    TERMINAL = TerminalController()
+except TypeError:
+    class TerminalController(object):
+        def render(self, message):
+            return re.sub(r"$\{.*\}", "", message)
+    TERMINAL = TerminalController()
 
 COLORIZE = "none"
 
