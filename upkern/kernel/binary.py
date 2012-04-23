@@ -166,20 +166,7 @@ class Binary(object):
                     ]
             helpers.colorize("GREEN", "\n".join(dry_list))
         else:
-            try:
-                os.chdir("/usr/src/linux")
-                shutil.copy("{directory}{image}".format(
-                    directory = self.image_directory, image = self.install_image),
-                    "/boot/{image}{suffix}".format(image = self.install_image,
-                        suffix = self.suffix))
-                shutil.copy(".config", "/boot/config{suffix}".format(
-                    suffix = self.suffix))
-                shutil.copy("System.map", "/boot/System.map{suffix}".format(
-                    suffix = self.suffix))
-                shutil.copy("/System.map", "/System.map.bak")
-                shutil.copy("System.map", "/System.map")
-                os.chdir(original_directory)
-            except Exception as error:
+            def undo():
                 if os.access("/boot/{image}{suffix}".format(
                     image = self.install_image, suffix = self.suffix), os.W_OK):
                     os.remove("/boot/{image}{suffix}".format(
@@ -196,6 +183,24 @@ class Binary(object):
                     "/System.map.bak", os.W_OK):
                     os.remove("/System.map")
                     os.rename("/System.map.bak", "/System.map")
+            try:
+                os.chdir("/usr/src/linux")
+                shutil.copy("{directory}{image}".format(
+                    directory = self.image_directory, image = self.install_image),
+                    "/boot/{image}{suffix}".format(image = self.install_image,
+                        suffix = self.suffix))
+                shutil.copy(".config", "/boot/config{suffix}".format(
+                    suffix = self.suffix))
+                shutil.copy("System.map", "/boot/System.map{suffix}".format(
+                    suffix = self.suffix))
+                shutil.copy("/System.map", "/System.map.bak")
+                shutil.copy("System.map", "/System.map")
+                os.chdir(original_directory)
+            except IOError as error:
+                undo()
+                raise IOError(error.errno, error.strerror, "/boot")
+            except Exception as error:
+                undo()
                 raise error
             finally:
                 if os.access("/System.map.bak", os.W_OK):
