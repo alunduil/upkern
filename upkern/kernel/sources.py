@@ -336,7 +336,7 @@ class Sources(object):
             os.chdir("/usr/src/linux")
             status = subprocess.call(command, shell = True)
             if status != 0:
-                raise KernelBuildFailure()
+                raise KernelBuildError(status)
             os.chdir(original_directory)
 
         binary_args = self.arguments
