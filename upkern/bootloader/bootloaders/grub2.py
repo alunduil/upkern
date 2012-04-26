@@ -179,10 +179,12 @@ class Grub2(BaseBootLoader):
                     helpers.debug({
                         "error": error,
                         })
-
-                os.rename("{grub_config}.bak".format(
-                    grub_config = self.configuration_uri),
-                    self.configuration_uri)
+    
+                if os.access("{grub_config}.bak".format(
+                    grub_config = self.configuration_uri), os.W_OK):
+                    os.rename("{grub_config}.bak".format(
+                        grub_config = self.configuration_uri),
+                        self.configuration_uri)
                 raise error
             finally:
                 if os.access("{grub_config}.bak".format(
