@@ -193,7 +193,8 @@ class Binary(object):
                     suffix = self.suffix))
                 shutil.copy("System.map", "/boot/System.map{suffix}".format(
                     suffix = self.suffix))
-                shutil.copy("/System.map", "/System.map.bak")
+                if os.access("/System.map", os.W_OK):
+                    shutil.copy("/System.map", "/System.map.bak")
                 shutil.copy("System.map", "/System.map")
                 os.chdir(original_directory)
             except IOError as error:
