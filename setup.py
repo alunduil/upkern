@@ -23,7 +23,7 @@ from distutils.core import setup
 
 setup_params = {}
 setup_params['name'] = "upkern"
-setup_params['version'] = "4.0.0"
+setup_params['version'] = "4.0.1"
 setup_params['description'] = "Automated kernel updater for Gentoo."
 setup_params["long_description"] = "".join([
         "Defaults to building the most up to date kernel currently on the ",
