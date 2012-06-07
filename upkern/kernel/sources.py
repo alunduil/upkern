@@ -112,7 +112,7 @@ class Sources(object):
                                 target = self._print_spinner)
                         spinner.start()
 
-                    package = unicode(finder((directory, ))[0][0])
+                    package = unicode(finder(("/usr/src/" + directory, ))[0][0])
                     self._packages[directory] = package
 
                     if not self.arguments["quiet"]:
@@ -189,7 +189,7 @@ class Sources(object):
                         spinner.start()
 
                     package = unicode(finder(
-                        (self.source_directories[0], ))[0][0])
+                        ("/usr/src/" + self.source_directories[0], ))[0][0])
                     self._packages[self.source_directories[0]] = package
 
                     if not self.arguments["quiet"]:
@@ -442,7 +442,8 @@ class Sources(object):
                     source_directory = self.directory_name),
                         '/usr/src/linux')
             except Exception as error:
-                os.remove("/usr/src/linux")
+                if os.access("/usr/src/linux", os.W_OK):
+                    os.remove("/usr/src/linux")
                 os.symlink(original_target, "/usr/src/linux")
                 raise error
 
