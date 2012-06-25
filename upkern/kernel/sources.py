@@ -444,7 +444,8 @@ class Sources(object):
             except Exception as error:
                 if os.access("/usr/src/linux", os.W_OK):
                     os.remove("/usr/src/linux")
-                os.symlink(original_target, "/usr/src/linux")
+                if original_target:
+                    os.symlink(original_target, "/usr/src/linux")
                 raise error
 
     @mountedboot
