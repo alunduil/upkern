@@ -165,8 +165,8 @@ class Grub2(BaseBootLoader):
             original_directory = os.getcwd()
             try:
                 os.chdir("/boot/grub2")
-                shutil.copy(self.configuration_uri, "{grub_config}.bak".format(
-                    grub_config = self.configuration_uri))
+                if os.access(self.configuration_uri, os.W_OK):
+                    shutil.copy(self.configuration_uri, "{grub_config}.bak".format(grub_config = self.configuration_uri))
                 status = subprocess.call(
                         "grub2-mkconfig -o {grub_config}".format(
                             grub_config = self.configuration_uri),
