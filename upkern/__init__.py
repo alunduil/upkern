@@ -1,20 +1,56 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (C) 2011 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
 #
-# This program is free software; you can redistribute it and#or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2 of the License, or (at your option) any later
-# version.
-#
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-# details.
-#
-# You should have received a copy of the GNU General Public License along with
-# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-# Place - Suite 330, Boston, MA  02111-1307, USA.
+# upkern is freely distributable under the terms of an MIT-style license.
+# See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-"""The program module for upkern. """
+import logging
 
+from upkern.arguments import ARGUMENTS
+
+def run():
+    '''Main execution function for upkern.'''
+
+    p = ARGUMENTS.parse_args()
+
+    logging.basicConfig(level = getattr(logging, p.level.upper()))
+
+    sources = Sources(name = p.name)
+
+    sources.install(force = p.force)
+
+    sources.prepare(configuration = p.configuration)
+    sources.configure(configurator = p.configurator, accept_defaults = p.yes)
+
+    if p.time:
+        start = datetime.datetime.now()
+
+    sources.build()
+
+    if p.time:
+        delta = datetime.datetime.now() - start
+
+    if p.module_rebuild:
+        rebuild_modules()
+
+    sources.install()
+
+    initrd = None
+
+    if p.initrd:
+        initrd = InitialRAMDisk(p.initial_ramdisk_type)
+        initrd.install(initrd_options = p.initrd_options)
+
+    bootloader = Bootloader()
+    bootloader.configure(kernel = sources.kernel, kernel_options = p.kernel_options, initial_ramdisk = initrd)
+
+    bootloader.install()
+
+    logger.info(
+            'The kernel, %s, has been successfully installed.  Please, check ' \
+            'that all configuration files are installed correctly and the ' \
+            'bootloader is configured correctly',
+            binary.name
+            )
+
+    if p.time:
+        logger.info('The kernel\'s build time was %s', str(delta))

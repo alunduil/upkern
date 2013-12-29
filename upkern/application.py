@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011 by Alex Brandt <alunduil@alunduil.com>             
-#                                                                    
+# Copyright (C) 2011 by Alex Brandt <alunduil@alunduil.com>
+#
 # This program is free software; you can redistribute it andor modify it under
 # the terms of the GNU General Public License as published by the Free Software
 # Foundation; either version 2 of the License, or (at your option) any later
 # version.
-#                                                                    
+#
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
-#                                                           
+#
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -41,11 +41,11 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
         self.arguments = UpkernOptions("upkern").parsed_args
 
         # If we have debugging turned on we should also have verbose.
-        if self.arguments.debug: 
+        if self.arguments.debug:
             self.arguments.verbose = True
 
         # If we have verbose we shouldn't be quiet.
-        if self.arguments.verbose: 
+        if self.arguments.verbose:
             self.arguments.quiet = False
 
         # Other option handling ...
@@ -90,7 +90,7 @@ class UpkernApplication(object): #pylint: disable-msg=R0903
         bootloader_params.update(verbosity)
 
         bootloader = BootLoader(**bootloader_params)
-        
+
         bootloader.prepare(kernel = binary,
                 kernel_options = self.arguments.kernel_options)
 
@@ -133,7 +133,7 @@ class UpkernOptions(object):
     def _add_args(self):
         """Add the options to the parser."""
 
-        self._parser.add_argument("--version", action = "version", 
+        self._parser.add_argument("--version", action = "version",
                 version = "%(prog)s 4.0.0")
 
         # --verbose, -v
@@ -158,14 +158,14 @@ class UpkernOptions(object):
                 ]
         self._parser.add_argument("--quiet", "-q", action = "store_true",
                 default = False, help = "".join(help_list))
-        
+
         # --color=[none,light,dark,auto]
         help_list = [
                 "Specifies whether output should use color and which type of ",
                 "background to color for (light or dark).  This defaults to ",
                 "auto.",
                 ]
-        self.parser.add_argument("--color", 
+        self.parser.add_argument("--color",
                 choices = ["none", "light", "dark", "auto"], default = "auto",
                 help = "".join(help_list))
 
@@ -176,7 +176,7 @@ class UpkernOptions(object):
                 "screen.  This way it can be seen what upkern will do ",
                 "without actually doing it.",
                 ]
-        self._parser.add_argument("--dry-run", "-d", action = "store_true", 
+        self._parser.add_argument("--dry-run", "-d", action = "store_true",
                 dest = "dry_run", default = False, help = "".join(help_list))
 
         # --configurator, -c
@@ -203,7 +203,7 @@ class UpkernOptions(object):
                 ".  All the configurators are documented in the kernel ",
                 "source files.",
                 ]
-        self._parser.add_argument("--configurator", "-c", 
+        self._parser.add_argument("--configurator", "-c",
                 choices = configurators_list, default = "menuconfig",
                 help = "".join(help_list))
 
@@ -242,7 +242,7 @@ class UpkernOptions(object):
                 "determine if kernels are building faster based on different ",
                 "configurations, etc."
                 ]
-        self._parser.add_argument("--time", "-t", action = "store_true", 
+        self._parser.add_argument("--time", "-t", action = "store_true",
                 default = False, help = "".join(help_list))
 
         # --yes, -y
