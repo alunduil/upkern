@@ -1,70 +1,110 @@
-#!/usr/bin/env python -t3
-# -*- coding: utf-8 -*-
-
-# Copyright (C) 2011 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
 #
-# This program is free software; you can redistribute it and#or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2 of the License, or (at your option) any later
-# version.
-#
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-# details.
-#
-# You should have received a copy of the GNU General Public License along with
-# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-# Place - Suite 330, Boston, MA  02111-1307, USA.
+# crumbs is freely distributable under the terms of an MIT-style license.
+# See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-from distutils.core import setup
+# -----------------------------------------------------------------------------
+import sys
+import traceback
 
-#from upkern.doc.man import build_manpage
+if sys.version_info.major < 3:
+    import ConfigParser
+    configparser_name = 'ConfigParser'
+else:
+    import configparser
+    configparser_name = 'configparser'
 
-setup_params = {}
-setup_params['name'] = "upkern"
-setup_params['version'] = "4.0.1"
-setup_params['description'] = "Automated kernel updater for Gentoo."
-setup_params["long_description"] = "".join([
-        "Defaults to building the most up to date kernel currently on the ",
-        "system but can be used to build an alternative kernel by specifying ",
-        "a name.  That name is an ebuild name for a kernel that at the very ",
-        "least specifies a version (in which case the gentoo-sources will be ",
-        "used).  Example names: 'sys-kernel/gentoo-sources-2.6.32-r6', ",
-        "'gentoo-sources-2.6.23-r6', '2.6.33-r6', 'vanilla-sources-2.6.33'.  ",
-        "The name passed must be the name of a current ebuild in the portage ",
-        "tree.",
-        ])
-setup_params['author'] = "Alex Brandt"
-setup_params['author_email'] = "alunduil@alunduil.com"
-setup_params['url'] = "http://www.alunduil.com/programs/upkern/"
-setup_params['license'] = "GPL-2"
-setup_params['scripts'] = [
-        "bin/upkern",
+original_sections = sys.modules[configparser_name].ConfigParser.sections
+
+def monkey_sections(self):
+    '''Return a list of sections available; DEFAULT is not included in the list.
+
+    Monkey patched to exclude the nosetests section as well.
+
+    '''
+
+    _ = original_sections(self)
+
+    if any([ 'distutils/dist.py' in frame[0] for frame in traceback.extract_stack() ]) and _.count('nosetests'):
+        _.remove('nosetests')
+
+    return _
+
+sys.modules[configparser_name].ConfigParser.sections = monkey_sections
+# -----------------------------------------------------------------------------
+
+from ez_setup import use_setuptools
+use_setuptools()
+
+from setuptools import setup
+
+from upkern import information
+
+PARAMS = {}
+
+PARAMS['name'] = information.NAME
+PARAMS['version'] = information.VERSION
+PARAMS['description'] = information.DESCRIPTION
+
+with open('README.rst', 'r') as fh:
+    PARAMS['long_description'] = fh.read()
+
+PARAMS['author'] = information.AUTHOR
+PARAMS['author_email'] = information.AUTHOR_EMAIL
+PARAMS['url'] = information.URL
+PARAMS['license'] = information.LICENSE
+
+PARAMS['classifiers'] = [
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Intended Audience :: End Users/Desktop',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Topic :: System :: Operating System Kernels :: Linux',
+        'Topic :: System :: Systems Administration',
+        'Topic :: Utilities',
         ]
-setup_params['packages'] = [
-        "upkern",
-        "upkern.kernel",
-        "upkern.bootloader",
-        "upkern.bootloader.bootloaders",
-        "upkern.system",
+
+PARAMS['keywords'] = [
+        'gentoo',
+        'kernel',
+        'update',
         ]
-setup_params['data_files'] = [
-        ("share/doc/%s-%s" % (setup_params['name'], setup_params['version']), [
-            "COPYING",
-            "README",
+
+PARAMS['provides'] = [
+        'upkern',
+        ]
+
+with open('requirements.txt', 'r') as req_fh:
+    PARAMS['install_requires'] = req_fh.readlines()
+
+with open('test_upkern/requirements.txt', 'r') as req_fh:
+    PARAMS['tests_require'] = req_fh.readlines()
+
+PARAMS['test_quite'] = 'nose.collector'
+
+PARAMS['entry_points'] = {
+        'console_scripts': [
+            'upkern = upkern:run',
+            ],
+        }
+
+PARAMS['packages'] = [
+        'upkern',
+        'upkern.kernel',
+        'upkern.bootloaders',
+        'upkern.system',
+        ]
+
+PARAMS['data_files'] = [
+        ('share/doc/{P[name]}-{P[version]}'.format(P = PARAMS), [
+            'README.rst',
             ]),
-        ("share/man/man8", [
-            "doc/man/man8/upkern.8",
-            ]),
         ]
-setup_params['requires'] = [
-        "gentoolkit",
-        "portage",
-        ]
-#setup_params['cmdclass'] = {
-#        "build_manpage": build_manpage,
-#        }
 
-setup(**setup_params)
-
+setup(**PARAMS)
