@@ -48,7 +48,7 @@ ARGUMENTS.add_argument(
 
 ARGUMENTS.add_argument(
         '--configuration',
-        '-f',
+        '-C',
         help = \
                 'Specifies an existing kernel configuration to use in place ' \
                 'of the default.'

@@ -1,22 +1,24 @@
-# -*- coding: utf-8 -*-
+# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
+#
+# upkern is freely distributable under the terms of an MIT-style license.
+# See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-# Copyright (C) 2012 by Alex Brandt <alunduil@alunduil.com>            
-#                                                                      
-# This program is free software; you can redistribute it andor modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2 of the License, or (at your option) any later
-# version.                                  
-#                                                                      
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-# more details.                         
-#                                                                      
-# You should have received a copy of the GNU General Public License along with
-# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-# Place - Suite 330, Boston, MA  02111-1307, USA.            
+def rebuild_modules():
+    '''Use emerge to rebuild all portage installed kernel modules.
 
-"""Any generic system items that are needed."""
+    Basically, a wrapper for `emerge @module-rebuild`.
 
-from fstab import FSTab
+    '''
+    
+    logger.info('rebuilding portage installed kernel modules')
 
+    options = []
+
+    if logger.level < 30:
+        options.append('-v')
+    else:
+        options.append('-q')
+
+    helpers.emerge(options = options, package = '@module-rebuild')
+
+    logger.info('finished rebuilding portage installed kernel modules')

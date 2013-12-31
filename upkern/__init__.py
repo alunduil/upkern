@@ -6,6 +6,10 @@
 import logging
 
 from upkern.arguments import ARGUMENTS
+from upkern.bootloaders import BootLoader
+from upkern.initrd import InitialRAMDisk
+from upkern.sources import Sources
+from upkern.system import rebuild_modules
 
 def run():
     '''Main execution function for upkern.'''
@@ -41,7 +45,7 @@ def run():
         initrd.install(initrd_options = p.initrd_options)
 
     bootloader = Bootloader()
-    bootloader.configure(kernel = sources.kernel, kernel_options = p.kernel_options, initial_ramdisk = initrd)
+    bootloader.configure(sources = sources, kernel_options = p.kernel_options, initial_ramdisk = initrd)
 
     bootloader.install()
 

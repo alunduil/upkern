@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012 by Alex Brandt <alunduil@alunduil.com>            
-#                                                                      
-# This program is free software; you can redistribute it andor modify it under 
+# Copyright (C) 2012 by Alex Brandt <alunduil@alunduil.com>
+#
+# This program is free software; you can redistribute it andor modify it under
 # the terms of the GNU General Public License as published by the Free Software
 # Foundation; either version 2 of the License, or (at your option) any later
-# version.                                  
-#                                                                      
+# version.
+#
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-# details.                         
-#                                                                      
+# details.
+#
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-# Place - Suite 330, Boston, MA  02111-1307, USA.            
+# Place - Suite 330, Boston, MA  02111-1307, USA.
 
 """Provides the kernel source models."""
 
@@ -36,8 +36,8 @@ from upkern.kernel.binary import Binary
 class Sources(object):
     """A kernel source model.
 
-    Specifies an interface that allows the programmer to easily work with the 
-    kernel sources that the object gets bound to.  This allows easy building, 
+    Specifies an interface that allows the programmer to easily work with the
+    kernel sources that the object gets bound to.  This allows easy building,
     installing and controlled manipulation of a kernel source directory.
 
     All references to how things should be called makes an attempt to coincide
@@ -52,7 +52,7 @@ class Sources(object):
     """
 
     def __init__(self, name = "", debug = False, verbose = False,
-            quiet = False, dry_run = False): 
+            quiet = False, dry_run = False):
         """Returns a kernel sources object.
 
         Get the appropriate information about the system to know how to perform
@@ -86,13 +86,13 @@ class Sources(object):
     @property
     def directory_name(self):
         """Get the name of the sources directory.
-        
+
         This caches the result after the first invocation so that subsequent
         calls are much quicker.
 
         This method grabs the first directory that is a member of
         self.package_name (a portage package object).
-        
+
         """
 
         if not hasattr(self, "_directory_name"):
@@ -134,17 +134,17 @@ class Sources(object):
     @property
     def package_name(self):
         """Get the package name of the kernel.
-        
+
         This caches the result after the first invocation so that subsequent
         calls are much quicker.
-        
+
         This method gets the portage name of the package of the kernel we want
-        to build.  If the name parameter for this object was specified and 
+        to build.  If the name parameter for this object was specified and
         matches the package regular expression, we use what was passed to
         create the package name.  If the string does not match, we grab the
         most up to date source directory and use portage to tell us the package
         name for those sources.
-        
+
         """
 
         if not hasattr(self, "_package_name"):
@@ -213,11 +213,11 @@ class Sources(object):
 
         The result of this method is a list of kernel source directories sorted
         by the recency of the kernel version (most recent to least recent).
-        
+
         """
 
         if not hasattr(self, "_directories"):
-            directories = [ 
+            directories = [
                     d for d in os.listdir('/usr/src') \
                             if re.match(r"linux-.+$", d)
                     ]
@@ -225,7 +225,7 @@ class Sources(object):
             keys = [ self._keyify(d) for d in directories ]
             dict_ = dict(zip(keys, directories))
 
-            self._directories = [ 
+            self._directories = [
                     dict_[d] for d in sorted(dict_.keys(), reverse = True)
                     ]
 
@@ -272,7 +272,7 @@ class Sources(object):
         1. Enter the source directory.
         2. Run make <configurator>
         3. Leave the source directory.
-        
+
         """
 
         if not self.arguments["quiet"]:
@@ -303,14 +303,14 @@ class Sources(object):
 
         if not self.arguments["quiet"]:
             print("Kernel sources configured.")
-        
+
     def build(self):
         """Build the kernel and return a binary object.
 
         1. Enter the source directory.
         2. Run make && make modules_install
         3. Leave the source directory.
-        
+
         """
 
         if not self.arguments["quiet"]:
@@ -397,7 +397,7 @@ class Sources(object):
             command = "emerge {options} {package}".format(
                     options = " ".join(opts),
                     package = self.package_name)
-            
+
             if self.arguments["dry_run"]:
                 helpers.colorize("GREEN", command)
             else:
@@ -409,11 +409,11 @@ class Sources(object):
 
     def _set_symlink(self):
         """Sets the symlink to the new kernel directory.
-        
+
         This operation can be assumed to be atomic.  If a failure occurs all
         actions taken up to that point shall be reverted and an appropriate
         exception raised.
-        
+
         """
 
         original_target = None
@@ -451,11 +451,11 @@ class Sources(object):
     @mountedboot
     def _copy_config(self, configuration = ""):
         """Copy the configuration file into /usr/src/linux/.config.
-        
+
         This operation can be assumed to be atomic.  If a failure occurs all
-        actions taken up to that point shall be reverted and an appropriate 
+        actions taken up to that point shall be reverted and an appropriate
         exception raised.
-        
+
         """
 
         # If no configuration file is passed; find the highest versioned one
@@ -470,7 +470,7 @@ class Sources(object):
 
             config_files = [
                     dict_[k] for k in sorted(dict_.keys(), reverse = True)
-                    ] 
+                    ]
 
             if len(config_files):
                 configuration = "/boot/" + config_files[0]
@@ -483,7 +483,7 @@ class Sources(object):
         if self.arguments["verbose"]:
             helpers.verbose("Using Configuration File: {0}", configuration)
 
-        # Perform the necessary actions (outlined in dry_run performed 
+        # Perform the necessary actions (outlined in dry_run performed
         # otherwise).  Keeping in mind that any action on the system itself
         # must be undone if an error occurs.
         if self.arguments["dry_run"]:
@@ -492,7 +492,7 @@ class Sources(object):
                     "cp {configuration} /usr/src/linux/.config",
                     "rm /usr/src/linux/.config.bak",
                     ]
-            helpers.colorize("GREEN", 
+            helpers.colorize("GREEN",
                     "\n".join(dry_list).format(configuration = configuration))
         else:
             try:
@@ -500,12 +500,12 @@ class Sources(object):
                     shutil.copy('/usr/src/linux/.config',
                             '/usr/src/linux/.config.bak')
                 shutil.copy('{configuration}'.format(
-                    configuration = configuration), 
+                    configuration = configuration),
                     '/usr/src/linux/.config')
             except Exception as error:
                 if os.access("/usr/src/linux/.config.bak", os.W_OK):
                     os.remove("/usr/src/linux/.config")
-                    os.rename("/usr/src/linux/.config.bak", 
+                    os.rename("/usr/src/linux/.config.bak",
                             "/usr/src/linux/.config")
                 raise error
             finally:
@@ -514,15 +514,15 @@ class Sources(object):
 
     def _keyify(self, kernel_string):
         """Convert a kernel string into a sortable key.
-        
+
         The key generated is a floating point number that always increments
         with the kernel version but is comparable as a float.  The number is
-        generated by concatenating and typecasting the following strings in 
+        generated by concatenating and typecasting the following strings in
         the following manner: <major><minor><patch>.<revision>.  Using this
         number the kernels can be guaranteed to be sorted by version.
-        
+
         """
-        
+
         regex = "".join([
             r".*?(?P<major>\d+)\.",
             r"(?P<minor>\d+)",
@@ -530,10 +530,10 @@ class Sources(object):
             r"-[^-]*(?:-r(?P<revision>\d+))?",
             ])
         match = re.match(regex, kernel_string)
-        
+
         revision = major = minor = patch = 0
         if match:
-            if match.group("revision"): 
+            if match.group("revision"):
                 revision = int(match.group("revision"))
             if match.group("major"):
                 major = int(match.group("major"))
@@ -548,7 +548,7 @@ class Sources(object):
             helpers.debug({
                 "key": key,
                 })
-        
+
         return float(key)
 
 class KernelBuildError(Exception):

@@ -1,0 +1,389 @@
+# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
+#
+# upkern is freely distributable under the terms of an MIT-style license.
+# See COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+import logging
+import re
+
+logger = logging.getLogger(__name__)
+
+_kernel_index_expression = re.compile(
+        r'.*?(?P<major>\d+)\.'
+        r'(?P<minor>\d+)'
+        r'(?:\.(?P<patch>\d+))?'
+        r'-[^-]*(?:-r(?P<revision>\d+))?'
+        )
+
+def kernel_index(kernel_string):
+    '''Map the kernel_string to an integer.
+
+    The generated integer is always greater for a newer kernel version.
+
+    Examples
+    --------
+
+    >>> kernel_index('linux-3.10.7-gentoo-r1')
+    3010007001
+
+    >>> kernel_index('linux-3.12.6-gentoo')
+    3012006000
+
+    '''
+
+    logger.debug('kernel_string: %s', kernel_string)
+
+    _ = _kernel_index_expression.match(kernel_string)
+
+    major = minor = patch = revision = '0'
+    if _:
+        major, minor, patch, revision = _.groups('0')
+
+    key = '{:03d}{:03d}{:03d}{:03d}'.format(int(major), int(minor), int(patch), int(revision))
+
+    logger.debug('kernel_index: %s', key)
+
+    return int(key)
+
+class Sources(object):
+    def __init__(self, name = None):
+        self.name = name
+        self.built = False
+
+    @property
+    def directory_name(self):
+        '''Name of the sources directory in `/usr/src/`.
+
+        Provides the first directory in `/usr/src` that is a member of
+        `self.package_name`.
+
+        .. note::
+            This property is cached after the first invocation until the object
+            is garbage collected.
+
+        '''
+
+        if not hasattr(self, '_directory_name'):
+            finder = FileOwner()
+
+            for directory in self.source_directories:
+                package = None
+
+                if directory in self._packages:
+                    package = self._packages[directory]
+                else:
+                    logger.info('finding the owner of %s', directory)
+
+                    # TODO Add spinner?
+
+                    package = str(find(('/usr/src/' + directory, ))[0][0])
+                    self._packages[directory] = package
+
+                if package == self.package_name.lstrip('='):
+                    self._directory_name = directory
+
+                    break
+
+            logger.info('using source directory: %s', self._directory_name)
+
+        return self._directory_name
+
+    @property
+    def package_name(self):
+        '''Name of the kernel sources package.
+
+        Using the specified name, we determine which sources should be mapped
+        by this object.
+
+        If the name is not set, we use the most up to date source directory and
+        use portage to determine the package name.
+
+        .. note::
+            This property is cached after the first invocation until the object
+            is garbage collected.
+
+        '''
+
+        if not hasattr(self, '_package_name'):
+            package_expression = re.compile(''.join([
+                    r'(?:sys-kernel/)?',
+                    r'(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+ -]*)-sources-)?',
+                    r'(?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)',
+                ]))
+
+            logger.debug('self.name: %s', self.name)
+
+            package_match = package_expression.match(self.name)
+
+            sources = 'gentoo'
+
+            self._package_name = '=sys-kernel/'
+
+            if package_match:
+                if package_match.group('sources'):
+                    sources = package_match.group('sources')
+                self._package_name += sources
+                self._package_name += '-sources-'
+                self._package_name += package_match.group('version')
+            else:
+                finder = FileOwner()
+
+                package = None
+
+                if self.source_directories[0] in self._packages:
+                    package = self._packages[self.source_directories[0]]
+                else:
+                    logger.info('finding the owner of %s', self.source_directories[0])
+
+                    package = str(finder(('/usr/src/' + self.source_directories[0], ))[0][0])
+
+                    self._packages[self.source_directories[0]] = package
+
+                self._package_name = package
+
+        return self._package_name
+
+    @property
+    def portage_configuration(self):
+        '''System's Portage configuration.
+
+        Basically, a dictionary of `emerge -info` output.
+
+        .. note::
+            This property is cached after the first invocation until the object
+            is garbage collected.
+
+        '''
+
+        if not hasattr(self, '_portage_configuration'):
+            self._portage_configuration = portage.config()
+
+        return self._portage_configuration
+
+    @property
+    def source_directories(self):
+        '''List of source directories in `/usr/src`.
+
+        Uses an integer mapping of kernel versions to determine the ordering
+        for the directories in this list.  The ordering of the source
+        directories will be most recent to least recent (by version number).
+
+        .. note::
+            This property is cached after the first invocation until the object
+            is garbage collected.
+
+        '''
+
+        if not hasattr(self, '_source_directories'):
+            directories = [ _ for _ in os.listdir('/usr/src') if re.match(r'linux-.+$', _) ]
+
+            self._source_directories = sorted(directories, key = kernel_index)
+
+        return self._source_directories
+
+    def build(self):
+        '''Build the kernel.
+
+        1. Enter the source directory
+        2. Run `make && make modules_install`
+        3. Leave the source directory
+
+        '''
+
+        logger.info('building the kernel sources')
+
+        original_directory = os.getcwd()
+
+        make_options = self.portage_config['MAKEOPTS']
+        if logger.level > 29:
+            make_options += ' -s'
+
+        command = 'make {0} && make {0} modules_install'.format(make_options)
+
+        logger.debug('command: %s', command)
+
+        os.chdir('/usr/src/linux')
+
+        status = subprocess.call(command, shell = True)
+
+        if status != 0:
+            logger.error('kernel did not build correctly')
+            sys.exit(1)
+
+        os.chdir(original_directory)
+
+        logger.info('finished building the kernel sources')
+
+    def configure(self, configurator = 'menuconfig', accept_defaults = False):
+        '''Configure the kernel sources.
+
+        1. Enter the source directory.
+        2. Run `make ${CONFIGURATOR}`
+        3. Leave the source directory.
+
+        '''
+
+        logger.info('configuring kernel sources')
+
+        original_directory = os.getcwd()
+
+        command = 'make {0} {1}'.format(
+                self.portage_config['MAKEOPTS'],
+                configurator
+                )
+
+        if accept_defaults:
+            command = 'yes "" | ' + command
+
+        logger.debug('command: %s', command)
+
+        os.chdir('/usr/src/linux')
+
+        status = subprocess.call(command, shell = True)
+
+        if status != 0:
+            pass # TODO raise an appropriate exception.
+
+        os.chdir(original_directory)
+
+        logger.info('finished configuring kernel sources')
+
+    def install(self, force = False):
+        '''Install the kernel sources.
+
+        Use portage to install the kernel sources.
+
+        '''
+
+        logger.info('installing kernel sources')
+
+        if not len(GentoolkitQuery(self.package_name).find_installed()) and force:
+            options = [
+                    '-n',
+                    '-1',
+                    ]
+
+            if logger.level < 30:
+                options.append('-v')
+            else:
+                options.append('-q')
+
+            helpers.emerge(options = options, package = self.package_name)
+
+            '''
+            command = 'emerge {0} {1}'.format(options, self.package_name)
+
+            logger.debug('command: %s', command)
+
+            if os.getuid() == 0:
+                status = subprocess.call(command, shell = True)
+
+                if status != 0:
+                    pass # TODO raise an appropriate exception.
+
+            else:
+                logger.error('must be root to install sources')
+                sys.exit(1)
+            '''
+
+        logger.info('finished installing kernel sources')
+
+    def prepare(self, configuration):
+        '''Prep the sources so they are ready to be built.
+
+        1. Setup the `/usr/src/linux` symlink
+        2. Copy the current configuration file from `/boot`
+
+        '''
+
+        logger.info('preparing the kernel sources')
+
+        self._setup_symlink()
+        self._copy_configuration(configuration)
+
+        logger.info('finished preparing the kernel sources')
+
+    def _copy_configuration(self, configuration = None):
+        '''Copy the configuration file into /usr/src/linux.
+
+        .. note::
+            This method leaves the environment in the state it found it even if
+            any errors occur.
+
+        '''
+
+        logger.info('copying kernel configuration')
+
+        boot_mounted = helpers.mount('/boot')
+
+        if configuration is None:
+            configuration_files = [ _ for _ in os.listdir('/boot') if re.match('config-.+', _) ]
+
+            configuration_files = sorted(configuration_files, key = kernel_index)
+
+            if len(configuration_files):
+                configuration = os.path.join(os.path.sep, 'boot', configuration_files[0])
+
+        if configuration is None:
+            return
+
+        logger.info('using configuration: %s', configuration)
+
+        try:
+            if os.access('/usr/src/linux/.config', os.R_OK):
+                shutil.copy('/usr/src/linux/.config', '/usr/src/linux/.config.bak')
+
+            shutil.copy(configuration, '/usr/src/linux/.config')
+        except Exception as e:
+            logger.exception(e)
+            logger.error('failed to copy kernel configuration')
+
+            if os.access('/usr/src/linux/.config.bak', os.W_OK):
+                os.remove('/usr/src/linux/.config')
+                os.rename('/usr/src/linux/.config.bak', '/usr/src/linux/.config')
+        finally:
+            if os.access('/usr/src/linux/.config.bak', os.W_OK):
+                os.remove('/usr/src/linux/.config.bak')
+            else:
+                sys.exit(1)
+
+        helpers.unmount('/boot', boot_mounted)
+
+    def _setup_symlink(self):
+        '''Create the `/usr/src/linux` symlink.
+
+        .. note::
+            This method leaves the environment in the state it found it even if
+            any errors occur.
+
+        '''
+
+        logger.info('symlinking /usr/src/linux')
+
+        original_target = None
+
+        if os.path.islink('/usr/src/linux'):
+            original_target = os.readlink('/usr/src/linux')
+
+            try:
+                os.remove('/usr/src/linux')
+            except Exception as e:
+                logger.exception(e)
+                logger.error('failed to remove existing symlink')
+
+                os.symlink(original_target, '/usr/src/linux')
+
+                sys.exit(1)
+
+        try:
+            os.symlink('/usr/src/{0}'.format(self.directory_name), '/usr/src/linux')
+        except Exception as e:
+            logger.exception(e)
+            logger.error('failed to symlink /usr/src/linux')
+
+            if os.access('/usr/src/linux', os.W_OK):
+                os.remove('/usr/src/linux')
+            if original_target:
+                os.symlink(original_target, '/usr/src/linux')
+
+            sys.exit(1)
