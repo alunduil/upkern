@@ -20,6 +20,8 @@ class TestKernelIndex(unittest.TestCase):
         self.kernel_strings = [ ( _['directory_name'], _['kernel_index'] ) for _ in SOURCES['all'] ]
 
     def test_kernel_index(self):
+        '''kernel_index()'''
+
         for kernel_string, result in self.kernel_strings:
             self.assertEqual(result, sources.kernel_index(kernel_string))
 
@@ -89,6 +91,8 @@ class TestSourcesProperties(unittest.TestCase):
         self.s = sources.Sources(name = name)
 
     def test_directory_name(self):
+        '''Sources().directory_name'''
+
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
 
@@ -103,6 +107,8 @@ class TestSourcesProperties(unittest.TestCase):
             logger.info('finished testing %s', source['package_name'])
 
     def test_package_name(self):
+        '''Sources().package_name'''
+
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
 
