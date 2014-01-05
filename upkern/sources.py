@@ -81,7 +81,7 @@ class Sources(object):
 
                 logger.info('finished finding the owner of %s', directory)
 
-                self._packages.setdefault(directory, package)
+                self._packages[directory] = package
 
                 logger.debug('self.package_name: %s', self.package_name)
 
@@ -111,41 +111,43 @@ class Sources(object):
         '''
 
         if not hasattr(self, '_package_name'):
-            package_expression = re.compile(''.join([
-                    r'(?:sys-kernel/)?',
-                    r'(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+ -]*)-sources-)?',
-                    r'(?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)',
-                ]))
+            package_expression = re.compile(
+                    r'(?:sys-kernel/)?' \
+                    r'(?:(?P<sources>[A-Za-z0-9+_][A-Za-z0-9+ -]*)-sources-)?' \
+                    r'(?P<version>[A-Za-z0-9+_][A-Za-z0-9+_.-]*)'
+                    )
 
-            logger.debug('self.name: %s', self.name)
+            if self.name is None:
+                logger.info('using latest kernel sources')
 
-            package_match = package_expression.match(self.name)
+                finder = gentoolkit.helpers.FileOwner()
 
-            sources = 'gentoo'
+                logger.info('finding the owner of %s', self.source_directories[0])
 
-            self._package_name = '=sys-kernel/'
+                package = '=' + self._packages.get(self.source_directories[0], str(finder(('/usr/src/' + self.source_directories[0], ))[0][0]))
 
-            if package_match:
-                if package_match.group('sources'):
-                    sources = package_match.group('sources')
-                self._package_name += sources
-                self._package_name += '-sources-'
-                self._package_name += package_match.group('version')
-            else:
-                finder = FileOwner()
+                logger.debug('package: %s', package)
 
-                package = None
+                logger.info('finished finding the owner of %s', self.source_directories[0])
 
-                if self.source_directories[0] in self._packages:
-                    package = self._packages[self.source_directories[0]]
-                else:
-                    logger.info('finding the owner of %s', self.source_directories[0])
-
-                    package = str(finder(('/usr/src/' + self.source_directories[0], ))[0][0])
-
-                    self._packages[self.source_directories[0]] = package
+                self._packages[self.source_directories[0]] = package
 
                 self._package_name = package
+            else:
+                logger.info('parsing %s', self.name)
+
+                self._package_name = '=sys-kernel/'
+
+                package_match = package_expression.match(self.name)
+
+                if package_match:
+                    sources = 'gentoo'
+                    if package_match.group('sources'):
+                        sources = package_match.group('sources')
+
+                    self._package_name += sources
+                    self._package_name += '-sources-'
+                    self._package_name += package_match.group('version')
 
         return self._package_name
 

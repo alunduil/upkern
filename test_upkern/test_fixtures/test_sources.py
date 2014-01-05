@@ -11,7 +11,7 @@ SOURCES['correct'].append(
         {
             'name': None,
             'directory_name': 'linux-3.12.6-gentoo',
-            'package_name': 'sys-kernel/gentoo-sources-3.12.6',
+            'package_name': '=sys-kernel/gentoo-sources-3.12.6',
             'kernel_index': 3012006000,
             'portage_configuration': { 'MAKEOPTS': '-j5' },
             'source_directories': [
@@ -30,7 +30,7 @@ SOURCES['correct'].append(
         {
             'name': 'sys-kernel/gentoo-sources-3.12.6',
             'directory_name': 'linux-3.12.6-gentoo',
-            'package_name': 'sys-kernel/gentoo-sources-3.12.6',
+            'package_name': '=sys-kernel/gentoo-sources-3.12.6',
             'kernel_index': 3012006000,
             'portage_configuration': { 'MAKEOPTS': '-j5' },
             'source_directories': [
@@ -49,7 +49,7 @@ SOURCES['correct'].append(
         {
             'name': 'gentoo-sources-3.9.11-r1',
             'directory_name': 'linux-3.9.11-gentoo-r1',
-            'package_name': 'sys-kernel/gentoo-sources-3.9.11-r1',
+            'package_name': '=sys-kernel/gentoo-sources-3.9.11-r1',
             'kernel_index': 3009011001,
             'portage_configuration': { 'MAKEOPTS': '-j5' },
             'source_directories': [
@@ -70,7 +70,7 @@ SOURCES['correct'].append(
         {
             'name': 'hardened-sources-3.11.7-r1',
             'directory_name': 'linux-3.11.7-hardened-r1',
-            'package_name': 'sys-kernel/hardened-sources-3.11.7-r1',
+            'package_name': '=sys-kernel/hardened-sources-3.11.7-r1',
             'kernel_index': 3011007001,
             'portage_configuration': { 'MAKEOPTS': '-j5' },
             'source_directories': [

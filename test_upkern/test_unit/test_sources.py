@@ -40,10 +40,17 @@ class TestSourcesConstructor(unittest.TestCase):
             self.assertEqual(source['name'], s.name)
 
 class TestSourcesProperties(unittest.TestCase):
+    mocks_mask = set()
+    mocks = set()
+
     def setUp(self):
         super(TestSourcesProperties, self).setUp()
 
+    mocks.add('gentoolkit.helpers.FileOwner')
     def mock_gentoolkit_helpers_fileowner(self, package_names):
+        if 'gentoolkit.helpers.FileOwner' in self.mocks_mask:
+            return
+
         _ = mock.patch('upkern.sources.gentoolkit.helpers.FileOwner')
 
         self.addCleanup(_.stop)
@@ -54,7 +61,11 @@ class TestSourcesProperties(unittest.TestCase):
         self.mocked_gentoolkit_helpers_fileowner.return_value = mocked_finder
         mocked_finder.side_effect = [ [ ( _, ) ] for _ in package_names ]
 
+    mocks.add('Sources.package_name')
     def mock_package_name(self, package_name):
+        if 'Sources.package_name' in self.mocks_mask:
+            return
+
         _ = mock.patch.object(sources.Sources, 'package_name', mock.PropertyMock())
 
         self.addCleanup(_.stop)
@@ -62,7 +73,11 @@ class TestSourcesProperties(unittest.TestCase):
         mocked_package_name = _.start()
         mocked_package_name.return_value = package_name
 
+    mocks.add('Sources.source_directories')
     def mock_source_directories(self, source_directories):
+        if 'Sources.source_directories' in self.mocks_mask:
+            return
+
         _ = mock.patch.object(sources.Sources, 'source_directories', mock.PropertyMock())
 
         self.addCleanup(_.stop)
@@ -84,5 +99,18 @@ class TestSourcesProperties(unittest.TestCase):
             self.prepare_sources(source['name'])
 
             self.assertEqual(source['directory_name'], self.s.directory_name)
+
+            logger.info('finished testing %s', source['package_name'])
+
+    def test_package_name(self):
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.mock_gentoolkit_helpers_fileowner(source['package_names'])
+            self.mock_source_directories(source['source_directories'])
+
+            self.prepare_sources(source['name'])
+
+            self.assertEqual(source['package_name'], self.s.package_name)
 
             logger.info('finished testing %s', source['package_name'])
