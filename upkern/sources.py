@@ -3,7 +3,9 @@
 # upkern is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import gentoolkit.helpers
 import logging
+import os
 import re
 
 logger = logging.getLogger(__name__)
@@ -50,6 +52,8 @@ class Sources(object):
         self.name = name
         self.built = False
 
+        self._packages = {}
+
     @property
     def directory_name(self):
         '''Name of the sources directory in `/usr/src/`.
@@ -64,27 +68,29 @@ class Sources(object):
         '''
 
         if not hasattr(self, '_directory_name'):
-            finder = FileOwner()
+            finder = gentoolkit.helpers.FileOwner()
+
+            logger.debug('self.source_directories: %s', self.source_directories)
 
             for directory in self.source_directories:
-                package = None
+                logger.info('finding the owner of %s', directory)
 
-                if directory in self._packages:
-                    package = self._packages[directory]
-                else:
-                    logger.info('finding the owner of %s', directory)
+                package = self._packages.get(directory, str(finder(('/usr/src/' + directory, ))[0][0]))
 
-                    # TODO Add spinner?
+                logger.debug('package: %s', package)
 
-                    package = str(find(('/usr/src/' + directory, ))[0][0])
-                    self._packages[directory] = package
+                logger.info('finished finding the owner of %s', directory)
+
+                self._packages.setdefault(directory, package)
+
+                logger.debug('self.package_name: %s', self.package_name)
 
                 if package == self.package_name.lstrip('='):
                     self._directory_name = directory
 
-                    break
+                    logger.info('using source directory: %s', self._directory_name)
 
-            logger.info('using source directory: %s', self._directory_name)
+                    break
 
         return self._directory_name
 
