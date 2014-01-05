@@ -6,6 +6,7 @@
 import gentoolkit.helpers
 import logging
 import os
+import portage
 import re
 
 logger = logging.getLogger(__name__)

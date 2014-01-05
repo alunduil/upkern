@@ -59,9 +59,21 @@ class TestSourcesProperties(unittest.TestCase):
 
         self.mocked_gentoolkit_helpers_fileowner = _.start()
 
-        mocked_finder = mock.MagicMock()
-        self.mocked_gentoolkit_helpers_fileowner.return_value = mocked_finder
-        mocked_finder.side_effect = [ [ ( _, ) ] for _ in package_names ]
+        self.mocked_finder = mock.MagicMock()
+        self.mocked_gentoolkit_helpers_fileowner.return_value = self.mocked_finder
+        self.mocked_finder.side_effect = [ [ ( _, ) ] for _ in package_names ]
+
+    mocks.add('portage.config')
+    def mock_portage_config(self, portage_configuration):
+        if 'portage.config' in self.mocks_mask:
+            return
+
+        _ = mock.patch('portage.config')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_portage_config = _.start()
+        self.mocked_portage_config.return_value = portage_configuration
 
     mocks.add('Sources.package_name')
     def mock_package_name(self, package_name):
@@ -118,5 +130,19 @@ class TestSourcesProperties(unittest.TestCase):
             self.prepare_sources(source['name'])
 
             self.assertEqual(source['package_name'], self.s.package_name)
+
+            logger.info('finished testing %s', source['package_name'])
+
+    def test_portage_configuration(self):
+        '''Sources().portage_configuration'''
+
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.mock_portage_config(source['portage_configuration'])
+
+            self.prepare_sources(source['name'])
+
+            self.assertEqual(source['portage_configuration'], self.s.portage_configuration)
 
             logger.info('finished testing %s', source['package_name'])
