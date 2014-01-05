@@ -238,7 +238,7 @@ class Sources(object):
         original_directory = os.getcwd()
 
         command = 'make {0} {1}'.format(
-                self.portage_config['MAKEOPTS'],
+                self.portage_configuration['MAKEOPTS'],
                 configurator
                 )
 

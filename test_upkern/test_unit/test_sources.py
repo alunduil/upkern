@@ -59,8 +59,8 @@ class TestBaseSources(unittest.TestCase):
         self.mocked_portage_config = _.start()
         self.mocked_portage_config.return_value = portage_configuration
 
-    def prepare_sources(self, name):
-        self.s = sources.Sources(name = name)
+    def prepare_sources(self, *args, **kwargs):
+        self.s = sources.Sources(*args, **kwargs)
 
 class TestSourcesProperties(TestBaseSources):
     mocks_mask = TestBaseSources.mocks_mask
@@ -213,5 +213,35 @@ class TestSourcesMethod(TestBaseSources):
 
             command = 'make {0} && make {0} modules_install'.format(source['portage_configuration']['MAKEOPTS'])
             self.mocked_subprocess_call.called_once_with(command, shell = True)
+
+    def _configure_wrapper(self, command, *args, **kwargs):
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.mock_portage_config(source['portage_configuration'])
+            self.mock_subprocess_call()
+
+            self.prepare_sources(source['name'])
+
+            self.s.configure(*args, **kwargs)
+
+            command = command.format(source['portage_configuration']['MAKEOPTS'])
+            self.mocked_subprocess_call.called_once_with(command, shell = True)
+
+    def test_configure(self):
+        '''sources.Sources().configure()'''
+
+        self._configure_wrapper('make {0} menuconfig')
+
+    def test_configure_with_configurator(self):
+        '''sources.Sources().configure(configurator = ?)'''
+
+        for configurator in [ 'menuconfig', 'oldconfig', 'silentoldconfig' ]:
+            self._configure_wrapper('make {0} menuconfig', configurator = configurator)
+
+    def test_configure_with_accept_defaults(self):
+        '''sources.Sources().configure(accept_defaults = True)'''
+
+        self._configure_wrapper('yes "" | make {0} menuconfig', accept_defaults = True)
 
 logger.debug('TestSourcesMethod.mocks: %s', TestSourcesMethod.mocks)
