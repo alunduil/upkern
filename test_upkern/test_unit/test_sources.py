@@ -1,10 +1,12 @@
-# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # upkern is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import copy
 import logging
 import mock
+import random
 import unittest
 
 from upkern import sources
@@ -63,12 +65,24 @@ class TestSourcesProperties(unittest.TestCase):
         self.mocked_gentoolkit_helpers_fileowner.return_value = self.mocked_finder
         self.mocked_finder.side_effect = [ [ ( _, ) ] for _ in package_names ]
 
+    mocks.add('os.listdir')
+    def mock_os_listdir(self, source_directories):
+        if 'os.listdir' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.os.listdir')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_os_listdir = _.start()
+        self.mocked_os_listdir.return_value = source_directories
+
     mocks.add('portage.config')
     def mock_portage_config(self, portage_configuration):
         if 'portage.config' in self.mocks_mask:
             return
 
-        _ = mock.patch('portage.config')
+        _ = mock.patch('upkern.sources.portage.config')
 
         self.addCleanup(_.stop)
 
@@ -144,5 +158,23 @@ class TestSourcesProperties(unittest.TestCase):
             self.prepare_sources(source['name'])
 
             self.assertEqual(source['portage_configuration'], self.s.portage_configuration)
+
+            logger.info('finished testing %s', source['package_name'])
+
+    def test_source_directories(self):
+        '''Sources().source_directories'''
+
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            logger.debug('source[source_directories]: %s', source['source_directories'])
+
+            _ = copy.copy(source['source_directories'])
+            random.shuffle(_)
+            self.mock_os_listdir(_)
+
+            self.prepare_sources(source['name'])
+
+            self.assertEqual(source['source_directories'], self.s.source_directories)
 
             logger.info('finished testing %s', source['package_name'])

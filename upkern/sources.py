@@ -1,4 +1,4 @@
-# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # upkern is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -186,7 +186,7 @@ class Sources(object):
         if not hasattr(self, '_source_directories'):
             directories = [ _ for _ in os.listdir('/usr/src') if re.match(r'linux-.+$', _) ]
 
-            self._source_directories = sorted(directories, key = kernel_index)
+            self._source_directories = sorted(directories, key = kernel_index, reverse = True)
 
         return self._source_directories
 
