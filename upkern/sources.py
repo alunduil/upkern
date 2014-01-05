@@ -8,6 +8,7 @@ import logging
 import os
 import portage
 import re
+import subprocess
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +204,7 @@ class Sources(object):
 
         original_directory = os.getcwd()
 
-        make_options = self.portage_config['MAKEOPTS']
+        make_options = self.portage_configuration['MAKEOPTS']
         if logger.level > 29:
             make_options += ' -s'
 

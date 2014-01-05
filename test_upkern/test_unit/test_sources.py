@@ -22,33 +22,49 @@ class TestKernelIndex(unittest.TestCase):
         self.kernel_strings = [ ( _['directory_name'], _['kernel_index'] ) for _ in SOURCES['all'] ]
 
     def test_kernel_index(self):
-        '''kernel_index()'''
+        '''sources.kernel_index()'''
 
         for kernel_string, result in self.kernel_strings:
             self.assertEqual(result, sources.kernel_index(kernel_string))
 
 class TestSourcesConstructor(unittest.TestCase):
     def test_sources_no_arguments(self):
-        '''Sources()'''
+        '''sources.Sources()'''
 
         s = sources.Sources()
 
         self.assertIsNone(s.name)
 
     def test_sources_with_name(self):
-        '''Sources(name = ?)'''
+        '''sources.Sources(name = ?)'''
 
         for source in SOURCES['all']:
             s = sources.Sources(name = source['name'])
 
             self.assertEqual(source['name'], s.name)
 
-class TestSourcesProperties(unittest.TestCase):
+class TestBaseSources(unittest.TestCase):
     mocks_mask = set()
     mocks = set()
 
-    def setUp(self):
-        super(TestSourcesProperties, self).setUp()
+    mocks.add('portage.config')
+    def mock_portage_config(self, portage_configuration):
+        if 'portage.config' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.portage.config')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_portage_config = _.start()
+        self.mocked_portage_config.return_value = portage_configuration
+
+    def prepare_sources(self, name):
+        self.s = sources.Sources(name = name)
+
+class TestSourcesProperties(TestBaseSources):
+    mocks_mask = TestBaseSources.mocks_mask
+    mocks = TestBaseSources.mocks
 
     mocks.add('gentoolkit.helpers.FileOwner')
     def mock_gentoolkit_helpers_fileowner(self, package_names):
@@ -77,18 +93,6 @@ class TestSourcesProperties(unittest.TestCase):
         self.mocked_os_listdir = _.start()
         self.mocked_os_listdir.return_value = source_directories
 
-    mocks.add('portage.config')
-    def mock_portage_config(self, portage_configuration):
-        if 'portage.config' in self.mocks_mask:
-            return
-
-        _ = mock.patch('upkern.sources.portage.config')
-
-        self.addCleanup(_.stop)
-
-        self.mocked_portage_config = _.start()
-        self.mocked_portage_config.return_value = portage_configuration
-
     mocks.add('Sources.package_name')
     def mock_package_name(self, package_name):
         if 'Sources.package_name' in self.mocks_mask:
@@ -113,11 +117,8 @@ class TestSourcesProperties(unittest.TestCase):
         mocked_source_directories = _.start()
         mocked_source_directories.return_value = source_directories
 
-    def prepare_sources(self, name):
-        self.s = sources.Sources(name = name)
-
     def test_directory_name(self):
-        '''Sources().directory_name'''
+        '''sources.Sources().directory_name'''
 
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
@@ -133,7 +134,7 @@ class TestSourcesProperties(unittest.TestCase):
             logger.info('finished testing %s', source['package_name'])
 
     def test_package_name(self):
-        '''Sources().package_name'''
+        '''sources.Sources().package_name'''
 
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
@@ -148,7 +149,7 @@ class TestSourcesProperties(unittest.TestCase):
             logger.info('finished testing %s', source['package_name'])
 
     def test_portage_configuration(self):
-        '''Sources().portage_configuration'''
+        '''sources.Sources().portage_configuration'''
 
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
@@ -162,7 +163,7 @@ class TestSourcesProperties(unittest.TestCase):
             logger.info('finished testing %s', source['package_name'])
 
     def test_source_directories(self):
-        '''Sources().source_directories'''
+        '''sources.Sources().source_directories'''
 
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
@@ -178,3 +179,39 @@ class TestSourcesProperties(unittest.TestCase):
             self.assertEqual(source['source_directories'], self.s.source_directories)
 
             logger.info('finished testing %s', source['package_name'])
+
+logger.debug('TestSourcesProperties.mocks: %s', TestSourcesProperties.mocks)
+
+class TestSourcesMethod(TestBaseSources):
+    mocks_mask = TestBaseSources.mocks_mask
+    mocks = TestBaseSources.mocks
+
+    mocks.add('subprocess.call')
+    def mock_subprocess_call(self, result = 0):
+        if 'subprocess.call' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.subprocess.call')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_subprocess_call = _.start()
+        self.mocked_subprocess_call.return_value = result
+
+    def test_source_build(self):
+        '''sources.Sources().build()'''
+
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.mock_portage_config(source['portage_configuration'])
+            self.mock_subprocess_call()
+
+            self.prepare_sources(source['name'])
+
+            self.s.build()
+
+            command = 'make {0} && make {0} modules_install'.format(source['portage_configuration']['MAKEOPTS'])
+            self.mocked_subprocess_call.called_once_with(command, shell = True)
+
+logger.debug('TestSourcesMethod.mocks: %s', TestSourcesMethod.mocks)
