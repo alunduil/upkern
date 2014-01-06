@@ -47,17 +47,17 @@ class TestBaseSources(unittest.TestCase):
     mocks_mask = set()
     mocks = set()
 
-    mocks.add('portage.config')
-    def mock_portage_config(self, portage_configuration):
-        if 'portage.config' in self.mocks_mask:
+    mocks.add('Sources.package_name')
+    def mock_package_name(self, package_name):
+        if 'Sources.package_name' in self.mocks_mask:
             return
 
-        _ = mock.patch('upkern.sources.portage.config')
+        _ = mock.patch.object(sources.Sources, 'package_name', mock.PropertyMock())
 
         self.addCleanup(_.stop)
 
-        self.mocked_portage_config = _.start()
-        self.mocked_portage_config.return_value = portage_configuration
+        mocked_package_name = _.start()
+        mocked_package_name.return_value = package_name
 
     def prepare_sources(self, *args, **kwargs):
         self.s = sources.Sources(*args, **kwargs)
@@ -93,17 +93,17 @@ class TestSourcesProperties(TestBaseSources):
         self.mocked_os_listdir = _.start()
         self.mocked_os_listdir.return_value = source_directories
 
-    mocks.add('Sources.package_name')
-    def mock_package_name(self, package_name):
-        if 'Sources.package_name' in self.mocks_mask:
+    mocks.add('portage.config')
+    def mock_portage_config(self, portage_configuration):
+        if 'portage.config' in self.mocks_mask:
             return
 
-        _ = mock.patch.object(sources.Sources, 'package_name', mock.PropertyMock())
+        _ = mock.patch('upkern.sources.portage.config')
 
         self.addCleanup(_.stop)
 
-        mocked_package_name = _.start()
-        mocked_package_name.return_value = package_name
+        self.mocked_portage_config = _.start()
+        self.mocked_portage_config.return_value = portage_configuration
 
     mocks.add('Sources.source_directories')
     def mock_source_directories(self, source_directories):
@@ -186,6 +186,21 @@ class TestSourcesMethod(TestBaseSources):
     mocks_mask = TestBaseSources.mocks_mask
     mocks = TestBaseSources.mocks
 
+    mocks.add('gentoolkit.query.Query')
+    def mock_gentoolkit_query_find_installed(self, package_names):
+        if 'gentoolkit.query.Query' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.gentoolkit.query.Query')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_gentoolkit_query = _.start()
+
+        self.mocked_query = mock.MagicMock()
+        self.mocked_gentoolkit_query.return_value = self.mocked_query
+        self.mocked_query.return_value = package_names
+
     mocks.add('subprocess.call')
     def mock_subprocess_call(self, result = 0):
         if 'subprocess.call' in self.mocks_mask:
@@ -198,13 +213,36 @@ class TestSourcesMethod(TestBaseSources):
         self.mocked_subprocess_call = _.start()
         self.mocked_subprocess_call.return_value = result
 
+    mocks.add('Sources.portage_configuration')
+    def mock_portage_configuration(self, portage_configuration):
+        if 'Sources.portage_configuration' in self.mocks_mask:
+            return
+
+        _ = mock.patch.object(sources.Sources, 'portage_configuration', mock.PropertyMock())
+
+        self.addCleanup(_.stop)
+
+        mocked_portage_configuration = _.start()
+        mocked_portage_configuration.return_value = portage_configuration
+
+    mocks.add('helpers.emerge')
+    def mock_helpers_emerge(self):
+        if 'helpers.emerge' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.helpers.emerge')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_helpers_emerge = _.start()
+
     def test_source_build(self):
         '''sources.Sources().build()'''
 
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
 
-            self.mock_portage_config(source['portage_configuration'])
+            self.mock_portage_configuration(source['portage_configuration'])
             self.mock_subprocess_call()
 
             self.prepare_sources(source['name'])
@@ -218,7 +256,7 @@ class TestSourcesMethod(TestBaseSources):
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
 
-            self.mock_portage_config(source['portage_configuration'])
+            self.mock_portage_configuration(source['portage_configuration'])
             self.mock_subprocess_call()
 
             self.prepare_sources(source['name'])
@@ -237,11 +275,54 @@ class TestSourcesMethod(TestBaseSources):
         '''sources.Sources().configure(configurator = ?)'''
 
         for configurator in [ 'menuconfig', 'oldconfig', 'silentoldconfig' ]:
-            self._configure_wrapper('make {0} menuconfig', configurator = configurator)
+            self._configure_wrapper('make {{0}} {0}'.format(configurator), configurator = configurator)
 
     def test_configure_with_accept_defaults(self):
         '''sources.Sources().configure(accept_defaults = True)'''
 
         self._configure_wrapper('yes "" | make {0} menuconfig', accept_defaults = True)
+
+    def _install_wrapper(self, installed, called = True):
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            if installed:
+                self.mock_gentoolkit_query_find_installed([ source['package_name'] ])
+            else:
+                self.mock_gentoolkit_query_find_installed([])
+
+            self.mock_helpers_emerge()
+            self.mock_package_name(source['package_name'])
+
+            self.prepare_sources(source['name'])
+
+            self.s.install()
+
+            logger.debug('self.mocked_helpers_emerge.calls: %s', self.mocked_helpers_emerge.calls)
+
+            if called:
+                self.mocked_helpers_emerge.called_once_with(options = [ '-n', '-1', '-v' ], package = source['package_name'])
+            else:
+                self.assertFalse(self.mocked_helpers_emerge.called)
+
+    def test_install_installed(self):
+        '''sources.Sources().install()—installed'''
+
+        self._install_wrapper(installed = True, called = False)
+
+    def test_install_not_installed(self):
+        '''sources.Sources().install()—not installed'''
+
+        self._install_wrapper(installed = False)
+
+    def test_install_with_force_installed(self):
+        '''sources.Sources().install(force = True)—installed'''
+
+        self._install_wrapper(installed = True)
+
+    def test_install_with_force_not_installed(self):
+        '''sources.Sources().install(force = True)—not installed'''
+
+        self._install_wrapper(installed = False)
 
 logger.debug('TestSourcesMethod.mocks: %s', TestSourcesMethod.mocks)

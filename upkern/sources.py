@@ -4,11 +4,14 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import gentoolkit.helpers
+import gentoolkit.query
 import logging
 import os
 import portage
 import re
 import subprocess
+
+from upkern import helpers
 
 logger = logging.getLogger(__name__)
 
@@ -267,11 +270,8 @@ class Sources(object):
 
         logger.info('installing kernel sources')
 
-        if not len(GentoolkitQuery(self.package_name).find_installed()) and force:
-            options = [
-                    '-n',
-                    '-1',
-                    ]
+        if not len(gentoolkit.query.Query(self.package_name).find_installed()) and force:
+            options = [ '-n', '-1' ]
 
             if logger.level < 30:
                 options.append('-v')
@@ -279,22 +279,6 @@ class Sources(object):
                 options.append('-q')
 
             helpers.emerge(options = options, package = self.package_name)
-
-            '''
-            command = 'emerge {0} {1}'.format(options, self.package_name)
-
-            logger.debug('command: %s', command)
-
-            if os.getuid() == 0:
-                status = subprocess.call(command, shell = True)
-
-                if status != 0:
-                    pass # TODO raise an appropriate exception.
-
-            else:
-                logger.error('must be root to install sources')
-                sys.exit(1)
-            '''
 
         logger.info('finished installing kernel sources')
 
