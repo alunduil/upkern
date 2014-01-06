@@ -1,4 +1,4 @@
-# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # upkern is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -19,6 +19,11 @@ SOURCES['correct'].append(
                 'linux-3.12.5-gentoo',
                 'linux-3.10.7-gentoo',
                 ],
+            'configuration_files': [
+                'config-3.12.6-gentoo',
+                'config-3.12.5-gentoo',
+                'config-3.10.7-gentoo',
+                ],
             'package_names': [
                 'sys-kernel/gentoo-sources-3.12.6',
                 'sys-kernel/gentoo-sources-3.12.5',
@@ -37,6 +42,11 @@ SOURCES['correct'].append(
                 'linux-3.12.6-gentoo',
                 'linux-3.12.5-gentoo',
                 'linux-3.10.7-gentoo',
+                ],
+            'configuration_files': [
+                'config-3.12.6-gentoo',
+                'config-3.12.5-gentoo',
+                'config-3.10.7-gentoo',
                 ],
             'package_names': [
                 'sys-kernel/gentoo-sources-3.12.6',
@@ -58,6 +68,12 @@ SOURCES['correct'].append(
                 'linux-3.10.7-gentoo',
                 'linux-3.9.11-gentoo-r1',
                 ],
+            'configuration_files': [
+                'config-3.12.6-gentoo',
+                'config-3.12.5-gentoo',
+                'config-3.10.7-gentoo',
+                'config-3.9.11-gentoo-r1',
+                ],
             'package_names': [
                 'sys-kernel/gentoo-sources-3.12.6',
                 'sys-kernel/gentoo-sources-3.12.5',
@@ -78,6 +94,12 @@ SOURCES['correct'].append(
                 'linux-3.12.5-gentoo',
                 'linux-3.11.7-hardened-r1',
                 'linux-3.10.7-gentoo',
+                ],
+            'configuration_files': [
+                'config-3.12.6-gentoo',
+                'config-3.12.5-gentoo',
+                'config-3.11.7-hardened-r1',
+                'config-3.10.7-gentoo',
                 ],
             'package_names': [
                 'sys-kernel/gentoo-sources-3.12.6',

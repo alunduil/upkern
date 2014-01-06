@@ -60,6 +60,27 @@ class Sources(object):
         self._packages = {}
 
     @property
+    def configuration_files(self):
+        '''List of configuration files present in `/boot`.
+
+        .. note::
+            This property will mount the /boot filesystem if possible.
+
+        '''
+
+        if not hasattr(self, '_configuration_files'):
+            boot_mounted = helpers.mount('/boot')
+
+            self._configuration_files = [ _ for _ in os.listdir('/boot') if re.match('config-.+', _) ]
+
+            if boot_mounted:
+                helpers.unmount('/boot')
+
+            self._configuration_files = sorted(self._configuration_files, key = kernel_index, reverse = True)
+
+        return self._configuration_files
+
+    @property
     def directory_name(self):
         '''Name of the sources directory in `/usr/src/`.
 
@@ -310,13 +331,8 @@ class Sources(object):
 
         boot_mounted = helpers.mount('/boot')
 
-        if configuration is None:
-            configuration_files = [ _ for _ in os.listdir('/boot') if re.match('config-.+', _) ]
-
-            configuration_files = sorted(configuration_files, key = kernel_index)
-
-            if len(configuration_files):
-                configuration = os.path.join(os.path.sep, 'boot', configuration_files[0])
+        if configuration is None and len(self.configuration_files):
+            configuration = os.path.join(os.path.sep, 'boot', configuration_files[0])
 
         if configuration is None:
             return

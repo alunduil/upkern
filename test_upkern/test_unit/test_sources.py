@@ -117,6 +117,46 @@ class TestSourcesProperties(TestBaseSources):
         mocked_source_directories = _.start()
         mocked_source_directories.return_value = source_directories
 
+    mocks.add('helpers.mount')
+    def mock_helpers_mount(self):
+        if 'helpers.mount' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.helpers.mount')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_helpers_mount = _.start()
+
+    mocks.add('helpers.unmount')
+    def mock_helpers_unmount(self):
+        if 'helpers.unmount' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.helpers.unmount')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_helpers_unmount = _.start()
+
+    def test_configuration_files(self):
+        '''sources.Sources().configuration_files'''
+
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            _ = copy.copy(source['configuration_files'])
+            random.shuffle(_)
+            self.mock_os_listdir(_)
+            self.mock_helpers_mount()
+            self.mock_helpers_unmount()
+
+            self.prepare_sources(source['name'])
+
+            self.assertEqual(source['configuration_files'], self.s.configuration_files)
+
+            logger.info('finished testing %s', source['package_name'])
+
     def test_directory_name(self):
         '''sources.Sources().directory_name'''
 

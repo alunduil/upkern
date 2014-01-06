@@ -37,35 +37,44 @@ def emerge(package, options = None):
         if status != 0:
             pass # TODO raise an appropriate exception
 
-def mountedboot(func):
-    """A decorator that checks if boot is mounted before running the function.
+def mount(mountpoint):
+    '''Mount the specified location unless it's already mounted.
 
-    If boot is not mounted; it gets mounted and unmounted properly.
+    In the typical idempotent fashion, this mounts the specified location unless
+    it's already mounted.
 
-    """
+    .. note::
+        This assumes the mountpoint is defined in `/etc/fstab` and if not found
+        there, it will throw an error.
 
-    def new_func(*args, **kargs):
-        """Closure definition."""
-        if os.path.ismount("/boot") or \
-                len([
-                    f for f in list(
-                        itertools.chain(*[
-                            [
-                                os.path.join(x[0], fs) for fs in x[2]
-                                ]
-                            for x in os.walk("/boot")
-                            ])
-                        ) if not re.search("^/boot/(?:boot|.keep)", f)
-                    ]):
-            res = func(*args, **kargs)
-        else:
-            os.system('mount /boot')
-            try:
-                res = func(*args, **kargs)
-            except:
-                raise
-            finally:
-                os.system('umount /boot')
-        return res
-    return new_func
+    Returns
+    -------
 
+    True if the location was mounted; otherwise, False.
+
+    '''
+
+    if os.path.ismount(mountpoint):
+        return False
+
+    command = 'mount {0}'.format(mountpoint)
+    status = subprocess.call(command, shell = True)
+
+    if status != 0:
+        pass # TODO raise an appropriate exception
+
+    return True
+
+def unmount(mountpoint):
+    '''Unmount the specified location.
+
+    .. note::
+        This unconditionally unmounts the specified mountpoint.
+
+    '''
+
+    command = 'umount {0}'.format(mountpoint)
+    status = subprocess.call(command, shell = True)
+
+    if status != 0:
+        pass # TODO raise an appropriate exception
