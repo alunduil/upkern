@@ -11,6 +11,7 @@ import unittest
 
 from upkern import sources
 
+from test_upkern.test_common.test_sources import TestBaseSources
 from test_upkern.test_fixtures.test_sources import SOURCES
 
 logger = logging.getLogger(__name__)
@@ -42,25 +43,6 @@ class TestSourcesConstructor(unittest.TestCase):
             s = sources.Sources(name = source['name'])
 
             self.assertEqual(source['name'], s.name)
-
-class TestBaseSources(unittest.TestCase):
-    mocks_mask = set()
-    mocks = set()
-
-    mocks.add('Sources.package_name')
-    def mock_package_name(self, package_name):
-        if 'Sources.package_name' in self.mocks_mask:
-            return
-
-        _ = mock.patch.object(sources.Sources, 'package_name', mock.PropertyMock())
-
-        self.addCleanup(_.stop)
-
-        mocked_package_name = _.start()
-        mocked_package_name.return_value = package_name
-
-    def prepare_sources(self, *args, **kwargs):
-        self.s = sources.Sources(*args, **kwargs)
 
 class TestSourcesProperties(TestBaseSources):
     mocks_mask = TestBaseSources.mocks_mask

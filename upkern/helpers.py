@@ -28,9 +28,7 @@ def emerge(package, options = None):
     logger.debug('command: %s', command)
 
     if os.getuid() != 0:
-        logger.error('emerge requires root permissions')
-
-        sys.exit(1)
+        raise PermissionError('emerge requires root permissions')
     else:
         status = subprocess.call(command, shell = True)
 

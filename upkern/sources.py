@@ -9,6 +9,7 @@ import logging
 import os
 import portage
 import re
+import shutil
 import subprocess
 
 from upkern import helpers
@@ -241,8 +242,7 @@ class Sources(object):
         status = subprocess.call(command, shell = True)
 
         if status != 0:
-            logger.error('kernel did not build correctly')
-            sys.exit(1)
+            raise RuntimeError('kernel did not build correctly')
 
         os.chdir(original_directory)
 
@@ -329,35 +329,34 @@ class Sources(object):
 
         logger.info('copying kernel configuration')
 
-        boot_mounted = helpers.mount('/boot')
-
-        if configuration is None and len(self.configuration_files):
-            configuration = os.path.join(os.path.sep, 'boot', configuration_files[0])
-
         if configuration is None:
-            return
+            if len(self.configuration_files):
+                configuration = os.path.join(os.path.sep, 'boot', self.configuration_files[0])
+            else:
+                logger.info('no eligible configuration files found')
+                logger.info('aborting copying kernel configuration')
+                return
 
         logger.info('using configuration: %s', configuration)
 
         try:
-            if os.access('/usr/src/linux/.config', os.R_OK):
-                shutil.copy('/usr/src/linux/.config', '/usr/src/linux/.config.bak')
-
+            if os.path.lexists('/usr/src/linux/.config'):
+                shutil.move('/usr/src/linux/.config', '/usr/src/linux/.config.bak')
             shutil.copy(configuration, '/usr/src/linux/.config')
         except Exception as e:
             logger.exception(e)
             logger.error('failed to copy kernel configuration')
+            logger.warn('please, submit a bug report including the previous traceback')
 
-            if os.access('/usr/src/linux/.config.bak', os.W_OK):
-                os.remove('/usr/src/linux/.config')
-                os.rename('/usr/src/linux/.config.bak', '/usr/src/linux/.config')
-        finally:
-            if os.access('/usr/src/linux/.config.bak', os.W_OK):
+            if os.path.lexists('/usr/src/linux/.config.bak'):
+                shutil.move('/usr/src/linux/.config.bak', '/usr/src/linux/.config')
+
+            raise e
+        else:
+            if os.path.lexists('/usr/src/linux/.config.bak'):
                 os.remove('/usr/src/linux/.config.bak')
-            else:
-                sys.exit(1)
 
-        helpers.unmount('/boot', boot_mounted)
+        logger.info('finished copying kernel configuration')
 
     def _setup_symlink(self):
         '''Create the `/usr/src/linux` symlink.
@@ -383,8 +382,7 @@ class Sources(object):
 
                 os.symlink(original_target, '/usr/src/linux')
 
-                sys.exit(1)
-
+                raise e
         try:
             os.symlink('/usr/src/{0}'.format(self.directory_name), '/usr/src/linux')
         except Exception as e:
@@ -396,4 +394,4 @@ class Sources(object):
             if original_target:
                 os.symlink(original_target, '/usr/src/linux')
 
-            sys.exit(1)
+            raise e
