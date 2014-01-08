@@ -1,4 +1,4 @@
-# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # upkern is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -7,7 +7,7 @@ import logging
 
 from upkern.arguments import ARGUMENTS
 from upkern.bootloaders import BootLoader
-from upkern.initrd import InitialRAMDisk
+from upkern.initramfs import InitialRAMFileSystem
 from upkern.sources import Sources
 from upkern.system import rebuild_modules
 
@@ -41,8 +41,12 @@ def run():
     initrd = None
 
     if p.initrd:
-        initrd = InitialRAMDisk(p.initial_ramdisk_type)
-        initrd.install(initrd_options = p.initrd_options)
+        initramfs = InitialRAMFileSystem(p.initramfs_preparer)
+        initramfs.configure(initramfs_options = p.initramfs_options)
+
+        initramfs.build()
+
+        initramfs.install()
 
     bootloader = Bootloader()
     bootloader.configure(sources = sources, kernel_options = p.kernel_options, initial_ramdisk = initrd)

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # upkern is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -99,7 +99,7 @@ ARGUMENTS.add_argument(
         )
 
 ARGUMENTS.add_argument(
-        '--initial-ramdisk',
+        '--initramfs',
         '-i',
         action = 'store_true',
         help = \
@@ -108,7 +108,7 @@ ARGUMENTS.add_argument(
         )
 
 ARGUMENTS.add_argument(
-        '--initial-ramdisk-type',
+        '--initramfs-preparer',
         choices = [ 'genkernel', 'dracut' ],
         default = 'genkernel',
         help = \
@@ -117,7 +117,7 @@ ARGUMENTS.add_argument(
         )
 
 ARGUMENTS.add_argument(
-        '--initial-ramdisk-options',
+        '--initramfs-options',
         help = \
                 'Literal options to be passed to the initial ramdisk mechanism.'
         )
