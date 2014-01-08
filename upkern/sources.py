@@ -291,7 +291,10 @@ class Sources(object):
 
         logger.info('installing kernel sources')
 
-        if not len(gentoolkit.query.Query(self.package_name).find_installed()) and force:
+        _ = gentoolkit.query.Query(self.package_name).find_installed()
+        logger.debug('installed: %s', _)
+
+        if not len(_) and force:
             options = [ '-n', '-1' ]
 
             if logger.level < 30:
@@ -351,7 +354,7 @@ class Sources(object):
             if os.path.lexists('/usr/src/linux/.config.bak'):
                 shutil.move('/usr/src/linux/.config.bak', '/usr/src/linux/.config')
 
-            raise e
+            raise
         else:
             if os.path.lexists('/usr/src/linux/.config.bak'):
                 os.remove('/usr/src/linux/.config.bak')
@@ -371,27 +374,22 @@ class Sources(object):
 
         original_target = None
 
-        if os.path.islink('/usr/src/linux'):
-            original_target = os.readlink('/usr/src/linux')
-
-            try:
-                os.remove('/usr/src/linux')
-            except Exception as e:
-                logger.exception(e)
-                logger.error('failed to remove existing symlink')
-
-                os.symlink(original_target, '/usr/src/linux')
-
-                raise e
         try:
-            os.symlink('/usr/src/{0}'.format(self.directory_name), '/usr/src/linux')
+            if os.path.islink('/usr/src/linux'):
+                original_target = os.readlink('/usr/src/linux')
+                os.remove('/usr/src/linux')
+            os.symlink(self.directory_name, '/usr/src/linux')
         except Exception as e:
             logger.exception(e)
             logger.error('failed to symlink /usr/src/linux')
+            logger.warn('please, submit a bug report including the previous traceback')
 
-            if os.access('/usr/src/linux', os.W_OK):
+            if os.path.islink('/usr/src/linux'):
                 os.remove('/usr/src/linux')
-            if original_target:
+
+            if original_target is not None:
                 os.symlink(original_target, '/usr/src/linux')
 
-            raise e
+            raise
+
+        logger.info('finished symlinking /usr/src/linux')
