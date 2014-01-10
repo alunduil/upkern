@@ -17,3 +17,6 @@ helpers.load_all_modules(__name__, os.path.dirname(__file__))
 class InitialRAMFileSystem(object):
     def __init__(self, preparer, *args, **kwargs):
         self.preparer = PREPARERS[preparer](*args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self.preparer, name)

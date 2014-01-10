@@ -13,6 +13,7 @@ from upkern import sources
 
 from test_upkern.test_common.test_sources import TestBaseSources
 from test_upkern.test_fixtures.test_sources import SOURCES
+from test_upkern.test_unit import TestBaseUnit
 
 logger = logging.getLogger(__name__)
 
@@ -204,9 +205,9 @@ class TestSourcesProperties(TestBaseSources):
 
 logger.debug('TestSourcesProperties.mocks: %s', TestSourcesProperties.mocks)
 
-class TestSourcesMethod(TestBaseSources):
-    mocks_mask = TestBaseSources.mocks_mask
-    mocks = TestBaseSources.mocks
+class TestSourcesMethod(TestBaseSources, TestBaseUnit):
+    mocks_mask = set().union(TestBaseSources.mocks_mask, TestBaseUnit.mocks_mask)
+    mocks = set().union(TestBaseSources.mocks, TestBaseUnit.mocks)
 
     mocks.add('gentoolkit.query.Query')
     def mock_gentoolkit_query_find_installed(self, package_names):
@@ -222,18 +223,6 @@ class TestSourcesMethod(TestBaseSources):
         self.mocked_query = mock.MagicMock()
         self.mocked_gentoolkit_query.return_value = self.mocked_query
         self.mocked_query.return_value = package_names
-
-    mocks.add('subprocess.call')
-    def mock_subprocess_call(self, result = 0):
-        if 'subprocess.call' in self.mocks_mask:
-            return
-
-        _ = mock.patch('upkern.sources.subprocess.call')
-
-        self.addCleanup(_.stop)
-
-        self.mocked_subprocess_call = _.start()
-        self.mocked_subprocess_call.return_value = result
 
     mocks.add('Sources.portage_configuration')
     def mock_portage_configuration(self, portage_configuration):
@@ -258,7 +247,7 @@ class TestSourcesMethod(TestBaseSources):
 
         self.mocked_helpers_emerge = _.start()
 
-    def test_source_build(self):
+    def test_build(self):
         '''sources.Sources().build()'''
 
         for source in SOURCES['all']:

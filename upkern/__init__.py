@@ -44,8 +44,6 @@ def run():
         initramfs = InitialRAMFileSystem(p.initramfs_preparer)
         initramfs.configure(initramfs_options = p.initramfs_options)
 
-        initramfs.build()
-
         initramfs.install()
 
     bootloader = Bootloader()

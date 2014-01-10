@@ -17,10 +17,3 @@ class TestInitialRAMFileSystemConstructor(unittest.TestCase):
         i = initramfs.InitialRAMFileSystem('genkernel')
 
         self.assertIsInstance(i.preparer, initramfs.genkernel.GenKernelPreparer)
-
-    def test_sources_dracut(self):
-        '''initramfs.InitialRAMFileSystem('dracut')'''
-
-        i = initramfs.InitialRAMFileSystem('dracut')
-
-        self.assertIsInstance(i.preparer, initramfs.dracut.DracutPreparer)

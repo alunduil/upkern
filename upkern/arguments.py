@@ -109,7 +109,7 @@ ARGUMENTS.add_argument(
 
 ARGUMENTS.add_argument(
         '--initramfs-preparer',
-        choices = [ 'genkernel', 'dracut' ],
+        choices = [ 'genkernel' ],
         default = 'genkernel',
         help = \
                 'Specifies the mechanism to build an initial ramdisk with.  ' \
