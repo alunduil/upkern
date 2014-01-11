@@ -42,7 +42,9 @@ def run():
 
     if p.initrd:
         initramfs = InitialRAMFileSystem(p.initramfs_preparer)
-        initramfs.configure(initramfs_options = p.initramfs_options)
+        initramfs.configure(*p.initramfs_options)
+
+        initramfs.build()
 
         initramfs.install()
 
@@ -55,7 +57,7 @@ def run():
             'The kernel, %s, has been successfully installed.  Please, check ' \
             'that all configuration files are installed correctly and the ' \
             'bootloader is configured correctly',
-            binary.name
+            sources.binary_name
             )
 
     if p.time:

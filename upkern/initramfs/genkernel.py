@@ -36,7 +36,7 @@ class GenKernelPreparer(object):
 
         logger.info('building the initramfs')
 
-        command = 'genkernel --no-ramdisk-modules {0} initramfs'.format(self.options)
+        command = 'genkernel --no-ramdisk-modules {0} initramfs'.format(' '.join([ '--' + _ for _ in self.options ]))
 
         logger.debug('command: %s', command)
 
