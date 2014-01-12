@@ -223,7 +223,7 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
 
         self.mocked_query = mock.MagicMock()
         self.mocked_gentoolkit_query.return_value = self.mocked_query
-        self.mocked_query.return_value = package_names
+        self.mocked_query.find_installed.return_value = package_names
 
     mocks.add('Sources.portage_configuration')
     def mock_portage_configuration(self, portage_configuration):
@@ -262,7 +262,7 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
             self.s.build()
 
             command = 'make {0} && make {0} modules_install'.format(source['portage_configuration']['MAKEOPTS'])
-            self.mocked_subprocess_call.called_once_with(command, shell = True)
+            self.mocked_subprocess_call.assert_called_once_with(command, shell = True)
 
     def _configure_wrapper(self, command, *args, **kwargs):
         for source in SOURCES['all']:
@@ -276,7 +276,7 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
             self.s.configure(*args, **kwargs)
 
             command = command.format(source['portage_configuration']['MAKEOPTS'])
-            self.mocked_subprocess_call.called_once_with(command, shell = True)
+            self.mocked_subprocess_call.assert_called_once_with(command, shell = True)
 
     def test_configure(self):
         '''sources.Sources().configure()'''
@@ -294,7 +294,7 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
 
         self._configure_wrapper('yes "" | make {0} menuconfig', accept_defaults = True)
 
-    def _install_wrapper(self, installed, called = True):
+    def _emerge_wrapper(self, installed, force = False, called = True):
         for source in SOURCES['all']:
             logger.info('testing %s', source['package_name'])
 
@@ -308,33 +308,33 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
 
             self.prepare_sources(source['name'])
 
-            self.s.install()
+            self.s.emerge(force)
 
-            logger.debug('self.mocked_helpers_emerge.calls: %s', self.mocked_helpers_emerge.calls)
+            logger.debug('self.mocked_helpers_emerge.mock_calls: %s', self.mocked_helpers_emerge.mock_calls)
 
             if called:
-                self.mocked_helpers_emerge.called_once_with(options = [ '-n', '-1', '-v' ], package = source['package_name'])
+                self.mocked_helpers_emerge.assert_called_once_with(options = [ '-n', '-1', '-v' ], package = source['package_name'])
             else:
                 self.assertFalse(self.mocked_helpers_emerge.called)
 
-    def test_install_installed(self):
-        '''sources.Sources().install()—installed'''
+    def test_emerge_installed(self):
+        '''sources.Sources().emerge()—installed'''
 
-        self._install_wrapper(installed = True, called = False)
+        self._emerge_wrapper(installed = True, called = False)
 
-    def test_install_not_installed(self):
-        '''sources.Sources().install()—not installed'''
+    def test_emerge_not_installed(self):
+        '''sources.Sources().emerge()—not installed'''
 
-        self._install_wrapper(installed = False)
+        self._emerge_wrapper(installed = False)
 
-    def test_install_with_force_installed(self):
-        '''sources.Sources().install(force = True)—installed'''
+    def test_emerge_with_force_installed(self):
+        '''sources.Sources().emerge(force = True)—installed'''
 
-        self._install_wrapper(installed = True)
+        self._emerge_wrapper(installed = True, force = True)
 
-    def test_install_with_force_not_installed(self):
-        '''sources.Sources().install(force = True)—not installed'''
+    def test_emerge_with_force_not_installed(self):
+        '''sources.Sources().emerge(force = True)—not installed'''
 
-        self._install_wrapper(installed = False)
+        self._emerge_wrapper(installed = False, force = True)
 
 logger.debug('TestSourcesMethod.mocks: %s', TestSourcesMethod.mocks)

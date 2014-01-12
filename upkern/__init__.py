@@ -20,7 +20,7 @@ def run():
 
     sources = Sources(name = p.name)
 
-    sources.install(force = p.force)
+    sources.emerge(force = p.force)
 
     sources.prepare(configuration = p.configuration)
     sources.configure(configurator = p.configurator, accept_defaults = p.yes)
@@ -38,9 +38,9 @@ def run():
 
     sources.install()
 
-    initrd = None
+    initramfs = None
 
-    if p.initrd:
+    if p.initramfs:
         initramfs = InitialRAMFileSystem(p.initramfs_preparer)
         initramfs.configure(*p.initramfs_options)
 
@@ -49,7 +49,9 @@ def run():
         initramfs.install()
 
     bootloader = Bootloader()
-    bootloader.configure(sources = sources, kernel_options = p.kernel_options, initial_ramdisk = initrd)
+    bootloader.configure(sources = sources, kernel_options = p.kernel_options, initramfs = initramfs)
+
+    bootloader.build()
 
     bootloader.install()
 

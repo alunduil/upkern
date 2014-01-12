@@ -282,19 +282,24 @@ class Sources(object):
 
         logger.info('finished configuring kernel sources')
 
-    def install(self, force = False):
+    def emerge(self, force = False):
         '''Install the kernel sources.
 
         Use portage to install the kernel sources.
 
         '''
 
-        logger.info('installing kernel sources')
+        logger.info('emerging kernel sources')
 
         _ = gentoolkit.query.Query(self.package_name).find_installed()
         logger.debug('installed: %s', _)
 
-        if not len(_) and force:
+        logger.debug('force: %s', force)
+
+        _ = not len(_) or force
+        logger.debug('emerge? %s', _)
+
+        if _:
             options = [ '-n', '-1' ]
 
             if logger.level < 30:
@@ -304,7 +309,7 @@ class Sources(object):
 
             helpers.emerge(options = options, package = self.package_name)
 
-        logger.info('finished installing kernel sources')
+        logger.info('finished emerging kernel sources')
 
     def prepare(self, configuration):
         '''Prep the sources so they are ready to be built.
