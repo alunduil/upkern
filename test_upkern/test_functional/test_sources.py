@@ -3,18 +3,16 @@
 # upkern is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import functools
 import logging
 import mock
 import os
 import shutil
-import tempfile
-import uuid
 
 from upkern import sources
 
 from test_upkern.test_common.test_sources import TestBaseSources
 from test_upkern.test_fixtures.test_sources import SOURCES
+from test_upkern.test_functional import TestBaseFunctional
 
 logger = logging.getLogger(__name__)
 
@@ -29,36 +27,9 @@ ORIGINALS = {
 }
 
 
-class TestFunctionalSources(TestBaseSources):
-    mocks_mask = TestBaseSources.mocks_mask
-    mocks = TestBaseSources.mocks
-
-    def prepare_temporary_directory(self):
-        self.temporary_directory_path = tempfile.mkdtemp(prefix = 'test_', suffix = '_upkern')
-
-        logger.debug('self.temporary_directory_path: %s', self.temporary_directory_path)
-
-        self.addCleanup(functools.partial(shutil.rmtree, self.temporary_directory_path))
-
-    def populate_temporary_directory_files(self, items = {}):
-        self.expected_contents = {}
-
-        for directory_path, file_names in items.items():
-            for file_name in file_names:
-                file_path = os.path.join(directory_path, file_name)
-                logger.debug('file_path: %s', file_path)
-
-                real_file_path = os.path.normpath(self.temporary_directory_path + file_path)
-                logger.debug('real_file_path: %s', real_file_path)
-
-                _ = uuid.uuid4()
-                self.expected_contents[file_path] = str(_)
-
-                if not os.path.exists(os.path.dirname(real_file_path)):
-                    os.makedirs(os.path.dirname(real_file_path))
-
-                with open(real_file_path, 'w') as fh:
-                    fh.write(str(_))
+class TestFunctionalSources(TestBaseSources, TestBaseFunctional):
+    mocks_mask = set().union(TestBaseSources.mocks_mask, TestBaseFunctional.mocks_mask)
+    mocks = set().union(TestBaseSources.mocks, TestBaseFunctional.mocks)
 
     def wrap_os_remove(self, prefix):
         def wrapped(path):
@@ -133,12 +104,6 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
         logger.debug('contents: %s', _)
 
         return _
-
-    def recursive_file_count(self, path):
-        logger.debug('path: %s', path)
-        logger.debug('real path: %s', os.path.normpath(self.temporary_directory_path + '/' + path))
-
-        return functools.reduce(lambda x, y: x + y, [ len(files) for root, directories, files in os.walk(os.path.normpath(self.temporary_directory_path + '/' + path)) ], 0)
 
     def test_copy_configuration_without_configuration_files(self):
         '''sources.Sources()._copy_configuration()—without configuration files'''

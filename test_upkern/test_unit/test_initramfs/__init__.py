@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class TestInitialRAMFileSystemConstructor(unittest.TestCase):
+    mocks_mask = set()
+    mocks = set()
+
     def test_sources_genkernel(self):
         '''initramfs.InitialRAMFileSystem('genkernel')'''
 

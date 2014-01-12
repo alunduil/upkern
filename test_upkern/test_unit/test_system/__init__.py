@@ -9,11 +9,14 @@ from test_upkern.test_unit import TestBaseUnit
 
 
 class TestRebuildModules(TestBaseUnit):
+    mocks_mask = TestBaseUnit.mocks_mask
+    mocks = TestBaseUnit.mocks
+
     def test_rebuild_modules(self):
         '''system.rebuild_modules()'''
 
-        self.mock_helpers_emerge()
+        self.mock_system_portage_emerge()
 
         system.rebuild_modules()
 
-        self.mocked_helpers_emerge.assert_called_once_with(options = [ '-v' ], package = '@module-rebuild')
+        self.mocked_system_portage_emerge.assert_called_once_with(options = [ '-v' ], package = '@module-rebuild')

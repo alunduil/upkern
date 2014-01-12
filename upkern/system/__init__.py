@@ -5,7 +5,7 @@
 
 import logging
 
-from upkern import helpers
+from upkern.system import portage
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,6 @@ def rebuild_modules():
     else:
         options.append('-q')
 
-    helpers.emerge(options = options, package = '@module-rebuild')
+    portage.emerge(options = options, package = '@module-rebuild')
 
     logger.info('finished rebuilding portage installed kernel modules')

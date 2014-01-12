@@ -9,5 +9,8 @@ from upkern.initramfs import genkernel
 
 
 class TestBaseGenKernelPreparer(unittest.TestCase):
+    mocks_mask = set()
+    mocks = set()
+
     def prepare_preparer(self, *args, **kwargs):
         self.p = genkernel.GenKernelPreparer(*args, **kwargs)

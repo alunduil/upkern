@@ -12,7 +12,7 @@ import re
 import shutil
 import subprocess
 
-from upkern import helpers
+from upkern import system
 
 logger = logging.getLogger(__name__)
 
@@ -70,12 +70,12 @@ class Sources(object):
         '''
 
         if not hasattr(self, '_configuration_files'):
-            boot_mounted = helpers.mount('/boot')
+            boot_mounted = system.utilities.mount('/boot')
 
             self._configuration_files = [ _ for _ in os.listdir('/boot') if re.match('config-.+', _) ]
 
             if boot_mounted:
-                helpers.unmount('/boot')
+                system.utilities.unmount('/boot')
 
             self._configuration_files = sorted(self._configuration_files, key = kernel_index, reverse = True)
 
@@ -307,7 +307,7 @@ class Sources(object):
             else:
                 options.append('-q')
 
-            helpers.emerge(options = options, package = self.package_name)
+            system.portage.emerge(options = options, package = self.package_name)
 
         logger.info('finished emerging kernel sources')
 

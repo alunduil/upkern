@@ -18,6 +18,9 @@ from test_upkern.test_unit import TestBaseUnit
 logger = logging.getLogger(__name__)
 
 class TestKernelIndex(unittest.TestCase):
+    mocks_mask = set()
+    mocks = set()
+
     def setUp(self):
         super(TestKernelIndex, self).setUp()
 
@@ -30,6 +33,9 @@ class TestKernelIndex(unittest.TestCase):
             self.assertEqual(result, sources.kernel_index(kernel_string))
 
 class TestSourcesConstructor(unittest.TestCase):
+    mocks_mask = set()
+    mocks = set()
+
     def test_sources_no_arguments(self):
         '''sources.Sources()'''
 
@@ -100,27 +106,27 @@ class TestSourcesProperties(TestBaseSources):
         mocked_source_directories = _.start()
         mocked_source_directories.return_value = source_directories
 
-    mocks.add('helpers.mount')
-    def mock_helpers_mount(self):
-        if 'helpers.mount' in self.mocks_mask:
+    mocks.add('system.utilties.mount')
+    def mock_system_utilities_mount(self):
+        if 'system.utiltiies.mount' in self.mocks_mask:
             return
 
-        _ = mock.patch('upkern.sources.helpers.mount')
+        _ = mock.patch('upkern.sources.system.utilities.mount')
 
         self.addCleanup(_.stop)
 
-        self.mocked_helpers_mount = _.start()
+        self.mocked_system_utilities_mount = _.start()
 
-    mocks.add('helpers.unmount')
-    def mock_helpers_unmount(self):
-        if 'helpers.unmount' in self.mocks_mask:
+    mocks.add('system.utilities.unmount')
+    def mock_system_utilities_unmount(self):
+        if 'system.utilities.unmount' in self.mocks_mask:
             return
 
-        _ = mock.patch('upkern.sources.helpers.unmount')
+        _ = mock.patch('upkern.sources.system.utilities.unmount')
 
         self.addCleanup(_.stop)
 
-        self.mocked_helpers_unmount = _.start()
+        self.mocked_system_utilities_unmount = _.start()
 
     def test_configuration_files(self):
         '''sources.Sources().configuration_files'''
@@ -131,8 +137,8 @@ class TestSourcesProperties(TestBaseSources):
             _ = copy.copy(source['configuration_files'])
             random.shuffle(_)
             self.mock_os_listdir(_)
-            self.mock_helpers_mount()
-            self.mock_helpers_unmount()
+            self.mock_system_utilities_mount()
+            self.mock_system_utilities_unmount()
 
             self.prepare_sources(source['name'])
 
@@ -292,19 +298,19 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
             else:
                 self.mock_gentoolkit_query_find_installed([])
 
-            self.mock_helpers_emerge()
+            self.mock_system_portage_emerge()
             self.mock_package_name(source['package_name'])
 
             self.prepare_sources(source['name'])
 
             self.s.emerge(force)
 
-            logger.debug('self.mocked_helpers_emerge.mock_calls: %s', self.mocked_helpers_emerge.mock_calls)
+            logger.debug('self.mocked_system_portage_emerge.mock_calls: %s', self.mocked_system_portage_emerge.mock_calls)
 
             if called:
-                self.mocked_helpers_emerge.assert_called_once_with(options = [ '-n', '-1', '-v' ], package = source['package_name'])
+                self.mocked_system_portage_emerge.assert_called_once_with(options = [ '-n', '-1', '-v' ], package = source['package_name'])
             else:
-                self.assertFalse(self.mocked_helpers_emerge.called)
+                self.assertFalse(self.mocked_system_portage_emerge.called)
 
     def test_emerge_installed(self):
         '''sources.Sources().emerge()—installed'''

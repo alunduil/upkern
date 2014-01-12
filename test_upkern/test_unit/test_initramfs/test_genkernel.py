@@ -12,8 +12,8 @@ from test_upkern.test_unit import TestBaseUnit
 
 
 class TestGenKernelPreparerMethods(TestBaseGenKernelPreparer, TestBaseUnit):
-    mocks_mask = TestBaseUnit.mocks_mask
-    mocks = TestBaseUnit.mocks
+    mocks_mask = set().union(TestBaseGenKernelPreparer.mocks_mask, TestBaseUnit.mocks_mask)
+    mocks = set().union(TestBaseGenKernelPreparer.mocks, TestBaseUnit.mocks)
 
     mocks.add('GenKernel.options')
     def mock_options(self, options = ''):

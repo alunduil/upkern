@@ -7,6 +7,9 @@ from test_upkern.test_common.test_initramfs.test_genkernel import TestBaseGenKer
 
 
 class TestGenKernelPreparerMethods(TestBaseGenKernelPreparer):
+    mocks_mask = TestBaseGenKernelPreparer.mocks_mask
+    mocks = TestBaseGenKernelPreparer.mocks
+
     def test_configure_without_parameters(self):
         '''initramfs.genkernel.GenKernelPreparer().configure()'''
 
