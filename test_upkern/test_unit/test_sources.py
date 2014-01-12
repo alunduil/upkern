@@ -237,17 +237,6 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
         mocked_portage_configuration = _.start()
         mocked_portage_configuration.return_value = portage_configuration
 
-    mocks.add('helpers.emerge')
-    def mock_helpers_emerge(self):
-        if 'helpers.emerge' in self.mocks_mask:
-            return
-
-        _ = mock.patch('upkern.sources.helpers.emerge')
-
-        self.addCleanup(_.stop)
-
-        self.mocked_helpers_emerge = _.start()
-
     def test_build(self):
         '''sources.Sources().build()'''
 
