@@ -276,7 +276,7 @@ class Sources(object):
         status = subprocess.call(command, shell = True)
 
         if status != 0:
-            pass # TODO raise an appropriate exception.
+            pass  # TODO raise an appropriate exception.
 
         os.chdir(original_directory)
 

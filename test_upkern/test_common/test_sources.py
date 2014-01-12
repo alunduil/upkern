@@ -8,6 +8,7 @@ import unittest
 
 from upkern import sources
 
+
 class TestBaseSources(unittest.TestCase):
     mocks_mask = set()
     mocks = set()
@@ -38,4 +39,3 @@ class TestBaseSources(unittest.TestCase):
 
     def prepare_sources(self, *args, **kwargs):
         self.s = sources.Sources(*args, **kwargs)
-

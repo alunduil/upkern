@@ -62,7 +62,7 @@ class TestSourcesProperties(TestBaseSources):
 
         self.mocked_finder = mock.MagicMock()
         self.mocked_gentoolkit_helpers_fileowner.return_value = self.mocked_finder
-        self.mocked_finder.side_effect = [ [ ( _, ) ] for _ in package_names ]
+        self.mocked_finder.side_effect = [ [ ( _, ) ] for _ in package_names ] # flake8: noqa
 
     mocks.add('os.listdir')
     def mock_os_listdir(self, source_directories):
@@ -204,6 +204,7 @@ class TestSourcesProperties(TestBaseSources):
             logger.info('finished testing %s', source['package_name'])
 
 logger.debug('TestSourcesProperties.mocks: %s', TestSourcesProperties.mocks)
+
 
 class TestSourcesMethod(TestBaseSources, TestBaseUnit):
     mocks_mask = set().union(TestBaseSources.mocks_mask, TestBaseUnit.mocks_mask)

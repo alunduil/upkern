@@ -10,6 +10,7 @@ from upkern.initramfs import PREPARERS
 
 logger = logging.getLogger(__name__)
 
+
 class GenKernelPreparer(object):
     @property
     def options(self):
@@ -36,7 +37,8 @@ class GenKernelPreparer(object):
 
         logger.info('building the initramfs')
 
-        command = 'genkernel --no-ramdisk-modules {0} initramfs'.format(' '.join([ '--' + _ for _ in self.options ]))
+        command = 'genkernel --no-ramdisk-modules {0} initramfs'.format(self.options)
+        command = ' '.join(command.split())
 
         logger.debug('command: %s', command)
 
@@ -46,5 +48,15 @@ class GenKernelPreparer(object):
             raise RuntimeError('initramfs did not build correctly')
 
         logger.info('finished building the initramfs')
+
+    def configure(self, *args):
+        '''Set the options for this initramfs from the passed arguments
+
+        This converts the list of arguments into an options string for the
+        preparer.
+
+        '''
+
+        self._options = ' '.join([ '--' + _ for _ in args ])
 
 PREPARERS['genkernel'] = GenKernelPreparer

@@ -19,14 +19,15 @@ from test_upkern.test_fixtures.test_sources import SOURCES
 logger = logging.getLogger(__name__)
 
 ORIGINALS = {
-        'os.path.islink': os.path.islink,
-        'os.path.lexists': os.path.lexists,
-        'os.readlink': os.readlink,
-        'os.remove': os.remove,
-        'os.symlink': os.symlink,
-        'shutil.copy': shutil.copy,
-        'shutil.move': shutil.move,
-        }
+    'os.path.islink': os.path.islink,
+    'os.path.lexists': os.path.lexists,
+    'os.readlink': os.readlink,
+    'os.remove': os.remove,
+    'os.symlink': os.symlink,
+    'shutil.copy': shutil.copy,
+    'shutil.move': shutil.move,
+}
+
 
 class TestFunctionalSources(TestBaseSources):
     mocks_mask = TestBaseSources.mocks_mask
@@ -71,6 +72,7 @@ class TestFunctionalSources(TestBaseSources):
         self.wrapped_os_remove = _.start()
         self.wrapped_os_remove.side_effect = wrapped
 
+
 class TestSourcesCopyConfiguration(TestFunctionalSources):
     mocks_mask = TestFunctionalSources.mocks_mask
     mocks = TestFunctionalSources.mocks
@@ -78,7 +80,7 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
     def populate_temporary_directory_files(self, items = {}):
         items.update({
             '/usr/src/linux': [ '.config' ],
-            })
+        })
 
         super(TestSourcesCopyConfiguration, self).populate_temporary_directory_files(items)
 
@@ -161,9 +163,9 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
             self.assertEqual(1, self.recursive_file_count('/'))
 
             self.assertEqual(
-                    self.expected_contents['/usr/src/linux/.config'],
-                    self.actual_contents('/usr/src/linux/.config')
-                    )
+                self.expected_contents['/usr/src/linux/.config'],
+                self.actual_contents('/usr/src/linux/.config')
+            )
 
             logger.info('finished testing %s', source['package_name'])
 
@@ -176,7 +178,7 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
             self.prepare_temporary_directory()
             self.populate_temporary_directory_files({
                 '/boot': source['configuration_files'],
-                })
+            })
 
             self.mock_configuration_files(source['configuration_files'])
 
@@ -192,9 +194,9 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
             self.assertEqual(len(source['configuration_files']) + 1, self.recursive_file_count('/'))
 
             self.assertEqual(
-                    self.expected_contents[os.path.join(os.path.sep, 'boot', source['configuration_files'][0])],
-                    self.actual_contents('/usr/src/linux/.config')
-                    )
+                self.expected_contents[os.path.join(os.path.sep, 'boot', source['configuration_files'][0])],
+                self.actual_contents('/usr/src/linux/.config')
+            )
 
             logger.info('finished testing %s', source['package_name'])
 
@@ -223,13 +225,14 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
             self.assertEqual(2, self.recursive_file_count('/'))
 
             self.assertEqual(
-                    self.expected_contents['/boot/config-3.12.6-gentoo'],
-                    self.actual_contents('/usr/src/linux/.config')
-                    )
+                self.expected_contents['/boot/config-3.12.6-gentoo'],
+                self.actual_contents('/usr/src/linux/.config')
+            )
 
             logger.info('finished testing %s', source['package_name'])
 
 logger.debug('TestSourcesCopyConfiguration.mocks: %s', TestSourcesCopyConfiguration.mocks)
+
 
 class TestSourcesSetupSymlink(TestFunctionalSources):
     mocks_mask = TestFunctionalSources.mocks_mask

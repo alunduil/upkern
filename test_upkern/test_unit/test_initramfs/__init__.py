@@ -10,6 +10,7 @@ from upkern import initramfs
 
 logger = logging.getLogger(__name__)
 
+
 class TestInitialRAMFileSystemConstructor(unittest.TestCase):
     def test_sources_genkernel(self):
         '''initramfs.InitialRAMFileSystem('genkernel')'''

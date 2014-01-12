@@ -4,18 +4,19 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import mock
-import unittest
 
 from upkern.initramfs import genkernel
 
+from test_upkern.test_common.test_initramfs.test_genkernel import TestBaseGenKernelPreparer
 from test_upkern.test_unit import TestBaseUnit
 
-class TestGenKernelPreparerMethods(TestBaseUnit):
+
+class TestGenKernelPreparerMethods(TestBaseGenKernelPreparer, TestBaseUnit):
     mocks_mask = TestBaseUnit.mocks_mask
     mocks = TestBaseUnit.mocks
 
     mocks.add('GenKernel.options')
-    def mock_options(self, options = ()):
+    def mock_options(self, options = ''):
         if 'GenKernel.options' in self.mocks_mask:
             return
 
@@ -26,11 +27,8 @@ class TestGenKernelPreparerMethods(TestBaseUnit):
         mocked_options = _.start()
         mocked_options.return_value = options
 
-    def prepare_preparer(self, *args, **kwargs):
-        self.p = genkernel.GenKernelPreparer(*args, **kwargs)
-
-    def test_build(self):
-        '''initramfs.genkernel.GenKernelPreparer().build()'''
+    def test_build_without_options(self):
+        '''initramfs.genkernel.GenKernelPreparer().build()—without options'''
 
         self.mock_subprocess_call()
         self.mock_options()
@@ -39,5 +37,18 @@ class TestGenKernelPreparerMethods(TestBaseUnit):
 
         self.p.build()
 
-        command = 'genkernel --no-ramdisk-modules  initramfs'
+        command = 'genkernel --no-ramdisk-modules initramfs'
+        self.mocked_subprocess_call.assert_called_once_with(command, shell = True)
+
+    def test_build_with_options(self):
+        '''initramfs.genkernel.GenKernelPreparer().build()—with options'''
+
+        self.mock_subprocess_call()
+        self.mock_options('--lvm --mdadm')
+
+        self.prepare_preparer()
+
+        self.p.build()
+
+        command = 'genkernel --no-ramdisk-modules --lvm --mdadm initramfs'
         self.mocked_subprocess_call.assert_called_once_with(command, shell = True)

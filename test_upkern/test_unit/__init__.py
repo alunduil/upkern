@@ -6,6 +6,7 @@
 import mock
 import unittest
 
+
 class TestBaseUnit(unittest.TestCase):
     mocks_mask = set()
     mocks = set()
