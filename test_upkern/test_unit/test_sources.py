@@ -106,27 +106,33 @@ class TestSourcesProperties(TestBaseSources):
         mocked_source_directories = _.start()
         mocked_source_directories.return_value = source_directories
 
-    mocks.add('system.utilties.mount')
-    def mock_system_utilities_mount(self):
-        if 'system.utiltiies.mount' in self.mocks_mask:
-            return
+    def test_binary_name(self):
+        '''sources.Sources().binary_name'''
 
-        _ = mock.patch('upkern.sources.system.utilities.mount')
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
 
-        self.addCleanup(_.stop)
+            self.mock_kernel_suffix(source['kernel_suffix'])
 
-        self.mocked_system_utilities_mount = _.start()
+            self.prepare_sources(source['name'])
 
-    mocks.add('system.utilities.unmount')
-    def mock_system_utilities_unmount(self):
-        if 'system.utilities.unmount' in self.mocks_mask:
-            return
+            self.assertEqual(source['binary_name'], self.s.binary_name)
 
-        _ = mock.patch('upkern.sources.system.utilities.unmount')
+            logger.info('finished testing %s', source['package_name'])
 
-        self.addCleanup(_.stop)
+    def test_configuration_name(self):
+        '''sources.Sources().configuration_name'''
 
-        self.mocked_system_utilities_unmount = _.start()
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.mock_kernel_suffix(source['kernel_suffix'])
+
+            self.prepare_sources(source['name'])
+
+            self.assertEqual(source['configuration_name'], self.s.configuration_name)
+
+            logger.info('finished testing %s', source['package_name'])
 
     def test_configuration_files(self):
         '''sources.Sources().configuration_files'''
@@ -159,6 +165,20 @@ class TestSourcesProperties(TestBaseSources):
             self.prepare_sources(source['name'])
 
             self.assertEqual(source['directory_name'], self.s.directory_name)
+
+            logger.info('finished testing %s', source['package_name'])
+
+    def test_kernel_suffix(self):
+        '''sources.Sources().kernel_suffix'''
+
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.mock_directory_name(source['directory_name'])
+
+            self.prepare_sources(source['name'])
+
+            self.assertEqual(source['kernel_suffix'], self.s.kernel_suffix)
 
             logger.info('finished testing %s', source['package_name'])
 
@@ -209,7 +229,19 @@ class TestSourcesProperties(TestBaseSources):
 
             logger.info('finished testing %s', source['package_name'])
 
-logger.debug('TestSourcesProperties.mocks: %s', TestSourcesProperties.mocks)
+    def test_system_map_name(self):
+        '''sources.Sources().system_map_name'''
+
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.mock_kernel_suffix(source['kernel_suffix'])
+
+            self.prepare_sources(source['name'])
+
+            self.assertEqual(source['system_map_name'], self.s.system_map_name)
+
+            logger.info('finished testing %s', source['package_name'])
 
 
 class TestSourcesMethod(TestBaseSources, TestBaseUnit):
@@ -331,5 +363,3 @@ class TestSourcesMethod(TestBaseSources, TestBaseUnit):
         '''sources.Sources().emerge(force = True)—not installed'''
 
         self._emerge_wrapper(installed = False, force = True)
-
-logger.debug('TestSourcesMethod.mocks: %s', TestSourcesMethod.mocks)

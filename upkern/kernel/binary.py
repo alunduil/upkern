@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012 by Alex Brandt <alunduil@alunduil.com>            
-#                                                                      
-# This program is free software; you can redistribute it andor modify it under 
+# Copyright (C) 2012 by Alex Brandt <alunduil@alunduil.com>
+#
+# This program is free software; you can redistribute it andor modify it under
 # the terms of the GNU General Public License as published by the Free Software
 # Foundation; either version 2 of the License, or (at your option) any later
-# version.                                  
-#                                                                      
+# version.
+#
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-# details.                         
-#                                                                      
+# details.
+#
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-# Place - Suite 330, Boston, MA  02111-1307, USA.            
+# Place - Suite 330, Boston, MA  02111-1307, USA.
 
 """Specifies the binary model for dealing with kernel objects."""
 
@@ -43,7 +43,7 @@ class Binary(object):
     """
 
     def __init__(self, directory, debug = False, verbose = False, quiet = False,
-            dry_run = False): 
+            dry_run = False):
         """Returns a kernel binary object.
 
         Get the appropriate information about the system to know how to perform
@@ -79,11 +79,11 @@ class Binary(object):
     @property
     def install_image(self):
         """Returns the name of the install image for this architecture.
-        
+
         Return bzImage, vmlinux, etc depending on the arch of the machine.
 
         From the kernel README:
-          
+
         Although originally developed first for 32-bit x86-based PCs (386 or
         higher), today Linux also runs on (at least) the Compaq Alpha AXP, Sun
         SPARC and UltraSPARC, Motorola 68000, PowerPC, PowerPC64, ARM, Hitachi
@@ -106,10 +106,10 @@ class Binary(object):
     @property
     def image_directory(self):
         """The location inside the kernel sources of the resulting image.
-        
+
         Caches the result after the first invocation so subsequent calls are
         quicker.
-        
+
         """
 
         if not hasattr(self, "_image_directory"):
@@ -133,17 +133,17 @@ class Binary(object):
         if not hasattr(self, "_suffix"):
             self._suffix = "-" + self.arguments["directory"].partition("-")[2]
         return self._suffix
-    
+
     @mountedboot
     def install(self):
         """Install the kernel into /boot.
-        
+
         1. Go into the source directory.
         2. Copy the image file to /boot.
         3. Copy the config file to /boot
         4. Copy System.map to /boot.
         5. Copy System.map to /
-        
+
         """
 
         if not self.arguments["quiet"]:

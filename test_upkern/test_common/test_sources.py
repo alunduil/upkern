@@ -25,6 +25,30 @@ class TestBaseSources(unittest.TestCase):
         mocked_configuration_files = _.start()
         mocked_configuration_files.return_value = configuration_files
 
+    mocks.add('Sources.directory_name')
+    def mock_directory_name(self, directory_name):
+        if 'Sources.directory_name' in self.mocks_mask:
+            return
+
+        _ = mock.patch.object(sources.Sources, 'directory_name', mock.PropertyMock())
+
+        self.addCleanup(_.stop)
+
+        mocked_directory_name = _.start()
+        mocked_directory_name.return_value = directory_name
+
+    mocks.add('Sources.kernel_suffix')
+    def mock_kernel_suffix(self, kernel_suffix):
+        if 'Sources.kernel_suffix' in self.mocks_mask:
+            return
+
+        _ = mock.patch.object(sources.Sources, 'kernel_suffix', mock.PropertyMock())
+
+        self.addCleanup(_.stop)
+
+        mocked_kernel_suffix = _.start()
+        mocked_kernel_suffix.return_value = kernel_suffix
+
     mocks.add('Sources.package_name')
     def mock_package_name(self, package_name):
         if 'Sources.package_name' in self.mocks_mask:
@@ -36,6 +60,28 @@ class TestBaseSources(unittest.TestCase):
 
         mocked_package_name = _.start()
         mocked_package_name.return_value = package_name
+
+    mocks.add('system.utilties.mount')
+    def mock_system_utilities_mount(self):
+        if 'system.utiltiies.mount' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.system.utilities.mount')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_system_utilities_mount = _.start()
+
+    mocks.add('system.utilities.unmount')
+    def mock_system_utilities_unmount(self):
+        if 'system.utilities.unmount' in self.mocks_mask:
+            return
+
+        _ = mock.patch('upkern.sources.system.utilities.unmount')
+
+        self.addCleanup(_.stop)
+
+        self.mocked_system_utilities_unmount = _.start()
 
     def prepare_sources(self, *args, **kwargs):
         self.s = sources.Sources(*args, **kwargs)

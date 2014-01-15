@@ -20,6 +20,7 @@ ORIGINALS = {
     'os.path.islink': os.path.islink,
     'os.path.lexists': os.path.lexists,
     'os.readlink': os.readlink,
+    'os.rename': os.rename,
     'os.remove': os.remove,
     'os.symlink': os.symlink,
     'shutil.copy': shutil.copy,
@@ -30,30 +31,6 @@ ORIGINALS = {
 class TestFunctionalSources(TestBaseSources, TestBaseFunctional):
     mocks_mask = set().union(TestBaseSources.mocks_mask, TestBaseFunctional.mocks_mask)
     mocks = set().union(TestBaseSources.mocks, TestBaseFunctional.mocks)
-
-    def wrap_os_remove(self, prefix):
-        def wrapped(path):
-            path = os.path.normpath(prefix + '/' + path)
-            return ORIGINALS['os.remove'](path)
-
-        _ = mock.patch('upkern.sources.os.remove')
-
-        self.addCleanup(_.stop)
-
-        self.wrapped_os_remove = _.start()
-        self.wrapped_os_remove.side_effect = wrapped
-
-
-class TestSourcesCopyConfiguration(TestFunctionalSources):
-    mocks_mask = TestFunctionalSources.mocks_mask
-    mocks = TestFunctionalSources.mocks
-
-    def populate_temporary_directory_files(self, items = {}):
-        items.update({
-            '/usr/src/linux': [ '.config' ],
-        })
-
-        super(TestSourcesCopyConfiguration, self).populate_temporary_directory_files(items)
 
     def wrap_os_path_lexists(self, prefix):
         def wrapped(path):
@@ -66,6 +43,18 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
 
         self.wrapped_os_path_lexists = _.start()
         self.wrapped_os_path_lexists.side_effect = wrapped
+
+    def wrap_os_remove(self, prefix):
+        def wrapped(path):
+            path = os.path.normpath(prefix + '/' + path)
+            return ORIGINALS['os.remove'](path)
+
+        _ = mock.patch('upkern.sources.os.remove')
+
+        self.addCleanup(_.stop)
+
+        self.wrapped_os_remove = _.start()
+        self.wrapped_os_remove.side_effect = wrapped
 
     def wrap_shutil_copy(self, prefix):
         def wrapped(src, dst):
@@ -80,6 +69,30 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
         self.wrapped_shutil_copy = _.start()
         self.wrapped_shutil_copy.side_effect = wrapped
 
+    def actual_contents(self, path):
+        real_path = os.path.normpath(self.temporary_directory_path + '/' + path)
+
+        _ = None
+
+        with open(real_path, 'r') as fh:
+            _ = fh.read()
+
+        logger.debug('contents: %s', _)
+
+        return _
+
+
+class TestSourcesCopyConfiguration(TestFunctionalSources):
+    mocks_mask = TestFunctionalSources.mocks_mask
+    mocks = TestFunctionalSources.mocks
+
+    def populate_temporary_directory_files(self, items = {}):
+        items.update({
+            '/usr/src/linux': [ '.config' ],
+        })
+
+        super(TestSourcesCopyConfiguration, self).populate_temporary_directory_files(items)
+
     def wrap_shutil_move(self, prefix):
         def wrapped(src, dst):
             src = os.path.normpath(prefix + '/' + src)
@@ -92,18 +105,6 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
 
         self.wrapped_shutil_move = _.start()
         self.wrapped_shutil_move.side_effect = wrapped
-
-    def actual_contents(self, path):
-        real_path = os.path.normpath(self.temporary_directory_path + '/' + path)
-
-        _ = None
-
-        with open(real_path, 'r') as fh:
-            _ = fh.read()
-
-        logger.debug('contents: %s', _)
-
-        return _
 
     def test_copy_configuration_without_configuration_files(self):
         '''sources.Sources()._copy_configuration()—without configuration files'''
@@ -146,6 +147,8 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
             })
 
             self.mock_configuration_files(source['configuration_files'])
+            self.mock_system_utilities_mount()
+            self.mock_system_utilities_unmount()
 
             self.wrap_os_path_lexists(self.temporary_directory_path)
             self.wrap_os_remove(self.temporary_directory_path)
@@ -177,6 +180,8 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
             self.populate_temporary_directory_files({ '/boot': _, })
 
             self.mock_configuration_files(_)
+            self.mock_system_utilities_mount()
+            self.mock_system_utilities_unmount()
 
             self.wrap_os_path_lexists(self.temporary_directory_path)
             self.wrap_os_remove(self.temporary_directory_path)
@@ -195,8 +200,6 @@ class TestSourcesCopyConfiguration(TestFunctionalSources):
             )
 
             logger.info('finished testing %s', source['package_name'])
-
-logger.debug('TestSourcesCopyConfiguration.mocks: %s', TestSourcesCopyConfiguration.mocks)
 
 
 class TestSourcesSetupSymlink(TestFunctionalSources):
@@ -259,18 +262,6 @@ class TestSourcesSetupSymlink(TestFunctionalSources):
         self.wrapped_os_symlink = _.start()
         self.wrapped_os_symlink.side_effect = wrapped
 
-    mocks.add('Sources.directory_name')
-    def mock_directory_name(self, directory_name):
-        if 'Sources.directory_name' in self.mocks_mask:
-            return
-
-        _ = mock.patch.object(sources.Sources, 'directory_name', mock.PropertyMock())
-
-        self.addCleanup(_.stop)
-
-        mocked_directory_name = _.start()
-        mocked_directory_name.return_value = directory_name
-
     def read_symlink(self, path):
         path = os.path.normpath(self.temporary_directory_path + '/' + path)
 
@@ -325,4 +316,74 @@ class TestSourcesSetupSymlink(TestFunctionalSources):
 
             logger.info('finished testing %s', source['package_name'])
 
-logger.debug('TestSourcesSetupSymlink.mocks: %s', TestSourcesSetupSymlink.mocks)
+
+class TestSourcesInstall(TestFunctionalSources):
+    mocks_mask = TestFunctionalSources.mocks_mask
+    mocks = TestFunctionalSources.mocks
+
+    mocks.add('Sources.binary_name')
+    def mock_binary_name(self, binary_name):
+        if 'Sources.binary_name' in self.mocks_mask:
+            return
+
+        _ = mock.patch.object(sources.Sources, 'binary_name', mock.PropertyMock())
+
+        self.addCleanup(_.stop)
+
+        mocked_binary_name = _.start()
+        mocked_binary_name.return_value = binary_name
+
+    def wrap_os_rename(self, prefix):
+        def wrapped(src, dst):
+            if src.startswith('/'):
+                src = os.path.normpath(prefix + '/' + src)
+            dst = os.path.normpath(prefix + '/' + dst)
+            return ORIGINALS['os.rename'](src, dst)
+
+        _ = mock.patch('upkern.sources.os.rename')
+
+        self.addCleanup(_.stop)
+
+        self.wrapped_os_rename = _.start()
+        self.wrapped_os_rename.side_effect = wrapped
+
+    def test_install(self):
+        '''sources.Sources().install()'''
+
+        for source in SOURCES['all']:
+            logger.info('testing %s', source['package_name'])
+
+            self.prepare_temporary_directory()
+            self.populate_temporary_directory_files(
+                {
+                    '/boot': [
+                        '.keep',
+                    ],
+                    '/usr/src/linux': [
+                        '.config',
+                        'System.map',
+                    ],
+                    '/usr/src/linux/arch/x86_64/boot': [
+                        'bzImage',
+                    ],
+                }
+            )
+
+            self.mock_kernel_suffix(source['kernel_suffix'])
+            self.mock_system_utilities_mount()
+            self.mock_system_utilities_unmount()
+
+            self.wrap_os_path_lexists(self.temporary_directory_path)
+            self.wrap_os_rename(self.temporary_directory_path)
+            self.wrap_shutil_copy(self.temporary_directory_path)
+
+            self.prepare_sources(source['name'])
+
+            self.s.install()
+
+            self.assertEqual(
+                self.expected_contents['/usr/src/linux/.config'],
+                self.actual_contents('/boot/{0}'.format(source['configuration_name'])),
+            )
+
+            logger.info('finished testing %s', source['package_name'])

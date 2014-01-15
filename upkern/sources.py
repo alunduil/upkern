@@ -7,6 +7,7 @@ import gentoolkit.helpers
 import gentoolkit.query
 import logging
 import os
+import platform
 import portage
 import re
 import shutil
@@ -61,6 +62,16 @@ class Sources(object):
         self._packages = {}
 
     @property
+    def binary_name(self):
+        '''Name of the binary created after building these sources.
+
+        Determines the generated binary from the system's platform.
+
+        '''
+
+        return 'bzImage' + self.kernel_suffix
+
+    @property
     def configuration_files(self):
         '''List of configuration files present in `/boot`.
 
@@ -80,6 +91,16 @@ class Sources(object):
             self._configuration_files = sorted(self._configuration_files, key = kernel_index, reverse = True)
 
         return self._configuration_files
+
+    @property
+    def configuration_name(self):
+        '''Name of the configuration created during sources configuration.
+
+        Simply prepends config on the kernel suffix.
+
+        '''
+
+        return 'config' + self.kernel_suffix
 
     @property
     def directory_name(self):
@@ -120,6 +141,19 @@ class Sources(object):
                     break
 
         return self._directory_name
+
+    @property
+    def kernel_suffix(self):
+        '''Suffix used in creation of other source properties.
+
+        This is really just the directory name with linux dropped.
+
+        '''
+
+        if not hasattr(self, '_kernel_suffix'):
+            self._kernel_suffix = self.directory_name.replace('linux', '')
+
+        return self._kernel_suffix
 
     @property
     def package_name(self):
@@ -216,6 +250,16 @@ class Sources(object):
 
         return self._source_directories
 
+    @property
+    def system_map_name(self):
+        '''The name of the System.map for these sources.
+
+        Simply prefixes the kernel_suffix with System.map
+
+        '''
+
+        return 'System.map' + self.kernel_suffix
+
     def build(self):
         '''Build the kernel.
 
@@ -311,6 +355,47 @@ class Sources(object):
 
         logger.info('finished emerging kernel sources')
 
+    def install(self):
+        '''Install the compiled kernel binary.
+
+        Also installs the configuration and system map.
+
+        '''
+
+        logger.info('installing binary kernel')
+
+        try:
+            boot_mounted = system.utilities.mount('/boot')
+
+            shutil.copy('/usr/src/linux/arch/{0}/boot/bzImage'.format(re.sub(r'i\d86', 'x86', platform.machine())), '/boot/' + self.binary_name)
+            shutil.copy('/usr/src/linux/.config', '/boot/' + self.configuration_name)
+            shutil.copy('/usr/src/linux/System.map', '/boot/' + self.system_map_name)
+
+            if os.path.lexists('/System.map'):
+                os.rename('/System.map', '/System.map.bak')
+            shutil.copy('/usr/src/linux/System.map', '/System.map')
+        except Exception as e:
+            logger.exception(e)
+            logger.error('failed installing binary kernel')
+            logger.warn('please, submit a bug including the previous traceback')
+
+            if os.path.lexists('/boot/' + self.binary_name):
+                os.remove('/boot/' + self.binary_name)
+
+            if os.path.lexists('/boot/' + self.configuration_name):
+                os.remove('/boot/' + self.configuration_name)
+
+            if os.path.lexists('/boot/' + self.system_map_name):
+                os.remove('/boot/' + self.system_map_name)
+
+            if os.path.lexists('/System.map.bak'):
+                os.rename('/System.map.bak', '/System.map')
+
+            raise
+        finally:
+            if boot_mounted:
+                system.utilities.unmount('/boot')
+
     def prepare(self, configuration):
         '''Prep the sources so they are ready to be built.
 
@@ -350,7 +435,14 @@ class Sources(object):
         try:
             if os.path.lexists('/usr/src/linux/.config'):
                 shutil.move('/usr/src/linux/.config', '/usr/src/linux/.config.bak')
+
+            boot_mounted = system.utilities.mount('/boot')
+
             shutil.copy(configuration, '/usr/src/linux/.config')
+
+            if boot_mounted:
+                system.utilities.unmount('/boot')
+
         except Exception as e:
             logger.exception(e)
             logger.error('failed to copy kernel configuration')

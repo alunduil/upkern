@@ -31,7 +31,7 @@ def mount(mountpoint):
     status = subprocess.call(command, shell = True)
 
     if status != 0:
-        pass  # TODO raise an appropriate exception
+        raise RuntimeError('mount encountered an error')
 
     return True
 
@@ -48,4 +48,4 @@ def unmount(mountpoint):
     status = subprocess.call(command, shell = True)
 
     if status != 0:
-        pass  # TODO raise an appropriate exception
+        raise RuntimeError('umount encountered an error')
